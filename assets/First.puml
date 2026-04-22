@@ -1,0 +1,123 @@
+@startuml
+title Restaurant Order Management - ER Diagram
+
+hide methods
+hide stereotypes
+skinparam linetype ortho
+
+entity "Role" as Role {
+  *role_id : BIGINT <<PK>>
+  --
+  role_name : VARCHAR(30) <<UK>>
+}
+
+entity "Staff" as Staff {
+  *staff_id : BIGINT <<PK>>
+  --
+  role_id : BIGINT <<FK>>
+  full_name : VARCHAR(120)
+  phone : VARCHAR(20)
+  email : VARCHAR(120) <<UK>>
+  username : VARCHAR(50) <<UK>>
+  is_active : BOOLEAN
+  created_at : DATETIME
+}
+
+entity "Customer" as Customer {
+  *customer_id : BIGINT <<PK>>
+  --
+  full_name : VARCHAR(120)
+  phone : VARCHAR(20)
+  email : VARCHAR(120) <<UK>>
+  is_active : BOOLEAN
+  created_at : DATETIME
+}
+
+entity "Product" as Product {
+  *product_id : BIGINT <<PK>>
+  --
+  product_name : VARCHAR(120)
+  description : VARCHAR(255)
+  unit_price : DECIMAL(10,2)
+  is_available : BOOLEAN
+}
+
+entity "OrderStatus" as OrderStatus {
+  *status_id : BIGINT <<PK>>
+  --
+  status_name : VARCHAR(30) <<UK>>
+  status_order : INT
+}
+
+entity "CustomerOrder" as CustomerOrder {
+  *order_id : BIGINT <<PK>>
+  --
+  order_code : VARCHAR(30) <<UK>>
+  customer_id : BIGINT <<FK>>
+  registered_by_staff_id : BIGINT <<FK>>
+  current_status_id : BIGINT <<FK>>
+  delivery_address : VARCHAR(255)
+  total_amount : DECIMAL(10,2)
+  created_at : DATETIME
+}
+
+entity "OrderItem" as OrderItem {
+  *order_item_id : BIGINT <<PK>>
+  --
+  order_id : BIGINT <<FK>>
+  product_id : BIGINT <<FK>>
+  quantity : INT
+  unit_price : DECIMAL(10,2)
+  line_total : DECIMAL(10,2)
+}
+
+entity "OrderStatusHistory" as OrderStatusHistory {
+  *history_id : BIGINT <<PK>>
+  --
+  order_id : BIGINT <<FK>>
+  from_status_id : BIGINT <<FK>>
+  to_status_id : BIGINT <<FK>>
+  changed_by_staff_id : BIGINT <<FK>>
+  changed_at : DATETIME
+  notes : VARCHAR(255)
+}
+
+entity "Delivery" as Delivery {
+  *delivery_id : BIGINT <<PK>>
+  --
+  order_id : BIGINT <<FK>> <<UK>>
+  courier_staff_id : BIGINT <<FK>>
+  dispatched_at : DATETIME
+  delivered_at : DATETIME
+  receiver_name : VARCHAR(120)
+}
+
+Role ||--o{ Staff : has
+Customer ||--o{ CustomerOrder : places
+Staff ||--o{ CustomerOrder : registers
+OrderStatus ||--o{ CustomerOrder : current_status
+CustomerOrder ||--|{ OrderItem : contains
+Product ||--o{ OrderItem : appears_in
+CustomerOrder ||--o{ OrderStatusHistory : logs
+OrderStatus ||--o{ OrderStatusHistory : from_status
+OrderStatus ||--o{ OrderStatusHistory : to_status
+Staff ||--o{ OrderStatusHistory : changes
+CustomerOrder ||--o| Delivery : has
+Staff ||--o{ Delivery : delivers
+
+note right of CustomerOrder
+- order_code must be unique
+- an order must contain at least one item
+- total_amount can be stored or calculated
+end note
+
+note right of OrderStatus
+Allowed flow:
+Pending
+-> In Preparation
+-> Ready for Delivery
+-> On the Way
+-> Delivered
+end note
+
+@enduml
