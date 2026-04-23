@@ -106,18 +106,18 @@ CustomerOrder ||--o| Delivery : has
 Staff ||--o{ Delivery : delivers
 
 note right of CustomerOrder
-- order_code must be unique
-- an order must contain at least one item
-- total_amount can be stored or calculated
+- el order_code debe ser único
+- una orden debe contener al menos un ítem
+- el total_amount puede ser almacenado o calculado
 end note
 
 note right of OrderStatus
-Allowed flow:
-Pending
--> In Preparation
--> Ready for Delivery
--> On the Way
--> Delivered
+Flujo permitido:
+Pendiente
+-> En Preparación
+-> Listo para Entrega
+-> En Camino
+-> Entregado
 end note
 
 @enduml
