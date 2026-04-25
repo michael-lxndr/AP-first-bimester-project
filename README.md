@@ -57,7 +57,7 @@ JavaFX
 
 La consola se usa como presentación inicial mientras se desarrolla la interfaz gráfica. JavaFX será la presentación final o demostrable cuando esté conectada correctamente a los servicios.
 
-## Nombre del proyecto
+## Configuración del proyecto
 
 ```text
 Project name: FirstBimesterProject
@@ -76,148 +76,137 @@ restaurant-order-manager
 ├── src
 │   ├── main
 │   │   ├── java
-│   │   │   └── first
-│   │   │       └── bimester
-│   │   │           └── project
-│   │   │               └── restaurant
-│   │   │                   │
-│   │   │                   ├── FirstBimesterProjectApplication.java
-│   │   │                   │
-│   │   │                   ├── config
-│   │   │                   │   ├── DataInitializer.java
-│   │   │                   │   └── JavaFxConfig.java
-│   │   │                   │
-│   │   │                   ├── domain
-│   │   │                   │   ├── entity
-│   │   │                   │   │   ├── Role.java
-│   │   │                   │   │   ├── Staff.java
-│   │   │                   │   │   ├── Customer.java
-│   │   │                   │   │   ├── Product.java
-│   │   │                   │   │   ├── OrderStatus.java
-│   │   │                   │   │   ├── OrderStatusTransitionRule.java
-│   │   │                   │   │   ├── CustomerOrder.java
-│   │   │                   │   │   ├── OrderItem.java
-│   │   │                   │   │   ├── OrderStatusHistory.java
-│   │   │                   │   │   └── Delivery.java
-│   │   │                   │   │
-│   │   │                   │   └── enums
-│   │   │                   │       ├── RoleCode.java
-│   │   │                   │       └── OrderStatusCode.java
-│   │   │                   │
-│   │   │                   ├── repository
-│   │   │                   │   ├── RoleRepository.java
-│   │   │                   │   ├── StaffRepository.java
-│   │   │                   │   ├── CustomerRepository.java
-│   │   │                   │   ├── ProductRepository.java
-│   │   │                   │   ├── OrderStatusRepository.java
-│   │   │                   │   ├── OrderStatusTransitionRuleRepository.java
-│   │   │                   │   ├── CustomerOrderRepository.java
-│   │   │                   │   ├── OrderItemRepository.java
-│   │   │                   │   ├── OrderStatusHistoryRepository.java
-│   │   │                   │   └── DeliveryRepository.java
-│   │   │                   │
-│   │   │                   ├── service
-│   │   │                   │   ├── CustomerService.java
-│   │   │                   │   ├── ProductService.java
-│   │   │                   │   ├── StaffService.java
-│   │   │                   │   ├── OrderService.java
-│   │   │                   │   ├── OrderQueryService.java
-│   │   │                   │   ├── DeliveryService.java
-│   │   │                   │   └── StateTransitionService.java
-│   │   │                   │
-│   │   │                   ├── dto
-│   │   │                   │   ├── request
-│   │   │                   │   │   ├── CreateCustomerRequest.java
-│   │   │                   │   │   ├── CreateProductRequest.java
-│   │   │                   │   │   ├── CreateOrderRequest.java
-│   │   │                   │   │   ├── CreateOrderItemRequest.java
-│   │   │                   │   │   ├── ChangeOrderStatusRequest.java
-│   │   │                   │   │   ├── DispatchOrderRequest.java
-│   │   │                   │   │   ├── ConfirmDeliveryRequest.java
-│   │   │                   │   │   └── ConfirmReceiptRequest.java
-│   │   │                   │   │
-│   │   │                   │   └── response
-│   │   │                   │       ├── ProductResponse.java
-│   │   │                   │       ├── CustomerResponse.java
-│   │   │                   │       ├── OrderSummaryResponse.java
-│   │   │                   │       ├── OrderDetailResponse.java
-│   │   │                   │       ├── OrderItemResponse.java
-│   │   │                   │       ├── OrderHistoryResponse.java
-│   │   │                   │       └── DeliveryResponse.java
-│   │   │                   │
-│   │   │                   ├── mapper
-│   │   │                   │   ├── CustomerMapper.java
-│   │   │                   │   ├── ProductMapper.java
-│   │   │                   │   ├── OrderMapper.java
-│   │   │                   │   └── DeliveryMapper.java
-│   │   │                   │
-│   │   │                   ├── exception
-│   │   │                   │   ├── BusinessException.java
-│   │   │                   │   ├── ResourceNotFoundException.java
-│   │   │                   │   ├── InvalidOrderStatusException.java
-│   │   │                   │   ├── InvalidRoleException.java
-│   │   │                   │   └── DuplicateResourceException.java
-│   │   │                   │
-│   │   │                   └── presentation
-│   │   │                       ├── console
-│   │   │                       │   ├── ConsoleApplicationRunner.java
-│   │   │                       │   ├── MainMenu.java
-│   │   │                       │   ├── AdminMenu.java
-│   │   │                       │   ├── CookMenu.java
-│   │   │                       │   ├── CourierMenu.java
-│   │   │                       │   └── CustomerMenu.java
-│   │   │                       │
-│   │   │                       └── javafx
-│   │   │                           ├── JavaFxApplication.java
-│   │   │                           ├── StageManager.java
-│   │   │                           ├── ViewLoader.java
-│   │   │                           ├── controller
-│   │   │                           │   ├── MainController.java
-│   │   │                           │   ├── AdminController.java
-│   │   │                           │   ├── CookController.java
-│   │   │                           │   ├── CourierController.java
-│   │   │                           │   ├── CustomerController.java
-│   │   │                           │   ├── ProductController.java
-│   │   │                           │   └── OrderTrackingController.java
-│   │   │                           ├── model
-│   │   │                           │   ├── ProductTableModel.java
-│   │   │                           │   ├── OrderTableModel.java
-│   │   │                           │   └── OrderHistoryTableModel.java
-│   │   │                           └── util
-│   │   │                               ├── AlertHelper.java
-│   │   │                               └── FormValidator.java
+│   │   │   └── first.bimester.project.restaurant
+│   │   │       ├── FirstBimesterProjectApplication.java
+│   │   │       │
+│   │   │       ├── config
+│   │   │       │   ├── DataInitializer.java
+│   │   │       │   └── JavaFxConfig.java
+│   │   │       │
+│   │   │       ├── domain
+│   │   │       │   ├── entity
+│   │   │       │   │   ├── Role.java
+│   │   │       │   │   ├── Staff.java
+│   │   │       │   │   ├── Customer.java
+│   │   │       │   │   ├── Product.java
+│   │   │       │   │   ├── OrderStatus.java
+│   │   │       │   │   ├── OrderStatusTransitionRule.java
+│   │   │       │   │   ├── CustomerOrder.java
+│   │   │       │   │   ├── OrderItem.java
+│   │   │       │   │   ├── OrderStatusHistory.java
+│   │   │       │   │   └── Delivery.java
+│   │   │       │   │
+│   │   │       │   └── enums
+│   │   │       │       ├── RoleCode.java
+│   │   │       │       └── OrderStatusCode.java
+│   │   │       │
+│   │   │       ├── repository
+│   │   │       │   ├── RoleRepository.java
+│   │   │       │   ├── StaffRepository.java
+│   │   │       │   ├── CustomerRepository.java
+│   │   │       │   ├── ProductRepository.java
+│   │   │       │   ├── OrderStatusRepository.java
+│   │   │       │   ├── OrderStatusTransitionRuleRepository.java
+│   │   │       │   ├── CustomerOrderRepository.java
+│   │   │       │   ├── OrderItemRepository.java
+│   │   │       │   ├── OrderStatusHistoryRepository.java
+│   │   │       │   └── DeliveryRepository.java
+│   │   │       │
+│   │   │       ├── service
+│   │   │       │   ├── CustomerService.java
+│   │   │       │   ├── ProductService.java
+│   │   │       │   ├── StaffService.java
+│   │   │       │   ├── OrderService.java
+│   │   │       │   ├── OrderQueryService.java
+│   │   │       │   ├── DeliveryService.java
+│   │   │       │   └── StateTransitionService.java
+│   │   │       │
+│   │   │       ├── dto
+│   │   │       │   ├── request
+│   │   │       │   │   ├── CreateCustomerRequest.java
+│   │   │       │   │   ├── CreateProductRequest.java
+│   │   │       │   │   ├── CreateOrderRequest.java
+│   │   │       │   │   ├── CreateOrderItemRequest.java
+│   │   │       │   │   ├── ChangeOrderStatusRequest.java
+│   │   │       │   │   ├── DispatchOrderRequest.java
+│   │   │       │   │   ├── ConfirmDeliveryRequest.java
+│   │   │       │   │   └── ConfirmReceiptRequest.java
+│   │   │       │   │
+│   │   │       │   └── response
+│   │   │       │       ├── ProductResponse.java
+│   │   │       │       ├── CustomerResponse.java
+│   │   │       │       ├── OrderSummaryResponse.java
+│   │   │       │       ├── OrderDetailResponse.java
+│   │   │       │       ├── OrderItemResponse.java
+│   │   │       │       ├── OrderHistoryResponse.java
+│   │   │       │       └── DeliveryResponse.java
+│   │   │       │
+│   │   │       ├── mapper
+│   │   │       │   ├── CustomerMapper.java
+│   │   │       │   ├── ProductMapper.java
+│   │   │       │   ├── OrderMapper.java
+│   │   │       │   └── DeliveryMapper.java
+│   │   │       │
+│   │   │       ├── exception
+│   │   │       │   ├── BusinessException.java
+│   │   │       │   ├── ResourceNotFoundException.java
+│   │   │       │   ├── InvalidOrderStatusException.java
+│   │   │       │   ├── InvalidRoleException.java
+│   │   │       │   └── DuplicateResourceException.java
+│   │   │       │
+│   │   │       └── presentation
+│   │   │           ├── console
+│   │   │           │   ├── ConsoleApplicationRunner.java
+│   │   │           │   ├── MainMenu.java
+│   │   │           │   ├── AdminMenu.java
+│   │   │           │   ├── CookMenu.java
+│   │   │           │   ├── CourierMenu.java
+│   │   │           │   └── CustomerMenu.java
+│   │   │           │
+│   │   │           └── javafx
+│   │   │               ├── JavaFxApplication.java
+│   │   │               ├── StageManager.java
+│   │   │               ├── ViewLoader.java
+│   │   │               ├── controller
+│   │   │               │   ├── MainController.java
+│   │   │               │   ├── AdminController.java
+│   │   │               │   ├── CookController.java
+│   │   │               │   ├── CourierController.java
+│   │   │               │   ├── CustomerController.java
+│   │   │               │   ├── ProductController.java
+│   │   │               │   └── OrderTrackingController.java
+│   │   │               ├── model
+│   │   │               │   ├── ProductTableModel.java
+│   │   │               │   ├── OrderTableModel.java
+│   │   │               │   └── OrderHistoryTableModel.java
+│   │   │               └── util
+│   │   │                   ├── AlertHelper.java
+│   │   │                   └── FormValidator.java
 │   │   │
 │   │   └── resources
 │   │       ├── application.yaml
-│   │       └── first
-│   │           └── bimester
-│   │               └── project
-│   │                   └── restaurant
-│   │                       └── presentation
-│   │                           └── javafx
-│   │                               ├── view
-│   │                               │   ├── main-view.fxml
-│   │                               │   ├── admin-view.fxml
-│   │                               │   ├── cook-view.fxml
-│   │                               │   ├── courier-view.fxml
-│   │                               │   ├── customer-view.fxml
-│   │                               │   ├── product-view.fxml
-│   │                               │   └── order-tracking-view.fxml
-│   │                               └── style
-│   │                                   └── application.css
+│   │       └── first.bimester.project.restaurant
+│   │           └── presentation
+│   │               └── javafx
+│   │                   ├── view
+│   │                   │   ├── main-view.fxml
+│   │                   │   ├── admin-view.fxml
+│   │                   │   ├── cook-view.fxml
+│   │                   │   ├── courier-view.fxml
+│   │                   │   ├── customer-view.fxml
+│   │                   │   ├── product-view.fxml
+│   │                   │   └── order-tracking-view.fxml
+│   │                   └── style
+│   │                       └── application.css
 │   │
 │   └── test
-│       └── java
-│           └── first
-│               └── bimester
-│                   └── project
-│                       └── restaurant
-│                           ├── service
-│                           │   ├── OrderServiceTest.java
-│                           │   ├── DeliveryServiceTest.java
-│                           │   └── StateTransitionServiceTest.java
-│                           └── repository
-│                               └── CustomerOrderRepositoryTest.java
+│       └── java.first.bimester.projectrestaurant
+│           ├── service
+│           │   ├── OrderServiceTest.java
+│           │   ├── DeliveryServiceTest.java
+│           │   └── StateTransitionServiceTest.java
+│           └── repository
+│               └── CustomerOrderRepositoryTest.java
 ```
 
 ## Documentación por paquete
