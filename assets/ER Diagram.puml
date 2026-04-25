@@ -1,4 +1,4 @@
-@startuml
+@startuml ER Diagram
 title Restaurant Order Management - ER Diagram
 
 hide methods
@@ -45,8 +45,19 @@ entity "Product" as Product {
 entity "OrderStatus" as OrderStatus {
   *status_id : BIGINT <<PK>>
   --
-  status_name : VARCHAR(30) <<UK>>
+  status_code : VARCHAR(30) <<UK>>
+  status_name : VARCHAR(50) <<UK>>
   status_order : INT
+  is_final : BOOLEAN
+}
+
+entity "OrderStatusTransitionRule" as OrderStatusTransitionRule {
+  *transition_rule_id : BIGINT <<PK>>
+  --
+  from_status_id : BIGINT <<FK>>
+  to_status_id : BIGINT <<FK>>
+  role_id : BIGINT <<FK>>
+  is_active : BOOLEAN
 }
 
 entity "CustomerOrder" as CustomerOrder {
@@ -59,6 +70,7 @@ entity "CustomerOrder" as CustomerOrder {
   delivery_address : VARCHAR(255)
   total_amount : DECIMAL(10,2)
   created_at : DATETIME
+  current_status_changed_at : DATETIME
 }
 
 entity "OrderItem" as OrderItem {
@@ -67,6 +79,7 @@ entity "OrderItem" as OrderItem {
   order_id : BIGINT <<FK>>
   product_id : BIGINT <<FK>>
   quantity : INT
+  product_name_snapshot : VARCHAR(120)
   unit_price : DECIMAL(10,2)
   line_total : DECIMAL(10,2)
 }
@@ -93,9 +106,12 @@ entity "Delivery" as Delivery {
 }
 
 Role ||--o{ Staff : has
+Role ||--o{ OrderStatusTransitionRule : authorizes
 Customer ||--o{ CustomerOrder : places
 Staff ||--o{ CustomerOrder : registers
 OrderStatus ||--o{ CustomerOrder : current_status
+OrderStatus ||--o{ OrderStatusTransitionRule : from_status
+OrderStatus ||--o{ OrderStatusTransitionRule : to_status
 CustomerOrder ||--|{ OrderItem : contains
 Product ||--o{ OrderItem : appears_in
 CustomerOrder ||--o{ OrderStatusHistory : logs
@@ -109,15 +125,42 @@ note right of CustomerOrder
 - el order_code debe ser único
 - una orden debe contener al menos un ítem
 - el total_amount puede ser almacenado o calculado
+- current_status_changed_at acelera consultas de seguimiento
+- al crear la orden debe insertarse también
+  el primer registro en OrderStatusHistory
 end note
 
 note right of OrderStatus
-Flujo permitido:
-Pendiente
--> En Preparación
--> Listo para Entrega
--> En Camino
--> Entregado
+Catálogo sugerido:
+- PENDIENTE / Pendiente
+- EN_PREPARACION / En preparación
+- LISTO / Listo
+- EN_CAMINO / En camino
+- ENTREGADO / Entregado
+Usar status_code evita ambigüedad entre
+"Listo" y "Listo para entrega" del PDF
+end note
+
+note right of OrderStatusTransitionRule
+Reglas de negocio trazables:
+- Pendiente -> En preparación : Cocinero
+- En preparación -> Listo : Cocinero
+- Listo -> En camino : Repartidor
+- En camino -> Entregado : Repartidor
+- no se permiten saltos ni retrocesos
+end note
+
+note right of OrderStatusHistory
+- todo cambio de estado debe registrarse
+- changed_by_staff_id + changed_at cubren
+  quién hizo el cambio y cuándo
+- notes permite guardar observaciones
+  operativas o incidencias
+end note
+
+note right of OrderItem
+- product_name_snapshot preserva trazabilidad
+  histórica aunque cambie el nombre del producto
 end note
 
 @enduml

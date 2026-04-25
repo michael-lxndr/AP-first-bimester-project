@@ -1,0 +1,416 @@
+@startuml restaurant-order-complete-flow
+
+title Sistema de Gestión y Despacho de Pedidos de Restaurante\nFlujo completo por rol con Spring Boot + Spring Data JPA + MySQL
+
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+autonumber
+
+actor "Administrator" as Admin
+actor "Cook" as Cook
+actor "Courier" as Courier
+actor "Customer" as CustomerUser
+
+participant "Terminal UI\n(o JavaFX / Swing)" as UI
+
+box "Spring Boot Application"
+participant "AuthController" as AuthC
+participant "OrderController" as OrderC
+participant "TrackingController" as TrackC
+
+participant "AuthService" as AuthS
+participant "OrderService" as OrderS
+participant "PreparationService" as PrepS
+participant "DeliveryService" as DelivS
+participant "TrackingService" as TrackS
+
+participant "RoleRepository" as RoleRepo
+participant "StaffRepository" as StaffRepo
+participant "CustomerRepository" as CustomerRepo
+participant "ProductRepository" as ProductRepo
+participant "OrderStatusRepository" as StatusRepo
+participant "CustomerOrderRepository" as OrderRepo
+participant "OrderItemRepository" as ItemRepo
+participant "OrderStatusHistoryRepository" as HistoryRepo
+participant "DeliveryRepository" as DeliveryRepo
+end box
+
+database "MySQL" as MySQL
+
+== 0. Inicio de sesión y validación de rol ==
+
+Admin -> UI : inicia sesión
+UI -> AuthC : POST /login(username, password)
+AuthC -> AuthS : authenticate(username, password)
+AuthS -> StaffRepo : findByUsername(username)
+StaffRepo -> MySQL : SELECT * FROM staff WHERE username = ?
+MySQL --> StaffRepo : Staff
+AuthS -> RoleRepo : findById(staff.roleId)
+RoleRepo -> MySQL : SELECT * FROM role WHERE role_id = ?
+MySQL --> RoleRepo : Role
+AuthS --> AuthC : Staff + Role
+AuthC --> UI : acceso concedido + menú según rol
+UI --> Admin : muestra menú de Administrador
+
+note right of AuthS
+Aquí se usan las entidades:
+- Staff
+- Role
+
+La misma lógica aplica para:
+- Cook
+- Courier
+end note
+
+== 1. Administrador registra pedido ==
+
+Admin -> UI : consulta menú disponible
+UI -> OrderC : GET /products
+OrderC -> OrderS : getAvailableProducts()
+OrderS -> ProductRepo : findByIsAvailableTrue()
+ProductRepo -> MySQL : SELECT * FROM product WHERE is_available = true
+MySQL --> ProductRepo : Product[]
+OrderS --> OrderC : lista de productos
+OrderC --> UI : menú disponible
+UI --> Admin : muestra productos
+
+Admin -> UI : registra cliente, dirección y productos
+UI -> OrderC : POST /orders(customerData, items, deliveryAddress, staffId)
+OrderC -> OrderS : createOrder(...)
+
+OrderS -> CustomerRepo : findByEmail(customer.email)
+CustomerRepo -> MySQL : SELECT * FROM customer WHERE email = ?
+alt cliente ya existe
+  MySQL --> CustomerRepo : Customer
+else cliente no existe
+  MySQL --> CustomerRepo : null
+  OrderS -> CustomerRepo : save(Customer)
+  CustomerRepo -> MySQL : INSERT INTO customer(...)
+  MySQL --> CustomerRepo : Customer creado
+end
+
+OrderS -> ProductRepo : findAllById(productIds)
+ProductRepo -> MySQL : SELECT * FROM product WHERE product_id IN (...)
+MySQL --> ProductRepo : Product[]
+
+OrderS -> StatusRepo : findByStatusName("Pendiente")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'Pendiente'
+MySQL --> StatusRepo : OrderStatus(Pendiente)
+
+OrderS -> OrderRepo : save(CustomerOrder)
+OrderRepo -> MySQL : INSERT INTO customer_order(...)
+MySQL --> OrderRepo : CustomerOrder creado
+
+OrderS -> ItemRepo : saveAll(OrderItem[])
+ItemRepo -> MySQL : INSERT INTO order_item(...)
+MySQL --> ItemRepo : OrderItem[] creados
+
+OrderS -> HistoryRepo : save(OrderStatusHistory)
+HistoryRepo -> MySQL : INSERT INTO order_status_history(from=null,to=Pendiente,...)
+MySQL --> HistoryRepo : historial creado
+
+OrderS --> OrderC : orderCode + total + status=Pendiente
+OrderC --> UI : pedido registrado correctamente
+UI --> Admin : muestra código del pedido y total
+
+note right of OrderS
+Aquí se usan las entidades:
+- Customer
+- Product
+- OrderStatus
+- CustomerOrder
+- OrderItem
+- OrderStatusHistory
+
+Reglas aplicadas:
+- el pedido debe tener al menos un producto
+- se calcula el total
+- se asigna estado inicial "Pendiente"
+- se registra el historial del cambio
+- el código del pedido debe ser único
+end note
+
+== 2. Cocinero consulta pedidos pendientes ==
+
+Cook -> UI : inicia sesión
+UI -> AuthC : POST /login(username, password)
+AuthC -> AuthS : authenticate(...)
+AuthS -> StaffRepo : findByUsername(username)
+StaffRepo -> MySQL : SELECT * FROM staff WHERE username = ?
+MySQL --> StaffRepo : Staff
+AuthS -> RoleRepo : findById(staff.roleId)
+RoleRepo -> MySQL : SELECT * FROM role WHERE role_id = ?
+MySQL --> RoleRepo : Role(Cook)
+AuthS --> AuthC : Staff + Role
+AuthC --> UI : acceso concedido
+UI --> Cook : muestra menú de Cocinero
+
+Cook -> UI : consulta pedidos pendientes
+UI -> OrderC : GET /orders?status=Pendiente
+OrderC -> PrepS : getOrdersByStatus("Pendiente")
+
+PrepS -> StatusRepo : findByStatusName("Pendiente")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'Pendiente'
+MySQL --> StatusRepo : OrderStatus(Pendiente)
+
+PrepS -> OrderRepo : findByCurrentStatusId(statusId)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE current_status_id = ?
+MySQL --> OrderRepo : CustomerOrder[]
+PrepS --> OrderC : pedidos pendientes
+OrderC --> UI : lista de pedidos
+UI --> Cook : muestra pedidos pendientes
+
+== 3. Cocinero cambia a "En preparación" ==
+
+Cook -> UI : toma pedido para preparar
+UI -> OrderC : PATCH /orders/{orderCode}/status = En preparación
+OrderC -> PrepS : startPreparation(orderCode, staffId)
+
+PrepS -> OrderRepo : findByOrderCode(orderCode)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE order_code = ?
+MySQL --> OrderRepo : CustomerOrder
+
+PrepS -> StatusRepo : findByStatusName("En preparación")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'En preparación'
+MySQL --> StatusRepo : OrderStatus(En preparación)
+
+alt estado actual = Pendiente
+  PrepS -> OrderRepo : save(currentStatus=En preparación)
+  OrderRepo -> MySQL : UPDATE customer_order SET current_status_id = ?
+  MySQL --> OrderRepo : CustomerOrder actualizado
+
+  PrepS -> HistoryRepo : save(Pendiente -> En preparación)
+  HistoryRepo -> MySQL : INSERT INTO order_status_history(...)
+  MySQL --> HistoryRepo : historial creado
+
+  PrepS --> OrderC : estado actualizado
+  OrderC --> UI : pedido en preparación
+  UI --> Cook : confirmación
+else transición inválida
+  PrepS --> OrderC : error de negocio
+  OrderC --> UI : no se puede cambiar el estado
+  UI --> Cook : muestra error
+end
+
+== 4. Cocinero cambia a "Listo para entrega" ==
+
+Cook -> UI : marca pedido como listo
+UI -> OrderC : PATCH /orders/{orderCode}/status = Listo para entrega
+OrderC -> PrepS : markReady(orderCode, staffId)
+
+PrepS -> OrderRepo : findByOrderCode(orderCode)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE order_code = ?
+MySQL --> OrderRepo : CustomerOrder
+
+PrepS -> StatusRepo : findByStatusName("Listo para entrega")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'Listo para entrega'
+MySQL --> StatusRepo : OrderStatus(Listo para entrega)
+
+alt estado actual = En preparación
+  PrepS -> OrderRepo : save(currentStatus=Listo para entrega)
+  OrderRepo -> MySQL : UPDATE customer_order SET current_status_id = ?
+  MySQL --> OrderRepo : CustomerOrder actualizado
+
+  PrepS -> HistoryRepo : save(En preparación -> Listo para entrega)
+  HistoryRepo -> MySQL : INSERT INTO order_status_history(...)
+  MySQL --> HistoryRepo : historial creado
+
+  PrepS --> OrderC : estado actualizado
+  OrderC --> UI : pedido listo para entrega
+  UI --> Cook : confirmación
+else transición inválida
+  PrepS --> OrderC : error de negocio
+  OrderC --> UI : no se puede cambiar el estado
+  UI --> Cook : muestra error
+end
+
+note right of PrepS
+Aquí se usan las entidades:
+- CustomerOrder
+- OrderStatus
+- OrderStatusHistory
+
+Regla crítica:
+El flujo debe respetar:
+Pendiente -> En preparación -> Listo para entrega
+end note
+
+== 5. Repartidor consulta pedidos listos ==
+
+Courier -> UI : inicia sesión
+UI -> AuthC : POST /login(username, password)
+AuthC -> AuthS : authenticate(...)
+AuthS -> StaffRepo : findByUsername(username)
+StaffRepo -> MySQL : SELECT * FROM staff WHERE username = ?
+MySQL --> StaffRepo : Staff
+AuthS -> RoleRepo : findById(staff.roleId)
+RoleRepo -> MySQL : SELECT * FROM role WHERE role_id = ?
+MySQL --> RoleRepo : Role(Courier)
+AuthS --> AuthC : Staff + Role
+AuthC --> UI : acceso concedido
+UI --> Courier : muestra menú de Repartidor
+
+Courier -> UI : consulta pedidos listos
+UI -> OrderC : GET /orders?status=Listo para entrega
+OrderC -> DelivS : getOrdersReadyForDelivery()
+
+DelivS -> StatusRepo : findByStatusName("Listo para entrega")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'Listo para entrega'
+MySQL --> StatusRepo : OrderStatus(Listo para entrega)
+
+DelivS -> OrderRepo : findByCurrentStatusId(statusId)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE current_status_id = ?
+MySQL --> OrderRepo : CustomerOrder[]
+DelivS --> OrderC : pedidos listos
+OrderC --> UI : lista de pedidos
+UI --> Courier : muestra pedidos listos
+
+== 6. Repartidor registra salida del pedido ==
+
+Courier -> UI : registra salida del pedido
+UI -> OrderC : POST /deliveries(orderCode, courierStaffId)
+OrderC -> DelivS : dispatchOrder(orderCode, courierStaffId)
+
+DelivS -> OrderRepo : findByOrderCode(orderCode)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE order_code = ?
+MySQL --> OrderRepo : CustomerOrder
+
+DelivS -> StatusRepo : findByStatusName("En camino")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'En camino'
+MySQL --> StatusRepo : OrderStatus(En camino)
+
+alt estado actual = Listo para entrega
+  DelivS -> DeliveryRepo : save(Delivery)
+  DeliveryRepo -> MySQL : INSERT INTO delivery(order_id,courier_staff_id,dispatched_at,...)
+  MySQL --> DeliveryRepo : Delivery creada
+
+  DelivS -> OrderRepo : save(currentStatus=En camino)
+  OrderRepo -> MySQL : UPDATE customer_order SET current_status_id = ?
+  MySQL --> OrderRepo : CustomerOrder actualizado
+
+  DelivS -> HistoryRepo : save(Listo para entrega -> En camino)
+  HistoryRepo -> MySQL : INSERT INTO order_status_history(...)
+  MySQL --> HistoryRepo : historial creado
+
+  DelivS --> OrderC : despacho registrado
+  OrderC --> UI : pedido en camino
+  UI --> Courier : confirmación
+else transición inválida
+  DelivS --> OrderC : error de negocio
+  OrderC --> UI : no se puede despachar
+  UI --> Courier : muestra error
+end
+
+== 7. Repartidor confirma entrega ==
+
+Courier -> UI : confirma entrega
+UI -> OrderC : PATCH /deliveries/{orderCode}/complete(receiverName)
+OrderC -> DelivS : confirmDelivery(orderCode, receiverName, courierStaffId)
+
+DelivS -> OrderRepo : findByOrderCode(orderCode)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE order_code = ?
+MySQL --> OrderRepo : CustomerOrder
+
+DelivS -> DeliveryRepo : findByOrderId(order.id)
+DeliveryRepo -> MySQL : SELECT * FROM delivery WHERE order_id = ?
+MySQL --> DeliveryRepo : Delivery
+
+DelivS -> StatusRepo : findByStatusName("Entregado")
+StatusRepo -> MySQL : SELECT * FROM order_status WHERE status_name = 'Entregado'
+MySQL --> StatusRepo : OrderStatus(Entregado)
+
+alt estado actual = En camino
+  DelivS -> DeliveryRepo : save(deliveredAt, receiverName)
+  DeliveryRepo -> MySQL : UPDATE delivery SET delivered_at=?, receiver_name=? WHERE delivery_id=?
+  MySQL --> DeliveryRepo : Delivery actualizada
+
+  DelivS -> OrderRepo : save(currentStatus=Entregado)
+  OrderRepo -> MySQL : UPDATE customer_order SET current_status_id = ?
+  MySQL --> OrderRepo : CustomerOrder actualizado
+
+  DelivS -> HistoryRepo : save(En camino -> Entregado)
+  HistoryRepo -> MySQL : INSERT INTO order_status_history(...)
+  MySQL --> HistoryRepo : historial creado
+
+  DelivS --> OrderC : entrega confirmada
+  OrderC --> UI : pedido entregado
+  UI --> Courier : confirmación
+else pedido no está en camino
+  DelivS --> OrderC : error de negocio
+  OrderC --> UI : no se puede entregar todavía
+  UI --> Courier : muestra error
+end
+
+note right of DelivS
+Aquí se usan las entidades:
+- Delivery
+- CustomerOrder
+- OrderStatus
+- OrderStatusHistory
+
+Reglas aplicadas:
+- solo se puede despachar si está "Listo para entrega"
+- solo se puede entregar si está "En camino"
+- se registra fecha/hora y nombre de quien recibe
+end note
+
+== 8. Cliente consulta estado del pedido ==
+
+CustomerUser -> UI : ingresa código del pedido
+UI -> TrackC : GET /tracking/{orderCode}
+TrackC -> TrackS : getTrackingByOrderCode(orderCode)
+
+TrackS -> OrderRepo : findByOrderCode(orderCode)
+OrderRepo -> MySQL : SELECT * FROM customer_order WHERE order_code = ?
+MySQL --> OrderRepo : CustomerOrder
+
+TrackS -> HistoryRepo : findByOrderIdOrderByChangedAtAsc(order.id)
+HistoryRepo -> MySQL : SELECT * FROM order_status_history WHERE order_id = ? ORDER BY changed_at ASC
+MySQL --> HistoryRepo : OrderStatusHistory[]
+
+TrackS -> DeliveryRepo : findByOrderId(order.id)
+DeliveryRepo -> MySQL : SELECT * FROM delivery WHERE order_id = ?
+MySQL --> DeliveryRepo : Delivery
+
+TrackS --> TrackC : estado actual + historial + entrega
+TrackC --> UI : respuesta de seguimiento
+UI --> CustomerUser : muestra estado actual e historial
+
+note right of TrackS
+El cliente solo consulta:
+- código del pedido
+- estado actual
+- historial del pedido
+
+No modifica información.
+end note
+
+note over UI,MySQL
+Tecnología representada en el flujo:
+
+1. UI:
+   - Terminal como opción base
+   - JavaFX o Swing como opción visual
+
+2. Backend:
+   - Spring Boot
+   - Spring Data JPA
+   - Services para lógica de negocio
+   - Repositories para persistencia
+
+3. Base de datos:
+   - MySQL
+
+4. Entidades usadas en el diagrama:
+   - Role
+   - Staff
+   - Customer
+   - Product
+   - OrderStatus
+   - CustomerOrder
+   - OrderItem
+   - OrderStatusHistory
+   - Delivery
+end note
+
+@enduml

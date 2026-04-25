@@ -1,4 +1,4 @@
-package first.bimester.project;
+package first.bimester.project.restaurant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
