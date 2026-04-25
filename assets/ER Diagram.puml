@@ -103,28 +103,35 @@ entity "Delivery" as Delivery {
   dispatched_at : DATETIME
   delivered_at : DATETIME
   receiver_name : VARCHAR(120)
+  customer_confirmed_at : DATETIME
+  customer_confirmation_notes : VARCHAR(255)
 }
 
 Role ||--o{ Staff : has
 Role ||--o{ OrderStatusTransitionRule : authorizes
+
 Customer ||--o{ CustomerOrder : places
+
 Staff ||--o{ CustomerOrder : registers
+Staff ||--o{ OrderStatusHistory : changes
+Staff ||--o{ Delivery : delivers
+
 OrderStatus ||--o{ CustomerOrder : current_status
 OrderStatus ||--o{ OrderStatusTransitionRule : from_status
 OrderStatus ||--o{ OrderStatusTransitionRule : to_status
-CustomerOrder ||--|{ OrderItem : contains
-Product ||--o{ OrderItem : appears_in
-CustomerOrder ||--o{ OrderStatusHistory : logs
 OrderStatus ||--o{ OrderStatusHistory : from_status
 OrderStatus ||--o{ OrderStatusHistory : to_status
-Staff ||--o{ OrderStatusHistory : changes
+
+CustomerOrder ||--|{ OrderItem : contains
+CustomerOrder ||--o{ OrderStatusHistory : logs
 CustomerOrder ||--o| Delivery : has
-Staff ||--o{ Delivery : delivers
+
+Product ||--o{ OrderItem : appears_in
 
 note right of CustomerOrder
-- el order_code debe ser único
+- order_code debe ser único
 - una orden debe contener al menos un ítem
-- el total_amount puede ser almacenado o calculado
+- total_amount puede ser almacenado o calculado
 - current_status_changed_at acelera consultas de seguimiento
 - al crear la orden debe insertarse también
   el primer registro en OrderStatusHistory
@@ -132,22 +139,32 @@ end note
 
 note right of OrderStatus
 Catálogo sugerido:
-- PENDIENTE / Pendiente
-- EN_PREPARACION / En preparación
-- LISTO / Listo
-- EN_CAMINO / En camino
-- ENTREGADO / Entregado
-Usar status_code evita ambigüedad entre
-"Listo" y "Listo para entrega" del PDF
+- PENDING / Pendiente
+- IN_PREPARATION / En preparación
+- READY / Listo
+- ON_THE_WAY / En camino
+- DELIVERED / Entregado
+
+DELIVERED representa que el repartidor
+confirmó la entrega.
+
+La confirmación del cliente no se modela
+como nuevo estado; se guarda en Delivery
+mediante customer_confirmed_at.
 end note
 
 note right of OrderStatusTransitionRule
 Reglas de negocio trazables:
-- Pendiente -> En preparación : Cocinero
-- En preparación -> Listo : Cocinero
-- Listo -> En camino : Repartidor
-- En camino -> Entregado : Repartidor
-- no se permiten saltos ni retrocesos
+- PENDING -> IN_PREPARATION : COOK
+- IN_PREPARATION -> READY : COOK
+- READY -> ON_THE_WAY : COURIER
+- ON_THE_WAY -> DELIVERED : COURIER
+
+No se permiten saltos ni retrocesos.
+
+Estas reglas aplican a Staff.
+El Customer no usa esta tabla porque
+no cambia el estado operativo del pedido.
 end note
 
 note right of OrderStatusHistory
@@ -161,6 +178,23 @@ end note
 note right of OrderItem
 - product_name_snapshot preserva trazabilidad
   histórica aunque cambie el nombre del producto
+- unit_price conserva el precio usado
+  al momento de crear el pedido
+end note
+
+note right of Delivery
+- dispatched_at se registra cuando el repartidor
+  sale con el pedido
+- delivered_at y receiver_name se registran
+  cuando el repartidor confirma la entrega
+- customer_confirmed_at se registra cuando
+  el cliente confirma que recibió el pedido
+- el cliente solo puede confirmar si:
+  1. el pedido está DELIVERED
+  2. existe Delivery
+  3. delivered_at no es null
+  4. el pedido pertenece a ese cliente
+  5. todavía no fue confirmado
 end note
 
 @enduml
