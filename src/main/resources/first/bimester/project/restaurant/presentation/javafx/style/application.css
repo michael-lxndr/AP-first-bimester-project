@@ -1,0 +1,14 @@
+.root {
+	-fx-font-family: "Segoe UI";
+	-fx-font-size: 14px;
+}
+
+.title {
+	-fx-font-size: 28px;
+	-fx-font-weight: bold;
+}
+
+.button {
+	-fx-padding: 10px 16px;
+	-fx-cursor: hand;
+}
