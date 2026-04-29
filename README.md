@@ -89,22 +89,22 @@ restaurant-order-manager
 │   │   │       │
 │   │   │       ├── domain
 │   │   │       │   ├── entity
-│   │   │       │   │   ├── Role.java
-│   │   │       │   │   ├── Staff.java
 │   │   │       │   │   ├── Customer.java
 │   │   │       │   │   ├── CustomerAddress.java
-│   │   │       │   │   ├── Product.java
-│   │   │       │   │   ├── OrderStatus.java
-│   │   │       │   │   ├── OrderStatusTransitionRule.java
 │   │   │       │   │   ├── CustomerOrder.java
+│   │   │       │   │   ├── Delivery.java
 │   │   │       │   │   ├── OrderItem.java
+│   │   │       │   │   ├── OrderStatus.java
 │   │   │       │   │   ├── OrderStatusHistory.java
-│   │   │       │   │   └── Delivery.java
+│   │   │       │   │   ├── OrderStatusTransitionRule.java
+│   │   │       │   │   ├── Product.java
+│   │   │       │   │   ├── Role.java
+│   │   │       │   │   └── Staff.java
 │   │   │       │   │
 │   │   │       │   └── enums
-│   │   │       │       ├── RoleCode.java
 │   │   │       │       ├── OrderStatusCode.java
-│   │   │       │       └── ProductCategory.java
+│   │   │       │       ├── ProductCategory.java
+│   │   │       │       └── RoleCode.java
 │   │   │       │
 │   │   │       ├── repository
 │   │   │       │   ├── RoleRepository.java

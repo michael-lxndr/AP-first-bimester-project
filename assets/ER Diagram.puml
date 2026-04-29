@@ -45,6 +45,7 @@ entity "CustomerAddress" as CustomerAddress {
   postal_code : VARCHAR(10)
   city : VARCHAR(50)
   province : VARCHAR(50)
+  country : VARCHAR(50)
   is_primary : BOOLEAN
   is_active : BOOLEAN
 }
@@ -69,7 +70,7 @@ entity "OrderStatus" as OrderStatus {
   --
   status_code : VARCHAR(30) <<UK>>
   status_name : VARCHAR(50) <<UK>>
-  status_order : INT
+  status_order : INT <<UK>>
   is_final : BOOLEAN
 }
 
@@ -121,7 +122,7 @@ entity "OrderStatusHistory" as OrderStatusHistory {
   *history_id : BIGINT <<PK>>
   --
   order_id : BIGINT <<FK>>
-  from_status_id : BIGINT <<FK>>
+  from_status_id : BIGINT <<FK>> <<DEFAULT:PENDING>>
   to_status_id : BIGINT <<FK>>
   changed_by_staff_id : BIGINT <<FK>>
   changed_at : DATETIME
@@ -134,10 +135,10 @@ entity "Delivery" as Delivery {
   order_id : BIGINT <<FK>> <<UK>>
   courier_staff_id : BIGINT <<FK>>
   dispatched_at : DATETIME
-  delivered_at : DATETIME
-  receiver_name : VARCHAR(120)
-  customer_confirmed_at : DATETIME
-  customer_confirmation_notes : VARCHAR(255)
+  delivered_at : DATETIME <<NULL>>
+  receiver_name : VARCHAR(120) <<NULL>>
+  customer_confirmed_at : DATETIME <<NULL>>
+  customer_confirmation_notes : VARCHAR(255) <<NULL>>
 }
 
 Role ||--o{ Staff : has
@@ -167,11 +168,14 @@ note right of CustomerOrder
 - order_code debe ser único
 - una orden debe contener al menos un ítem
 - delivery_address_id referencia la dirección elegida
-  por el cliente
+  por el cliente y es obligatoria porque define
+  dónde se realiza la entrega
 - delivery_address_snapshot preserva la dirección
   histórica aunque luego el cliente edite sus direcciones
 - total_amount = subtotal_amount + tax_amount
   + address_surcharge_amount - discount_amount
+- los montos no pueden ser negativos según checks
+  de base de datos
 - current_status_changed_at acelera consultas de seguimiento
 - al crear la orden debe insertarse también
   el primer registro en OrderStatusHistory
@@ -183,6 +187,10 @@ note right of CustomerAddress
 - is_active permite ocultar direcciones sin borrar historial.
 - Al crear un pedido se debe validar que la dirección
   pertenezca al cliente del pedido.
+- city y province son obligatorias pero no tienen
+  valor por defecto: deben venir del registro real
+  de dirección del cliente.
+- country es obligatorio y usa Ecuador por defecto.
 end note
 
 note right of Product
@@ -190,6 +198,8 @@ note right of Product
 - category clasifica menú: STARTER, MAIN_COURSE,
   DRINK, DESSERT, COMBO.
 - preparation_time_minutes ayuda a estimar entrega.
+- unit_price, production_cost y preparation_time_minutes
+  tienen validaciones CHECK para evitar valores inválidos.
 - production_cost sirve para análisis interno,
   no debe exponerse necesariamente al cliente.
 end note
@@ -208,6 +218,8 @@ confirmó la entrega.
 La confirmación del cliente no se modela
 como nuevo estado; se guarda en Delivery
 mediante customer_confirmed_at.
+
+status_order también es único y debe ser mayor a cero.
 end note
 
 note right of OrderStatusTransitionRule
@@ -222,10 +234,15 @@ No se permiten saltos ni retrocesos.
 Estas reglas aplican a Staff.
 El Customer no usa esta tabla porque
 no cambia el estado operativo del pedido.
+
+La base impide duplicar una regla mediante
+UNIQUE(from_status_id, to_status_id, role_id).
 end note
 
 note right of OrderStatusHistory
 - todo cambio de estado debe registrarse
+- from_status_id es obligatorio; si no se informa,
+  la base usa PENDING como estado inicial por defecto
 - changed_by_staff_id + changed_at cubren
   quién hizo el cambio y cuándo
 - notes permite guardar observaciones
@@ -248,6 +265,12 @@ note right of Delivery
   cuando el repartidor confirma la entrega
 - customer_confirmed_at se registra cuando
   el cliente confirma que recibió el pedido
+- delivered_at, receiver_name y customer_confirmed_at
+  son campos opcionales hasta que avance la entrega
+- si delivered_at tiene valor, receiver_name se vuelve
+  obligatorio por CHECK de base de datos
+- customer_confirmed_at solo puede existir después
+  de delivered_at
 - el cliente solo puede confirmar si:
   1. el pedido está DELIVERED
   2. existe Delivery
