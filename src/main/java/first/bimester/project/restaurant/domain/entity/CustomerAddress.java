@@ -51,24 +51,30 @@ public class CustomerAddress {
 	private String postalCode;
 
 	@Size(max = 50)
-	@Builder.Default
-	@Column(name = "city", length = 50)
-	private String city = "Quito";
+	@NotNull
+	@Column(name = "city", nullable = false, length = 50)
+	private String city;
 
 	@Size(max = 50)
-	@Builder.Default
-	@Column(name = "province", length = 50)
-	private String province = "Pichincha";
+	@NotNull
+	@Column(name = "province", nullable = false, length = 50)
+	private String province;
+
+	@Size(max = 50)
+	@NotNull
+	@ColumnDefault("'Ecuador'")
+	@Column(name = "country", nullable = false, length = 50)
+	private String country;
 
 	@NotNull
-	@Builder.Default
 	@ColumnDefault("0")
 	@Column(name = "is_primary", nullable = false)
-	private Boolean isPrimary = false;
+	private Boolean isPrimary;
 
 	@NotNull
-	@Builder.Default
 	@ColumnDefault("1")
 	@Column(name = "is_active", nullable = false)
-	private Boolean isActive = true;
+	private Boolean isActive;
+
+
 }

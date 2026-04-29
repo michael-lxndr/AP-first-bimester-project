@@ -26,8 +26,10 @@ public class OrderStatusHistory {
 	@JoinColumn(name = "order_id", nullable = false)
 	private CustomerOrder order;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_status_id")
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ColumnDefault("1")
+	@JoinColumn(name = "from_status_id", nullable = false)
 	private OrderStatus fromStatus;
 
 	@NotNull

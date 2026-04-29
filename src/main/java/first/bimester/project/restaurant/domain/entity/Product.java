@@ -24,7 +24,7 @@ public class Product {
 	private Long id;
 
 	@Size(max = 20)
-	@Column(name = "product_code", unique = true, length = 20)
+	@Column(name = "product_code", length = 20)
 	private String productCode;
 
 	@Size(max = 120)
@@ -40,18 +40,18 @@ public class Product {
 	@Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
 	private BigDecimal unitPrice;
 
+	@ColumnDefault("0.00")
 	@Column(name = "production_cost", precision = 10, scale = 2)
-	@Builder.Default
-	private BigDecimal productionCost = BigDecimal.ZERO;
+	private BigDecimal productionCost;
 
+	@Size(max = 30)
 	@Enumerated(EnumType.STRING)
 	@Column(name = "category", length = 30)
 	private ProductCategory category;
 
 	@ColumnDefault("15")
 	@Column(name = "preparation_time_minutes")
-	@Builder.Default
-	private Integer preparationTimeMinutes = 15;
+	private Integer preparationTimeMinutes;
 
 	@NotNull
 	@ColumnDefault("1")

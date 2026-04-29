@@ -42,33 +42,30 @@ public class CustomerOrder {
 	@JoinColumn(name = "current_status_id", nullable = false)
 	private OrderStatus currentStatus;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "delivery_address_id")
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "delivery_address_id", nullable = false)
 	private CustomerAddress deliveryAddress;
 
 	@Size(max = 255)
 	@Column(name = "delivery_address_snapshot")
 	private String deliveryAddressSnapshot;
 
-	@Builder.Default
 	@ColumnDefault("0.00")
 	@Column(name = "subtotal_amount", precision = 10, scale = 2)
-	private BigDecimal subtotalAmount = BigDecimal.ZERO;
+	private BigDecimal subtotalAmount;
 
-	@Builder.Default
 	@ColumnDefault("0.00")
 	@Column(name = "tax_amount", precision = 10, scale = 2)
-	private BigDecimal taxAmount = BigDecimal.ZERO;
+	private BigDecimal taxAmount;
 
-	@Builder.Default
 	@ColumnDefault("0.00")
 	@Column(name = "discount_amount", precision = 10, scale = 2)
-	private BigDecimal discountAmount = BigDecimal.ZERO;
+	private BigDecimal discountAmount;
 
-	@Builder.Default
 	@ColumnDefault("0.00")
 	@Column(name = "address_surcharge_amount", precision = 10, scale = 2)
-	private BigDecimal addressSurchargeAmount = BigDecimal.ZERO;
+	private BigDecimal addressSurchargeAmount;
 
 	@NotNull
 	@ColumnDefault("0.00")
@@ -80,10 +77,9 @@ public class CustomerOrder {
 	private String discountCode;
 
 	@NotNull
-	@Builder.Default
 	@ColumnDefault("0")
 	@Column(name = "is_priority", nullable = false)
-	private Boolean isPriority = false;
+	private Boolean isPriority;
 
 	@Size(max = 255)
 	@Column(name = "general_notes")

@@ -1,5 +1,6 @@
 package first.bimester.project.restaurant.domain.entity;
 
+import first.bimester.project.restaurant.domain.enums.OrderStatusCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -21,8 +22,9 @@ public class OrderStatus {
 
 	@Size(max = 30)
 	@NotNull
+	@Enumerated(EnumType.STRING)
 	@Column(name = "status_code", nullable = false, length = 30)
-	private String statusCode;
+	private OrderStatusCode statusCode;
 
 	@Size(max = 50)
 	@NotNull

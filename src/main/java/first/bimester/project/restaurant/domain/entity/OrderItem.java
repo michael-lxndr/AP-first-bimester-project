@@ -53,10 +53,9 @@ public class OrderItem {
 	private String specialNote;
 
 	@NotNull
-	@Builder.Default
 	@ColumnDefault("0")
 	@Column(name = "is_ready", nullable = false)
-	private Boolean isReady = false;
+	private Boolean isReady;
 
 
 }

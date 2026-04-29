@@ -1,5 +1,6 @@
 package first.bimester.project.restaurant.domain.entity;
 
+import first.bimester.project.restaurant.domain.enums.RoleCode;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -20,8 +21,9 @@ public class Role {
 
 	@Size(max = 30)
 	@NotNull
+	@Enumerated(EnumType.STRING)
 	@Column(name = "role_name", nullable = false, length = 30)
-	private String roleName;
+	private RoleCode roleCode;
 
 
 }
