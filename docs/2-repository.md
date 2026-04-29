@@ -18,6 +18,7 @@ repository
 ├── RoleRepository.java
 ├── StaffRepository.java
 ├── CustomerRepository.java
+├── CustomerAddressRepository.java
 ├── ProductRepository.java
 ├── OrderStatusRepository.java
 ├── OrderStatusTransitionRuleRepository.java
@@ -124,6 +125,42 @@ Quién lo usa:
 - DeliveryService para confirmar recepción
 ```
 
+## `CustomerAddressRepository.java`
+
+Repositorio para `CustomerAddress`.
+
+Qué hace:
+
+```text
+1. Buscar direcciones activas de un cliente.
+2. Buscar la dirección principal de un cliente.
+3. Verificar que una dirección pertenece a un cliente.
+4. Guardar altas, ediciones y bajas lógicas de direcciones.
+```
+
+Consultas esperadas:
+
+```text
+findByCustomerIdAndIsActiveTrue(...)
+findByCustomerIdAndIsPrimaryTrueAndIsActiveTrue(...)
+existsByIdAndCustomerIdAndIsActiveTrue(...)
+```
+
+Quién lo usa:
+
+```text
+- CustomerAddressService
+- OrderService para validar deliveryAddressId al crear pedidos
+- OrderQueryService si se quiere mostrar datos estructurados de dirección
+```
+
+Importante:
+
+```text
+El repositorio no decide si una dirección puede usarse en un pedido.
+Solo devuelve datos. La validación de pertenencia vive en service.
+```
+
 ## `ProductRepository.java`
 
 Repositorio para `Product`.
@@ -134,7 +171,9 @@ Qué hace:
 1. Buscar producto por ID.
 2. Listar productos disponibles.
 3. Verificar existencia de producto.
-4. Guardar productos.
+4. Filtrar productos por categoría.
+5. Buscar productos por código.
+6. Guardar productos.
 ```
 
 Consultas esperadas:
@@ -142,6 +181,8 @@ Consultas esperadas:
 ```text
 findByIsAvailableTrue()
 findByProductNameContainingIgnoreCase(...)
+findByCategoryAndIsAvailableTrue(...)
+findByProductCode(...)
 ```
 
 Quién lo usa:
@@ -231,7 +272,8 @@ Qué hace:
 2. Verificar si un código ya existe.
 3. Listar pedidos por estado.
 4. Listar pedidos por cliente.
-5. Guardar pedidos.
+5. Listar pedidos por dirección de entrega.
+6. Guardar pedidos.
 ```
 
 Consultas esperadas:
@@ -241,6 +283,7 @@ findByOrderCode(...)
 existsByOrderCode(...)
 findByCurrentStatusStatusCode(...)
 findByCustomerCustomerId(...)
+findByDeliveryAddressId(...)
 ```
 
 Quién lo usa:

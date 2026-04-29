@@ -105,6 +105,7 @@ Servicios que usa:
 
 ```text
 CustomerService
+CustomerAddressService
 ProductService
 OrderService
 OrderQueryService
@@ -114,12 +115,13 @@ Opciones esperadas:
 
 ```text
 1. Registrar cliente.
-2. Registrar producto.
-3. Consultar menú.
-4. Crear pedido.
-5. Listar pedidos.
-6. Ver detalle de pedido.
-7. Volver.
+2. Registrar dirección de cliente.
+3. Registrar producto.
+4. Consultar menú.
+5. Crear pedido.
+6. Listar pedidos.
+7. Ver detalle de pedido.
+8. Volver.
 ```
 
 Flujo para crear pedido:
@@ -127,11 +129,23 @@ Flujo para crear pedido:
 ```text
 1. Pedir ID del administrador.
 2. Pedir ID del cliente.
-3. Pedir dirección de entrega.
-4. Pedir productos y cantidades.
-5. Crear CreateOrderRequest.
-6. Llamar OrderService.createOrder.
-7. Mostrar resultado o error.
+3. Listar direcciones activas del cliente.
+4. Pedir ID de dirección de entrega.
+5. Pedir productos, cantidades y notas especiales.
+6. Crear CreateOrderRequest.
+7. Llamar OrderService.createOrder.
+8. Mostrar resultado o error.
+```
+
+Flujo para registrar dirección:
+
+```text
+1. Pedir ID del cliente.
+2. Pedir alias, calle principal, número, referencia, ciudad y provincia.
+3. Preguntar si será dirección principal.
+4. Crear CreateCustomerAddressRequest.
+5. Llamar CustomerAddressService.createAddress.
+6. Mostrar resultado o error.
 ```
 
 ## `console/CookMenu.java`
@@ -175,6 +189,7 @@ Servicios que usa:
 ```text
 OrderQueryService
 DeliveryService
+CustomerAddressService opcionalmente
 ```
 
 Opciones esperadas:
@@ -224,8 +239,9 @@ Opciones esperadas:
 ```text
 1. Consultar pedido por código.
 2. Ver historial.
-3. Confirmar recepción.
-4. Volver.
+3. Administrar direcciones.
+4. Confirmar recepción.
+5. Volver.
 ```
 
 Flujo para consultar pedido:
@@ -343,6 +359,7 @@ Servicios que usa:
 
 ```text
 CustomerService
+CustomerAddressService
 ProductService
 OrderService
 OrderQueryService
@@ -352,8 +369,9 @@ Qué hace:
 
 ```text
 1. Leer formularios de cliente.
-2. Leer formularios de producto.
-3. Leer formularios de pedido.
+2. Leer formularios de dirección.
+3. Leer formularios de producto.
+4. Leer formularios de pedido.
 4. Crear request DTOs.
 5. Llamar servicios.
 6. Mostrar respuestas en tablas o mensajes.
@@ -397,6 +415,7 @@ Servicios que usa:
 ```text
 OrderQueryService
 DeliveryService
+CustomerAddressService opcionalmente
 ```
 
 Qué hace:
@@ -427,7 +446,8 @@ Qué hace:
 2. Mostrar estado actual.
 3. Mostrar historial.
 4. Mostrar datos de entrega.
-5. Permitir confirmar recepción si corresponde.
+5. Permitir administrar direcciones si el alcance de UI lo incluye.
+6. Permitir confirmar recepción si corresponde.
 ```
 
 Regla visual:
@@ -585,6 +605,7 @@ Debe permitir:
 
 ```text
 - Registrar cliente.
+- Registrar direcciones del cliente.
 - Registrar producto.
 - Crear pedido.
 - Ver pedidos.
@@ -627,6 +648,7 @@ Debe permitir:
 - Ingresar código de pedido.
 - Ver estado actual.
 - Ver historial.
+- Administrar direcciones si se habilita autogestión del cliente.
 - Confirmar recepción.
 ```
 

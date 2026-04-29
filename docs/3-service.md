@@ -17,6 +17,7 @@ Acá se valida quién puede hacer qué, en qué momento, bajo qué estado y con 
 ```text
 service
 ├── CustomerService.java
+├── CustomerAddressService.java
 ├── ProductService.java
 ├── StaffService.java
 ├── OrderService.java
@@ -62,6 +63,52 @@ Quién lo usa:
 - OrderQueryService
 ```
 
+## `CustomerAddressService.java`
+
+Servicio para administrar direcciones de clientes.
+
+Qué hace:
+
+```text
+1. Registrar direcciones para un cliente.
+2. Listar direcciones activas.
+3. Marcar una dirección como principal.
+4. Desactivar direcciones sin borrar historial.
+5. Validar que una dirección pertenece al cliente antes de crear un pedido.
+```
+
+Flujo recomendado para registrar dirección:
+
+```text
+createAddress(request)
+
+1. Buscar Customer por ID.
+2. Validar que el cliente exista y esté activo.
+3. Validar alias y mainStreet.
+4. Si request.isPrimary es true, desmarcar otras direcciones principales del cliente.
+5. Crear CustomerAddress.
+6. Guardar con CustomerAddressRepository.
+7. Devolver CustomerAddressResponse.
+```
+
+Método clave para pedidos:
+
+```text
+validateAddressForCustomer(customerId, addressId)
+
+1. Buscar dirección activa por addressId.
+2. Verificar que address.customer.id coincida con customerId.
+3. Si no coincide, lanzar BusinessException.
+4. Devolver CustomerAddress válida.
+```
+
+Por qué importa:
+
+```text
+Sin esta validación, un cliente podría usar por error o malicia una dirección de otro cliente.
+Eso no se resuelve en repository; es una regla de negocio.
+```
+
 ## `ProductService.java`
 
 Servicio para productos del menú.
@@ -72,8 +119,9 @@ Qué hace:
 1. Crear productos.
 2. Consultar menú.
 3. Listar productos disponibles.
-4. Activar o desactivar productos.
-5. Validar precio y nombre.
+4. Filtrar por categoría.
+5. Activar o desactivar productos.
+6. Validar precio, nombre, código y tiempo de preparación.
 ```
 
 Flujo recomendado para crear producto:
@@ -83,11 +131,14 @@ createProduct(request)
 
 1. Validar productName.
 2. Validar unitPrice mayor o igual a cero.
-3. Crear Product.
-4. Marcar isAvailable como true.
-5. Guardar con ProductRepository.
-6. Convertir a ProductResponse.
-7. Devolver respuesta.
+3. Validar productCode si se usa como único.
+4. Validar category si se informa.
+5. Validar preparationTimeMinutes mayor a cero si se informa.
+6. Crear Product.
+7. Marcar isAvailable como true.
+8. Guardar con ProductRepository.
+9. Convertir a ProductResponse.
+10. Devolver respuesta.
 ```
 
 Quién lo usa:
@@ -217,17 +268,21 @@ createOrder(request)
 2. Validar que el staff tenga rol ADMINISTRATOR.
 3. Buscar cliente.
 4. Validar que el cliente exista y esté activo.
-5. Validar que el pedido tenga al menos un producto.
-6. Buscar cada Product por ID.
-7. Validar que cada Product esté disponible.
-8. Calcular lineTotal de cada OrderItem.
-9. Calcular totalAmount.
-10. Buscar estado inicial PENDING.
-11. Crear CustomerOrder.
-12. Crear OrderItem por cada producto.
-13. Crear primer OrderStatusHistory.
-14. Guardar todo dentro de una transacción.
-15. Devolver OrderDetailResponse.
+5. Validar deliveryAddressId con CustomerAddressService.
+6. Generar deliveryAddressSnapshot.
+7. Validar que el pedido tenga al menos un producto.
+8. Buscar cada Product por ID.
+9. Validar que cada Product esté disponible.
+10. Calcular lineTotal de cada OrderItem.
+11. Calcular subtotalAmount.
+12. Calcular taxAmount, discountAmount y addressSurchargeAmount si aplican.
+13. Calcular totalAmount.
+14. Buscar estado inicial PENDING.
+15. Crear CustomerOrder.
+16. Crear OrderItem por cada producto, incluyendo specialNote si existe.
+17. Crear primer OrderStatusHistory.
+18. Guardar todo dentro de una transacción.
+19. Devolver OrderDetailResponse.
 ```
 
 Flujo recomendado para cambiar estado:
@@ -372,4 +427,24 @@ Importante:
 La confirmación del cliente no crea OrderStatusHistory porque no cambia el estado operativo.
 El estado ya es DELIVERED.
 La confirmación se guarda en Delivery.
+```
+
+## Pasos de integración de las mejoras de FoodFlow2
+
+```text
+1. Implementar CustomerAddressService antes de cambiar pantallas.
+2. Cambiar CreateOrderRequest para recibir deliveryAddressId y no solo texto libre.
+3. En OrderService.createOrder, validar dirección y generar snapshot antes de guardar.
+4. Extender ProductService para manejar ProductCategory y preparationTimeMinutes.
+5. Extender cálculo de totales: subtotalAmount, taxAmount, discountAmount, addressSurchargeAmount y totalAmount.
+6. Usar OrderItem.specialNote para notas por producto.
+7. Usar OrderItem.isReady solo para cocina; no reemplaza OrderStatus.
+```
+
+Tradeoff importante:
+
+```text
+FoodFlow2 usa herencia de Usuario para Cliente/Cocinero/Repartidor/Administrador.
+Este proyecto mantiene Staff + Role porque las reglas de transición ya dependen de roles trazables.
+Copiar esa herencia acá duplicaría conceptos y haría más confuso el control de permisos.
 ```

@@ -33,13 +33,35 @@ entity "Customer" as Customer {
   created_at : DATETIME
 }
 
+entity "CustomerAddress" as CustomerAddress {
+  *address_id : BIGINT <<PK>>
+  --
+  customer_id : BIGINT <<FK>>
+  alias : VARCHAR(50)
+  main_street : VARCHAR(150)
+  secondary_street : VARCHAR(150)
+  house_number : VARCHAR(10)
+  reference : VARCHAR(255)
+  postal_code : VARCHAR(10)
+  city : VARCHAR(50)
+  province : VARCHAR(50)
+  is_primary : BOOLEAN
+  is_active : BOOLEAN
+}
+
 entity "Product" as Product {
   *product_id : BIGINT <<PK>>
   --
+  product_code : VARCHAR(20) <<UK>>
   product_name : VARCHAR(120)
   description : VARCHAR(255)
   unit_price : DECIMAL(10,2)
+  production_cost : DECIMAL(10,2)
+  category : VARCHAR(30)
+  preparation_time_minutes : INT
   is_available : BOOLEAN
+  image_url : VARCHAR(255)
+  created_at : DATETIME
 }
 
 entity "OrderStatus" as OrderStatus {
@@ -67,9 +89,18 @@ entity "CustomerOrder" as CustomerOrder {
   customer_id : BIGINT <<FK>>
   registered_by_staff_id : BIGINT <<FK>>
   current_status_id : BIGINT <<FK>>
-  delivery_address : VARCHAR(255)
+  delivery_address_id : BIGINT <<FK>>
+  delivery_address_snapshot : VARCHAR(255)
+  subtotal_amount : DECIMAL(10,2)
+  tax_amount : DECIMAL(10,2)
+  discount_amount : DECIMAL(10,2)
+  address_surcharge_amount : DECIMAL(10,2)
   total_amount : DECIMAL(10,2)
+  discount_code : VARCHAR(20)
+  is_priority : BOOLEAN
+  general_notes : VARCHAR(255)
   created_at : DATETIME
+  estimated_delivery_at : DATETIME
   current_status_changed_at : DATETIME
 }
 
@@ -82,6 +113,8 @@ entity "OrderItem" as OrderItem {
   product_name_snapshot : VARCHAR(120)
   unit_price : DECIMAL(10,2)
   line_total : DECIMAL(10,2)
+  special_note : VARCHAR(150)
+  is_ready : BOOLEAN
 }
 
 entity "OrderStatusHistory" as OrderStatusHistory {
@@ -111,6 +144,8 @@ Role ||--o{ Staff : has
 Role ||--o{ OrderStatusTransitionRule : authorizes
 
 Customer ||--o{ CustomerOrder : places
+Customer ||--o{ CustomerAddress : owns
+CustomerAddress ||--o{ CustomerOrder : selected_for
 
 Staff ||--o{ CustomerOrder : registers
 Staff ||--o{ OrderStatusHistory : changes
@@ -131,10 +166,32 @@ Product ||--o{ OrderItem : appears_in
 note right of CustomerOrder
 - order_code debe ser único
 - una orden debe contener al menos un ítem
-- total_amount puede ser almacenado o calculado
+- delivery_address_id referencia la dirección elegida
+  por el cliente
+- delivery_address_snapshot preserva la dirección
+  histórica aunque luego el cliente edite sus direcciones
+- total_amount = subtotal_amount + tax_amount
+  + address_surcharge_amount - discount_amount
 - current_status_changed_at acelera consultas de seguimiento
 - al crear la orden debe insertarse también
   el primer registro en OrderStatusHistory
+end note
+
+note right of CustomerAddress
+- Un cliente puede registrar varias direcciones.
+- is_primary marca la dirección sugerida por defecto.
+- is_active permite ocultar direcciones sin borrar historial.
+- Al crear un pedido se debe validar que la dirección
+  pertenezca al cliente del pedido.
+end note
+
+note right of Product
+- product_code facilita búsqueda e integración externa.
+- category clasifica menú: STARTER, MAIN_COURSE,
+  DRINK, DESSERT, COMBO.
+- preparation_time_minutes ayuda a estimar entrega.
+- production_cost sirve para análisis interno,
+  no debe exponerse necesariamente al cliente.
 end note
 
 note right of OrderStatus
@@ -180,6 +237,8 @@ note right of OrderItem
   histórica aunque cambie el nombre del producto
 - unit_price conserva el precio usado
   al momento de crear el pedido
+- special_note permite observaciones por producto
+- is_ready permite seguimiento interno de cocina
 end note
 
 note right of Delivery

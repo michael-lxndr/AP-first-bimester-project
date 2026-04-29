@@ -12,6 +12,7 @@ domain
 │   ├── Role.java
 │   ├── Staff.java
 │   ├── Customer.java
+│   ├── CustomerAddress.java
 │   ├── Product.java
 │   ├── OrderStatus.java
 │   ├── OrderStatusTransitionRule.java
@@ -22,7 +23,8 @@ domain
 │
 └── enums
     ├── RoleCode.java
-    └── OrderStatusCode.java
+    ├── OrderStatusCode.java
+    └── ProductCategory.java
 ```
 
 ## `entity/Role.java`
@@ -121,6 +123,7 @@ Qué hace:
 1. Guarda datos del cliente.
 2. Permite asociar pedidos a un cliente.
 3. Permite validar que el cliente existe antes de consultar o confirmar recepción.
+4. Agrupa las direcciones reutilizables del cliente.
 ```
 
 Campos importantes:
@@ -132,12 +135,14 @@ phone
 email
 isActive
 createdAt
+addresses
 ```
 
 Relación principal:
 
 ```text
 Customer 1 ─── 0..* CustomerOrder
+Customer 1 ─── 0..* CustomerAddress
 ```
 
 Es decir: un cliente puede tener muchos pedidos, pero cada pedido pertenece a un solo cliente.
@@ -148,6 +153,59 @@ Cómo se usa:
 - OrderService usa Customer para crear pedidos.
 - OrderQueryService usa Customer para consultar pedidos.
 - DeliveryService valida que el cliente que confirma recepción sea dueño del pedido.
+- CustomerAddressService valida y administra direcciones del cliente.
+```
+
+## `entity/CustomerAddress.java`
+
+Representa una dirección guardada por un cliente.
+
+Viene de la idea `Direccion` del proyecto `FoodFlow2`, pero adaptada al naming y al modelo principal.
+
+Qué hace:
+
+```text
+1. Permite que un cliente tenga varias direcciones.
+2. Marca una dirección principal para sugerirla al crear pedidos.
+3. Permite desactivar direcciones sin borrar historial.
+4. Sirve como dirección seleccionable para un pedido nuevo.
+```
+
+Campos importantes:
+
+```text
+addressId
+customer
+alias
+mainStreet
+secondaryStreet
+houseNumber
+reference
+postalCode
+city
+province
+isPrimary
+isActive
+```
+
+Relación principal:
+
+```text
+Customer 1 ─── 0..* CustomerAddress
+CustomerAddress 1 ─── 0..* CustomerOrder
+```
+
+Regla clave:
+
+```text
+Un pedido solo puede usar una dirección que pertenezca al mismo cliente del pedido.
+```
+
+Importante:
+
+```text
+CustomerAddress puede cambiar con el tiempo. Por eso CustomerOrder también guarda deliveryAddressSnapshot.
+El snapshot preserva la dirección usada originalmente aunque el cliente edite o desactive la dirección después.
 ```
 
 ## `entity/Product.java`
@@ -169,16 +227,24 @@ Qué hace:
 1. Guarda nombre, descripción y precio actual.
 2. Indica si el producto está disponible.
 3. Permite crear ítems de pedido a partir de productos existentes.
+4. Clasifica el producto por categoría.
+5. Guarda datos operativos como costo interno, imagen y tiempo de preparación.
 ```
 
 Campos importantes:
 
 ```text
 productId
+productCode
 productName
 description
 unitPrice
+productionCost
+category
+preparationTimeMinutes
 isAvailable
+imageUrl
+createdAt
 ```
 
 Relación principal:
@@ -194,6 +260,7 @@ Importante:
 ```text
 El precio actual del Product no debe modificar pedidos antiguos.
 Por eso OrderItem guarda unitPrice y productNameSnapshot.
+productionCost es información interna: sirve para análisis, no necesariamente para mostrar al cliente.
 ```
 
 ## `entity/OrderStatus.java`
@@ -294,9 +361,11 @@ Qué hace:
 2. Relaciona el pedido con el cliente.
 3. Relaciona el pedido con el staff que lo registró.
 4. Guarda el estado actual.
-5. Guarda dirección de entrega.
-6. Guarda el total.
-7. Guarda fechas de creación y cambio de estado.
+5. Relaciona la dirección de entrega elegida.
+6. Guarda un snapshot textual de la dirección.
+7. Guarda subtotal, impuestos, descuentos, recargos y total.
+8. Guarda prioridad, observaciones y fecha estimada.
+9. Guarda fechas de creación y cambio de estado.
 ```
 
 Campos importantes:
@@ -308,8 +377,17 @@ customer
 registeredByStaff
 currentStatus
 deliveryAddress
+deliveryAddressSnapshot
+subtotalAmount
+taxAmount
+discountAmount
+addressSurchargeAmount
 totalAmount
+discountCode
+isPriority
+generalNotes
 createdAt
+estimatedDeliveryAt
 currentStatusChangedAt
 ```
 
@@ -317,6 +395,7 @@ Relaciones:
 
 ```text
 CustomerOrder 1 ─── 1 Customer
+CustomerOrder 1 ─── 0..1 CustomerAddress deliveryAddress
 CustomerOrder 1 ─── 1 Staff registeredByStaff
 CustomerOrder 1 ─── 1 OrderStatus currentStatus
 CustomerOrder 1 ─── 1..* OrderItem
@@ -329,6 +408,9 @@ Reglas relacionadas:
 ```text
 - orderCode debe ser único.
 - Un pedido debe tener al menos un OrderItem.
+- Si se informa deliveryAddress, debe pertenecer al Customer del pedido.
+- deliveryAddressSnapshot debe llenarse al crear el pedido.
+- totalAmount debe ser consistente con subtotalAmount, taxAmount, discountAmount y addressSurchargeAmount.
 - Al crear un pedido, su estado inicial debe ser PENDING.
 - Al crear un pedido, se debe registrar el primer historial.
 ```
@@ -347,6 +429,8 @@ Qué hace:
 3. Guarda nombre del producto en el momento de compra.
 4. Guarda precio unitario en el momento de compra.
 5. Guarda subtotal de la línea.
+6. Guarda una nota especial por producto.
+7. Permite marcar si el ítem ya está listo en cocina.
 ```
 
 Campos importantes:
@@ -359,6 +443,8 @@ quantity
 productNameSnapshot
 unitPrice
 lineTotal
+specialNote
+isReady
 ```
 
 Relaciones:
@@ -373,6 +459,8 @@ Importante:
 ```text
 productNameSnapshot y unitPrice preservan historia.
 Si el producto cambia de nombre o precio después, el pedido antiguo mantiene los datos originales.
+specialNote pertenece al pedido, no al producto del catálogo.
+isReady sirve para seguimiento interno de preparación, no reemplaza el estado global del pedido.
 ```
 
 ## `entity/OrderStatusHistory.java`
@@ -521,4 +609,36 @@ OrderService busca PENDING al crear pedidos.
 DeliveryService busca ON_THE_WAY y DELIVERED.
 OrderQueryService lista pedidos por estado.
 DataInitializer carga estados iniciales.
+```
+
+## `enums/ProductCategory.java`
+
+Define categorías para clasificar el menú.
+
+Valores esperados:
+
+```text
+STARTER
+MAIN_COURSE
+DRINK
+DESSERT
+COMBO
+```
+
+Qué hace:
+
+```text
+1. Evita escribir categorías como texto libre.
+2. Permite filtrar productos por tipo.
+3. Ayuda a organizar pantallas de menú y reportes.
+```
+
+Equivalencia con `FoodFlow2`:
+
+```text
+ENTRADA       → STARTER
+PLATO_FUERTE  → MAIN_COURSE
+BEBIDA        → DRINK
+POSTRE        → DESSERT
+COMBO         → COMBO
 ```

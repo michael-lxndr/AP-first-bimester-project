@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 
@@ -46,6 +47,16 @@ public class OrderItem {
 	@NotNull
 	@Column(name = "line_total", nullable = false, precision = 10, scale = 2)
 	private BigDecimal lineTotal;
+
+	@Size(max = 150)
+	@Column(name = "special_note", length = 150)
+	private String specialNote;
+
+	@NotNull
+	@Builder.Default
+	@ColumnDefault("0")
+	@Column(name = "is_ready", nullable = false)
+	private Boolean isReady = false;
 
 
 }

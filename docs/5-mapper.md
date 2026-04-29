@@ -16,6 +16,7 @@ Un mapper no debe consultar base de datos ni validar reglas de negocio. Solo rec
 ```text
 mapper
 ├── CustomerMapper.java
+├── CustomerAddressMapper.java
 ├── ProductMapper.java
 ├── OrderMapper.java
 └── DeliveryMapper.java
@@ -42,6 +43,7 @@ Customer.phone       → CustomerResponse.phone
 Customer.email       → CustomerResponse.email
 Customer.isActive    → CustomerResponse.isActive
 Customer.createdAt   → CustomerResponse.createdAt
+Customer.addresses   → CustomerResponse.addresses opcional
 ```
 
 Quién lo usa:
@@ -49,6 +51,43 @@ Quién lo usa:
 ```text
 - CustomerService
 - OrderMapper
+```
+
+## `CustomerAddressMapper.java`
+
+Convierte `CustomerAddress` en `CustomerAddressResponse`.
+
+Qué hace:
+
+```text
+1. Recibe una entidad CustomerAddress.
+2. Extrae datos visibles de dirección.
+3. Construye CustomerAddressResponse.
+```
+
+Transformación esperada:
+
+```text
+CustomerAddress.addressId       → addressId
+CustomerAddress.customer.id      → customerId
+CustomerAddress.alias            → alias
+CustomerAddress.mainStreet       → mainStreet
+CustomerAddress.secondaryStreet  → secondaryStreet
+CustomerAddress.houseNumber      → houseNumber
+CustomerAddress.reference        → reference
+CustomerAddress.postalCode       → postalCode
+CustomerAddress.city             → city
+CustomerAddress.province         → province
+CustomerAddress.isPrimary        → isPrimary
+CustomerAddress.isActive         → isActive
+```
+
+Quién lo usa:
+
+```text
+- CustomerAddressService
+- CustomerMapper si se incluyen direcciones en CustomerResponse
+- OrderMapper si se muestra la dirección estructurada además del snapshot
 ```
 
 ## `ProductMapper.java`
@@ -67,10 +106,14 @@ Transformación esperada:
 
 ```text
 Product.productId    → ProductResponse.productId
+Product.productCode  → ProductResponse.productCode
 Product.productName  → ProductResponse.productName
 Product.description  → ProductResponse.description
 Product.unitPrice    → ProductResponse.unitPrice
+Product.category     → ProductResponse.category
+Product.preparationTimeMinutes → ProductResponse.preparationTimeMinutes
 Product.isAvailable  → ProductResponse.isAvailable
+Product.imageUrl     → ProductResponse.imageUrl
 ```
 
 Quién lo usa:
@@ -102,7 +145,10 @@ CustomerOrder.orderCode                  → orderCode
 CustomerOrder.customer.fullName          → customerName
 CustomerOrder.currentStatus.statusCode   → currentStatusCode
 CustomerOrder.currentStatus.statusName   → currentStatusName
+CustomerOrder.deliveryAddressSnapshot    → deliveryAddress
+CustomerOrder.isPriority                 → isPriority
 CustomerOrder.totalAmount                → totalAmount
+CustomerOrder.estimatedDeliveryAt        → estimatedDeliveryAt
 CustomerOrder.createdAt                  → createdAt
 CustomerOrder.currentStatusChangedAt     → currentStatusChangedAt
 ```
@@ -114,9 +160,11 @@ Debe incluir:
 ```text
 1. Datos principales del pedido.
 2. Datos del cliente.
-3. Lista de ítems.
-4. Historial.
-5. Datos de entrega si existe.
+3. Dirección de entrega usada, preferentemente deliveryAddressSnapshot.
+4. Desglose financiero: subtotal, impuestos, descuentos, recargos y total.
+5. Lista de ítems.
+6. Historial.
+7. Datos de entrega si existe.
 ```
 
 Importante:

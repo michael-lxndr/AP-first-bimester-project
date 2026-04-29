@@ -7,6 +7,8 @@ import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -43,6 +45,10 @@ public class Customer {
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
 	@Column(name = "created_at", nullable = false)
 	private Instant createdAt;
+
+	@Builder.Default
+	@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<CustomerAddress> addresses = new ArrayList<>();
 
 
 }

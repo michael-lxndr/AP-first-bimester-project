@@ -22,9 +22,13 @@ El sistema permite:
 
 ```text
 - Registrar clientes.
+- Registrar varias direcciones por cliente.
 - Registrar productos.
+- Clasificar productos por categoría y tiempo de preparación.
 - Crear pedidos con uno o más productos.
 - Calcular el total del pedido.
+- Calcular subtotal, impuestos, descuentos y recargo por dirección.
+- Guardar notas generales del pedido y notas especiales por producto.
 - Controlar el flujo de estados.
 - Asignar responsabilidades por rol.
 - Registrar historial de cambios.
@@ -88,6 +92,7 @@ restaurant-order-manager
 │   │   │       │   │   ├── Role.java
 │   │   │       │   │   ├── Staff.java
 │   │   │       │   │   ├── Customer.java
+│   │   │       │   │   ├── CustomerAddress.java
 │   │   │       │   │   ├── Product.java
 │   │   │       │   │   ├── OrderStatus.java
 │   │   │       │   │   ├── OrderStatusTransitionRule.java
@@ -98,12 +103,14 @@ restaurant-order-manager
 │   │   │       │   │
 │   │   │       │   └── enums
 │   │   │       │       ├── RoleCode.java
-│   │   │       │       └── OrderStatusCode.java
+│   │   │       │       ├── OrderStatusCode.java
+│   │   │       │       └── ProductCategory.java
 │   │   │       │
 │   │   │       ├── repository
 │   │   │       │   ├── RoleRepository.java
 │   │   │       │   ├── StaffRepository.java
 │   │   │       │   ├── CustomerRepository.java
+│   │   │       │   ├── CustomerAddressRepository.java
 │   │   │       │   ├── ProductRepository.java
 │   │   │       │   ├── OrderStatusRepository.java
 │   │   │       │   ├── OrderStatusTransitionRuleRepository.java
@@ -114,6 +121,7 @@ restaurant-order-manager
 │   │   │       │
 │   │   │       ├── service
 │   │   │       │   ├── CustomerService.java
+│   │   │       │   ├── CustomerAddressService.java
 │   │   │       │   ├── ProductService.java
 │   │   │       │   ├── StaffService.java
 │   │   │       │   ├── OrderService.java
@@ -124,6 +132,7 @@ restaurant-order-manager
 │   │   │       ├── dto
 │   │   │       │   ├── request
 │   │   │       │   │   ├── CreateCustomerRequest.java
+│   │   │       │   │   ├── CreateCustomerAddressRequest.java
 │   │   │       │   │   ├── CreateProductRequest.java
 │   │   │       │   │   ├── CreateOrderRequest.java
 │   │   │       │   │   ├── CreateOrderItemRequest.java
@@ -135,6 +144,7 @@ restaurant-order-manager
 │   │   │       │   └── response
 │   │   │       │       ├── ProductResponse.java
 │   │   │       │       ├── CustomerResponse.java
+│   │   │       │       ├── CustomerAddressResponse.java
 │   │   │       │       ├── OrderSummaryResponse.java
 │   │   │       │       ├── OrderDetailResponse.java
 │   │   │       │       ├── OrderItemResponse.java
@@ -143,6 +153,7 @@ restaurant-order-manager
 │   │   │       │
 │   │   │       ├── mapper
 │   │   │       │   ├── CustomerMapper.java
+│   │   │       │   ├── CustomerAddressMapper.java
 │   │   │       │   ├── ProductMapper.java
 │   │   │       │   ├── OrderMapper.java
 │   │   │       │   └── DeliveryMapper.java
@@ -240,8 +251,9 @@ Contiene las reglas del restaurante.
 
 ```text
 - Validar roles.
+- Validar que una dirección pertenezca al cliente antes de usarla en un pedido.
 - Validar flujo de estados.
-- Calcular totales.
+- Calcular subtotal, impuestos, descuentos, recargos y total.
 - Crear historial.
 - Crear entregas.
 - Confirmar entregas.
@@ -255,7 +267,8 @@ Accede a MySQL mediante Spring Data JPA.
 ```text
 - Buscar entidades.
 - Guardar entidades.
-- Consultar pedidos por código, estado, cliente o repartidor.
+- Consultar direcciones por cliente.
+- Consultar pedidos por código, estado, cliente, dirección o repartidor.
 ```
 
 No toma decisiones de negocio.
@@ -268,6 +281,7 @@ Representa el modelo del sistema.
 - Entidades JPA.
 - Enums/códigos del dominio.
 - Relaciones del diagrama ER.
+- Direcciones reutilizables por cliente y snapshots históricos por pedido.
 ```
 
 ### DTO
@@ -324,14 +338,41 @@ Pasos:
 ```text
 1. Validar que el staff sea ADMINISTRATOR.
 2. Validar cliente.
-3. Validar que exista al menos un producto.
-4. Validar productos disponibles.
-5. Calcular subtotales.
-6. Calcular total.
-7. Crear CustomerOrder con estado PENDING.
-8. Crear OrderItem por cada producto.
-9. Crear primer OrderStatusHistory.
-10. Guardar todo en una transacción.
+3. Validar que la dirección elegida pertenezca al cliente y esté activa.
+4. Generar deliveryAddressSnapshot para no perder historial si el cliente edita su dirección.
+5. Validar que exista al menos un producto.
+6. Validar productos disponibles.
+7. Calcular subtotal de cada línea.
+8. Calcular subtotal del pedido.
+9. Calcular taxAmount, discountAmount y addressSurchargeAmount si aplican.
+10. Calcular totalAmount.
+11. Crear CustomerOrder con estado PENDING.
+12. Crear OrderItem por cada producto, incluyendo specialNote si existe.
+13. Crear primer OrderStatusHistory.
+14. Guardar todo en una transacción.
+```
+
+### Registrar dirección de cliente
+
+```text
+AdminMenu/AdminController o CustomerMenu/CustomerController
+    ↓
+CustomerAddressService.createAddress
+    ↓
+CustomerRepository
+CustomerAddressRepository
+```
+
+Pasos:
+
+```text
+1. Buscar cliente por ID.
+2. Verificar que el cliente exista y esté activo.
+3. Validar alias, calle principal y datos mínimos.
+4. Si la dirección se marca como principal, desmarcar las demás direcciones activas del cliente.
+5. Crear CustomerAddress.
+6. Guardar con CustomerAddressRepository.
+7. Devolver CustomerAddressResponse.
 ```
 
 ### Cambiar estado del pedido
@@ -430,6 +471,9 @@ Pasos:
 ```text
 - Cada pedido tiene un código único.
 - Un pedido debe tener al menos un producto.
+- Un cliente puede tener muchas direcciones.
+- Una dirección solo puede usarse en pedidos del cliente dueño de esa dirección.
+- El pedido guarda una copia textual de la dirección para mantener historial.
 - El administrador registra pedidos.
 - El cocinero cambia PENDING → IN_PREPARATION → READY.
 - El repartidor cambia READY → ON_THE_WAY → DELIVERED.
@@ -437,7 +481,39 @@ Pasos:
 - Todo cambio de estado debe registrarse en historial.
 - El cliente puede consultar estado e historial.
 - El cliente solo puede confirmar recepción cuando el repartidor ya confirmó entrega.
+- Las notas especiales por producto no modifican el catálogo; pertenecen al ítem del pedido.
 ```
+
+## Novedades tomadas de `revisar/FoodFlow2`
+
+Se revisó el modelo de `FoodFlow2` y se integraron las mejoras que encajan con el diseño principal sin cambiar la arquitectura base:
+
+```text
+- Direccion        → CustomerAddress
+- CategoriaProducto → ProductCategory
+- notaEspecial     → OrderItem.specialNote
+- listo            → OrderItem.isReady
+- subtotal/iva/descuento/recargo → CustomerOrder campos financieros
+- prioritario/observaciones → CustomerOrder.isPriority/generalNotes
+- tiempoPreparacionMin/imagenUrl/costoProduccion → Product
+```
+
+No se copió la herencia `Usuario → Cliente/Cocinero/Repartidor/Administrador` porque este proyecto ya usa `Staff + Role + OrderStatusTransitionRule`. Mantener roles como catálogo deja las reglas de autorización trazables en base de datos y evita mezclar datos de login con responsabilidades operativas.
+
+## Pasos para terminar la integración funcional
+
+```text
+1. Crear CustomerAddressRepository con consultas por customerId, isActive e isPrimary.
+2. Crear CustomerAddressService para alta, baja lógica, selección principal y validación de pertenencia.
+3. Actualizar CreateOrderRequest para recibir deliveryAddressId en lugar de texto libre.
+4. En OrderService.createOrder, buscar CustomerAddress y validar customerId.
+5. Generar deliveryAddressSnapshot antes de guardar CustomerOrder.
+6. Actualizar OrderMapper para devolver addressId y deliveryAddressSnapshot.
+7. Actualizar consola/JavaFX para listar direcciones del cliente antes de crear el pedido.
+8. Si se usa Hibernate ddl-auto, revisar la migración generada; si se usa SQL manual, crear tabla customer_addresses y FK customer_orders.delivery_address_id.
+```
+
+La decisión importante, loco: una cosa es la dirección editable del cliente y otra es la dirección histórica del pedido. Si no guardás snapshot, editás una dirección hoy y te cambia el significado de pedidos viejos. Eso en negocio real es un bug silencioso.
 
 ## Regla de oro del proyecto
 

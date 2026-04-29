@@ -18,6 +18,7 @@ Esto evita exponer entidades completas, relaciones internas o datos que la panta
 dto
 ├── request
 │   ├── CreateCustomerRequest.java
+│   ├── CreateCustomerAddressRequest.java
 │   ├── CreateProductRequest.java
 │   ├── CreateOrderRequest.java
 │   ├── CreateOrderItemRequest.java
@@ -29,6 +30,7 @@ dto
 └── response
     ├── ProductResponse.java
     ├── CustomerResponse.java
+    ├── CustomerAddressResponse.java
     ├── OrderSummaryResponse.java
     ├── OrderDetailResponse.java
     ├── OrderItemResponse.java
@@ -65,6 +67,42 @@ phone: requerido o validado según decisión del grupo
 email: formato válido si se ingresa
 ```
 
+## `request/CreateCustomerAddressRequest.java`
+
+Datos necesarios para registrar una dirección de cliente.
+
+Campos esperados:
+
+```text
+customerId
+alias
+mainStreet
+secondaryStreet
+houseNumber
+reference
+postalCode
+city
+province
+isPrimary
+```
+
+Qué hace:
+
+```text
+1. Lleva datos desde consola o JavaFX hacia CustomerAddressService.
+2. Permite registrar varias direcciones por cliente.
+3. Permite indicar si la dirección será la principal.
+```
+
+Validaciones esperadas:
+
+```text
+customerId: requerido
+alias: requerido
+mainStreet: requerida
+city/province: opcionales con valor por defecto si el negocio lo decide
+```
+
 ## `request/CreateProductRequest.java`
 
 Datos necesarios para registrar un producto.
@@ -75,6 +113,11 @@ Campos esperados:
 productName
 description
 unitPrice
+productCode
+category
+productionCost
+preparationTimeMinutes
+imageUrl
 ```
 
 Qué hace:
@@ -90,6 +133,8 @@ Validaciones esperadas:
 productName: requerido
 unitPrice: mayor o igual a cero
 description: opcional
+category: opcional, pero debe existir en ProductCategory si se informa
+preparationTimeMinutes: mayor a cero si se informa
 ```
 
 ## `request/CreateOrderRequest.java`
@@ -101,7 +146,10 @@ Campos esperados:
 ```text
 customerId
 registeredByStaffId
-deliveryAddress
+deliveryAddressId
+generalNotes
+discountCode
+isPriority
 items
 ```
 
@@ -109,7 +157,7 @@ Qué hace:
 
 ```text
 1. Lleva datos de creación del pedido hacia OrderService.
-2. Agrupa cliente, administrador, dirección e ítems.
+2. Agrupa cliente, administrador, dirección elegida, notas, descuentos e ítems.
 ```
 
 Validaciones esperadas:
@@ -117,7 +165,7 @@ Validaciones esperadas:
 ```text
 customerId: requerido
 registeredByStaffId: requerido
-deliveryAddress: requerida
+deliveryAddressId: requerido cuando el cliente ya tiene direcciones registradas
 items: mínimo un elemento
 ```
 
@@ -140,6 +188,7 @@ Campos esperados:
 ```text
 productId
 quantity
+specialNote
 ```
 
 Qué hace:
@@ -147,6 +196,7 @@ Qué hace:
 ```text
 1. Indica qué producto se pide.
 2. Indica cuántas unidades se piden.
+3. Permite una observación específica para ese producto.
 ```
 
 Validaciones esperadas:
@@ -154,6 +204,7 @@ Validaciones esperadas:
 ```text
 productId: requerido
 quantity: mayor a cero
+specialNote: opcional, máximo recomendado 150 caracteres
 ```
 
 ## `request/ChangeOrderStatusRequest.java`
@@ -283,10 +334,14 @@ Campos esperados:
 
 ```text
 productId
+productCode
 productName
 description
 unitPrice
+category
+preparationTimeMinutes
 isAvailable
+imageUrl
 ```
 
 Quién lo usa:
@@ -311,6 +366,7 @@ phone
 email
 isActive
 createdAt
+addresses
 ```
 
 Quién lo usa:
@@ -319,6 +375,35 @@ Quién lo usa:
 - CustomerService
 - OrderDetailResponse
 - Pantallas de administración
+```
+
+## `response/CustomerAddressResponse.java`
+
+Datos visibles de una dirección de cliente.
+
+Campos esperados:
+
+```text
+addressId
+customerId
+alias
+mainStreet
+secondaryStreet
+houseNumber
+reference
+postalCode
+city
+province
+isPrimary
+isActive
+```
+
+Quién lo usa:
+
+```text
+- CustomerAddressService
+- CustomerResponse si se decide incluir direcciones
+- Pantallas de creación de pedidos
 ```
 
 ## `response/OrderSummaryResponse.java`
@@ -362,10 +447,19 @@ Campos esperados:
 ```text
 orderCode
 customer
-deliveryAddress
+deliveryAddressId
+deliveryAddressSnapshot
 currentStatusCode
 currentStatusName
+subtotalAmount
+taxAmount
+discountAmount
+addressSurchargeAmount
 totalAmount
+discountCode
+isPriority
+generalNotes
+estimatedDeliveryAt
 createdAt
 currentStatusChangedAt
 items
@@ -393,6 +487,8 @@ productNameSnapshot
 quantity
 unitPrice
 lineTotal
+specialNote
+isReady
 ```
 
 Qué hace:

@@ -31,6 +31,7 @@ Ejemplos:
 ```text
 El cliente está inactivo.
 El producto no está disponible.
+La dirección no pertenece al cliente del pedido.
 El pedido ya fue confirmado por el cliente.
 La entrega aún no fue registrada por el repartidor.
 ```
@@ -55,6 +56,7 @@ Cuándo usarla:
 - Cuando no existe un cliente con ese ID.
 - Cuando no existe un producto con ese ID.
 - Cuando no existe un staff con ese ID.
+- Cuando no existe una dirección con ese ID.
 - Cuando no existe Delivery para un pedido.
 ```
 
@@ -63,6 +65,7 @@ Ejemplos:
 ```text
 No existe un pedido con código ORD-0001.
 No existe un producto con ID 5.
+No existe una dirección activa con ID 8.
 No existe una entrega registrada para este pedido.
 ```
 
@@ -70,6 +73,7 @@ Quién la lanza:
 
 ```text
 - CustomerService
+- CustomerAddressService
 - ProductService
 - StaffService
 - OrderService
@@ -145,6 +149,7 @@ Cuándo usarla:
 - Cuando ya existe un pedido con el mismo código.
 - Cuando ya existe un cliente con el mismo email.
 - Cuando ya existe un staff con el mismo username.
+- Cuando ya existe una dirección principal y se intenta crear otra sin desmarcar la anterior.
 - Cuando se intenta crear otra Delivery para el mismo pedido.
 ```
 
