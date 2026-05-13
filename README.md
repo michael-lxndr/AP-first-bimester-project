@@ -1,76 +1,181 @@
 # Restaurant Order Manager
 
-Proyecto académico para modelar y documentar la gestión completa de pedidos de restaurante: registro, preparación, despacho, entrega y confirmación de recepción.
+Proyecto académico de escritorio para gestionar pedidos de restaurante: registro de clientes, direcciones, productos, pedidos, cambios de estado, despacho y confirmación de entrega.
 
-## Fuente de verdad del modelo
+## Estado del proyecto
 
-La documentación de este repositorio se alinea principalmente con estos archivos:
+Este repositorio está configurado como una aplicación Java de escritorio con JavaFX, JPA/Hibernate y MySQL.
 
-```text
-assets/ROM - ER Diagram.sql
-assets/ER Diagram.puml
-assets/restaurant-order-complete-flow.puml
-```
-
-Si hay una diferencia entre un documento narrativo y esos assets, manda el modelo relacional/ER.
-
-## Flujo operativo principal
+Importante para el entorno de trabajo actual:
 
 ```text
-PENDING → IN_PREPARATION → READY → ON_THE_WAY → DELIVERED
+- No usa Spring Boot.
+- No usa Spring Data JPA.
+- No usa Gradle.
+- Usa Maven como gestor del proyecto.
+- Usa Java 21.
 ```
 
-Pares código/etiqueta del catálogo de estados:
+La persistencia se maneja con Jakarta Persistence + Hibernate mediante `EntityManager` y `persistence.xml`.
+
+## Tecnologías verificadas
+
+Tomado de `pom.xml` y de la estructura actual del proyecto:
 
 ```text
-PENDING         → Pendiente
-IN_PREPARATION  → En preparación
-READY           → Listo
-ON_THE_WAY      → En camino
-DELIVERED       → Entregado
+Java 21
+Maven
+JavaFX 21.0.6
+Jakarta Persistence 3.1.0
+Hibernate ORM 6.6.3.Final
+Jakarta Validation API 3.1.0
+MySQL Connector/J 9.1.0
+Lombok 1.18.46
+JUnit Jupiter API 5.10.2
 ```
 
-Importante:
+## Requisitos para ejecutar
 
 ```text
-- status_code es la clave operativa del flujo.
-- status_name es la etiqueta visible para la UI.
-- La confirmación del cliente NO crea un nuevo estado.
-- La confirmación del cliente se guarda en deliveries.customer_confirmed_at.
+JDK 21
+Maven 3.9 o superior
+MySQL 8 o compatible
+IDE recomendado: NetBeans, IntelliJ IDEA o VS Code con soporte Java/Maven
 ```
 
-## Roles operativos
+Si se usa Lombok desde el IDE, hay que activar annotation processing. Si no, el proyecto puede compilar por Maven pero el IDE puede marcar falsos errores.
+
+## Configuración de base de datos
+
+La conexión está definida en:
+
+```text
+src/main/resources/META-INF/persistence.xml
+```
+
+Configuración actual:
+
+```text
+URL:      jdbc:mysql://localhost:3307/first_bimester_project
+Usuario:  root
+Password: root
+```
+
+Antes de ejecutar, crear la base de datos:
+
+```sql
+CREATE DATABASE first_bimester_project;
+```
+
+Si tu MySQL usa otro puerto, usuario o contraseña, actualizá `persistence.xml`.
+
+## Cómo ejecutar
+
+Desde la raíz del proyecto:
+
+```bash
+mvn javafx:run
+```
+
+También está configurado `exec-maven-plugin` para levantar:
+
+```text
+first.bimester.presentation.javafx.JavaFxLauncher
+```
+
+Comando alternativo:
+
+```bash
+mvn exec:java
+```
+
+## Estructura principal
+
+```text
+src/main/java/first/bimester
+├── Main.java
+├── demo
+│   └── JpaInsertDemo.java
+├── domain
+│   ├── entity
+│   └── enums
+├── repository
+│   └── CustomerRepository.java
+└── presentation
+    └── javafx
+        ├── JavaFxApplication.java
+        ├── JavaFxLauncher.java
+        ├── StageManager.java
+        ├── ViewLoader.java
+        └── controller
+            └── MainController.java
+```
+
+Recursos JavaFX y configuración JPA:
+
+```text
+src/main/resources
+├── META-INF/persistence.xml
+└── first/bimester/presentation/javafx
+    ├── style/application.css
+    └── view/main-view.fxml
+```
+
+## Arquitectura del proyecto
+
+La arquitectura esperada se organiza por capas simples:
+
+```text
+Presentation Layer  -> JavaFX
+Service Layer       -> reglas de negocio
+Repository Layer    -> acceso a datos con EntityManager
+Domain Layer        -> entidades JPA y enums
+Database Layer      -> MySQL
+```
+
+Regla de oro:
+
+```text
+La presentación no contiene reglas de negocio.
+Los repositorios no deciden reglas de negocio.
+Los servicios coordinan reglas, validaciones y transacciones.
+```
+
+En este entorno sin Spring Boot, las dependencias se crean de forma explícita. Si una pantalla necesita un servicio, el proyecto debe construirlo manualmente o mediante una clase bootstrap propia, no mediante `@Autowired` ni `ApplicationContext`.
+
+## Modelo de negocio
+
+El sistema modela el flujo de un pedido de restaurante.
+
+Estados operativos:
+
+```text
+PENDING -> IN_PREPARATION -> READY -> ON_THE_WAY -> DELIVERED
+```
+
+Roles principales:
 
 ```text
 ADMINISTRATOR
 COOK
 COURIER
+CUSTOMER
 ```
 
 Responsabilidades:
 
 ```text
-- ADMINISTRATOR: registra clientes, direcciones, productos y pedidos.
-- COOK: mueve pedidos de PENDING a IN_PREPARATION y luego a READY.
-- COURIER: mueve pedidos de READY a ON_THE_WAY y luego a DELIVERED.
-- CUSTOMER: consulta seguimiento y confirma recepción, pero NO cambia estados operativos.
+ADMINISTRATOR: registra clientes, direcciones, productos y pedidos.
+COOK: mueve pedidos de PENDING a IN_PREPARATION y luego a READY.
+COURIER: mueve pedidos de READY a ON_THE_WAY y luego a DELIVERED.
+CUSTOMER: consulta seguimiento y confirma recepción; no cambia estados operativos.
 ```
 
-## Aclaración importante sobre identificación del staff
+La confirmación del cliente no crea un nuevo estado. Se registra como dato de entrega en `deliveries.customer_confirmed_at`.
 
-El esquema actual guarda `staff.username`, `staff.email`, `staff.role_id` e `is_active`, pero NO modela contraseña.
+## Modelo relacional de referencia
 
-Eso significa que:
-
-```text
-- la identificación del staff en diagramas es operativa/demostrativa
-- no hay autenticación completa en el modelo relacional actual
-- las autorizaciones fuertes se apoyan en role_name + reglas de transición
-```
-
-## Modelo relacional vigente
-
-Tablas principales:
+Tablas principales del modelo:
 
 ```text
 roles
@@ -89,198 +194,59 @@ deliveries
 Relaciones clave:
 
 ```text
-- staff.role_id → roles.role_id
-- customer_addresses.customer_id → customers.customer_id
-- customer_orders.customer_id → customers.customer_id
-- customer_orders.registered_by_staff_id → staff.staff_id
-- customer_orders.current_status_id → order_statuses.status_id
-- customer_orders.delivery_address_id → customer_addresses.address_id
-- order_items.order_id → customer_orders.order_id
-- order_items.product_id → products.product_id
-- order_status_histories.order_id → customer_orders.order_id
-- order_status_histories.from_status_id/to_status_id → order_statuses.status_id
-- order_status_histories.changed_by_staff_id → staff.staff_id
-- deliveries.order_id → customer_orders.order_id
-- deliveries.courier_staff_id → staff.staff_id
+staff.role_id -> roles.role_id
+customer_addresses.customer_id -> customers.customer_id
+customer_orders.customer_id -> customers.customer_id
+customer_orders.registered_by_staff_id -> staff.staff_id
+customer_orders.current_status_id -> order_statuses.status_id
+customer_orders.delivery_address_id -> customer_addresses.address_id
+order_items.order_id -> customer_orders.order_id
+order_items.product_id -> products.product_id
+order_status_histories.order_id -> customer_orders.order_id
+deliveries.order_id -> customer_orders.order_id
+deliveries.courier_staff_id -> staff.staff_id
 ```
 
-## Reglas de negocio que YA están reflejadas en SQL/ER
+## Assets incluidos
 
 ```text
-- order_code debe ser único.
-- Un pedido debe tener delivery_address_id obligatorio.
-- La dirección elegida debe pertenecer al cliente del pedido.
-- customer_orders.delivery_address_snapshot preserva el histórico de entrega.
-- city y province son obligatorias en customer_addresses.
-- country es obligatorio y usa Ecuador por defecto.
-- unit_price, production_cost y preparation_time_minutes tienen CHECKs.
-- total_amount no puede ser negativo.
-- current_status_changed_at acelera seguimiento.
-- Todo cambio de estado debe insertarse en order_status_histories.
-- deliveries.order_id es UNIQUE: un pedido tiene máximo una entrega.
-- delivered_at exige receiver_name.
-- customer_confirmed_at solo puede existir después de delivered_at.
+assets/ER Diagram.png              -> imagen del diagrama entidad-relación
+assets/ER Diagram.puml             -> fuente PlantUML del diagrama ER
+assets/ROM - ER Diagram.sql        -> script SQL de referencia
+assets/ROM - Test Data.sql         -> datos de prueba
+assets/Tema del Proyecto Primer Bimestre.pdf -> enunciado académico
 ```
 
-## Reglas de transición por rol
-
-La tabla `order_status_transition_rules` documenta y hace trazable quién puede mover qué estado:
+## Documentación por capa
 
 ```text
-PENDING         → IN_PREPARATION  : COOK
-IN_PREPARATION  → READY           : COOK
-READY           → ON_THE_WAY      : COURIER
-ON_THE_WAY      → DELIVERED       : COURIER
+docs/1-domain.md       -> entidades y enums del dominio
+docs/2-repository.md   -> repositorios con EntityManager, sin Spring Data
+docs/3-service.md      -> reglas de negocio esperadas
+docs/4-dto.md          -> objetos de entrada/salida esperados
+docs/5-mapper.md       -> conversión entre entidades y DTOs
+docs/6-exception.md    -> excepciones de negocio esperadas
+docs/7-presentation.md -> presentación JavaFX sin Spring Boot
 ```
 
-Consecuencia arquitectónica:
+## Convenciones importantes
 
 ```text
-- No conviene validar estados solo “a mano” contra strings sueltos.
-- La aplicación debería consultar las reglas activas de transición.
-- status_code + role_name son la combinación correcta para esa validación.
+- Mantener Java 21 para que todos trabajen con el mismo JDK.
+- Usar Maven; no documentar comandos de Gradle.
+- No agregar Spring Boot salvo que el profesor cambie explícitamente el requerimiento.
+- Usar EntityManager en repositories.
+- Mantener las reglas de negocio fuera de los controllers JavaFX.
+- Mantener las entidades alineadas con el modelo ER y el SQL de assets/.
 ```
 
-## Arquitectura objetivo
+## Idea clave
 
-El proyecto se documenta con arquitectura por capas:
+La dirección editable del cliente y la dirección histórica del pedido no son lo mismo:
 
 ```text
-Presentation Layer
-    ↓
-Service Layer
-    ↓
-Repository Layer
-    ↓
-Database Layer
+customer_addresses        -> dato vivo del cliente
+delivery_address_snapshot -> evidencia histórica del pedido
 ```
 
-Responsabilidad por capa:
-
-```text
-- Presentation: captura datos y muestra resultados.
-- Service: valida reglas, calcula montos y coordina transacciones.
-- Repository: consulta y persiste entidades.
-- Database: aplica constraints, relaciones, índices y defaults.
-```
-
-Regla de oro:
-
-```text
-La presentación no contiene reglas de negocio.
-Los repositorios no deciden negocio.
-Los servicios deciden negocio.
-```
-
-## Stack verificado del proyecto
-
-Tomado de `build.gradle.kts`:
-
-```text
-Java 25
-Spring Boot 4.0.6
-Gradle Kotlin DSL
-Spring Data JPA
-Spring Validation
-MySQL Connector/J
-Lombok
-JavaFX 25.0.3
-```
-
-Además, `bootRun` está configurado para levantar:
-
-```text
-first.bimester.project.restaurant.presentation.javafx.JavaFxLauncher
-```
-
-## Qué describe la documentación de `docs/`
-
-Los archivos dentro de `docs/` describen la arquitectura objetivo por paquete, alineada al modelo ER:
-
-```text
-docs/1-domain.md
-docs/2-repository.md
-docs/3-service.md
-docs/4-dto.md
-docs/5-mapper.md
-docs/6-exception.md
-docs/7-presentation.md
-```
-
-## Flujos principales esperados
-
-### 1. Crear pedido
-
-```text
-1. Validar que el staff sea ADMINISTRATOR.
-2. Buscar o registrar el cliente.
-3. Buscar o registrar una dirección del cliente.
-4. Validar que la dirección pertenezca al cliente y esté activa.
-5. Generar deliveryAddressSnapshot.
-6. Validar que exista al menos un ítem.
-7. Validar productos disponibles.
-8. Calcular subtotal, impuestos, descuento, recargo y total.
-9. Asignar estado inicial PENDING.
-10. Insertar el pedido, sus ítems y el historial inicial en una transacción.
-```
-
-### 2. Cambiar estado en cocina
-
-```text
-1. Buscar el pedido por orderCode.
-2. Validar staff COOK.
-3. Buscar estado destino por status_code.
-4. Validar transición en order_status_transition_rules.
-5. Actualizar current_status_id y current_status_changed_at.
-6. Insertar OrderStatusHistory.
-```
-
-### 3. Despachar pedido
-
-```text
-1. Buscar el pedido por orderCode.
-2. Validar staff COURIER.
-3. Verificar que no exista delivery previa.
-4. Validar transición READY → ON_THE_WAY.
-5. Crear Delivery con dispatched_at.
-6. Actualizar estado e historial en una transacción.
-```
-
-### 4. Confirmar entrega
-
-```text
-1. Buscar el pedido y su Delivery.
-2. Validar transición ON_THE_WAY → DELIVERED.
-3. Registrar delivered_at y receiver_name.
-4. Actualizar estado e historial en una transacción.
-```
-
-### 5. Confirmar recepción por cliente
-
-```text
-1. Verificar que el pedido pertenezca al cliente.
-2. Verificar que el pedido esté DELIVERED.
-3. Verificar que exista Delivery y que delivered_at no sea null.
-4. Verificar que customer_confirmed_at siga vacío.
-5. Registrar customer_confirmed_at y customer_confirmation_notes.
-6. NO crear nuevo estado ni nuevo historial.
-```
-
-## Diagramas incluidos
-
-```text
-assets/ER Diagram.puml                         → diagrama entidad-relación
-assets/ROM - ER Diagram.sql                    → script SQL de referencia
-assets/restaurant-order-complete-flow.puml     → secuencia completa por rol
-```
-
-## Idea clave del negocio
-
-La dirección editable del cliente y la dirección histórica del pedido NO son la misma cosa.
-
-```text
-customer_addresses        → dato vivo del cliente
-delivery_address_snapshot → evidencia histórica del pedido
-```
-
-Si mezclás ambas, rompés trazabilidad. Y eso, hermano, en un sistema real es un bug silencioso de los feos.
+Mezclar esos conceptos rompe trazabilidad. Por eso el pedido debe conservar el snapshot de la dirección usada al momento de crearse.

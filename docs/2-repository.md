@@ -1,6 +1,17 @@
 # Package `repository`
 
-El paquete `repository` contiene las interfaces de acceso a datos. Estas interfaces usan Spring Data JPA para consultar y guardar información en MySQL.
+El paquete `repository` contiene las clases responsables de acceder a la base de datos.
+
+En este proyecto los repositorios usan Jakarta Persistence directamente mediante `EntityManager`.
+
+Importante para el entorno actual:
+
+```text
+- No son interfaces de Spring Data JPA.
+- No extienden JpaRepository.
+- No usan @Repository.
+- No dependen de Spring Boot.
+```
 
 Regla principal:
 
@@ -9,402 +20,195 @@ Repository busca y guarda.
 Service decide.
 ```
 
-Un repositorio no debe validar reglas de negocio como roles, transiciones o permisos. Eso pertenece a `service`.
+Un repositorio no debe validar roles, permisos, transiciones de estado ni reglas de negocio. Eso pertenece a la capa `service`.
 
-## Estructura
+## Estructura actual
 
 ```text
 repository
-├── RoleRepository.java
-├── StaffRepository.java
-├── CustomerRepository.java
-├── CustomerAddressRepository.java
-├── ProductRepository.java
-├── OrderStatusRepository.java
-├── OrderStatusTransitionRuleRepository.java
-├── CustomerOrderRepository.java
-├── OrderItemRepository.java
-├── OrderStatusHistoryRepository.java
-└── DeliveryRepository.java
-```
-
-## `RoleRepository.java`
-
-Repositorio para `Role`.
-
-Qué hace:
-
-```text
-1. Buscar roles por nombre o código.
-2. Verificar si un rol ya existe.
-3. Guardar roles iniciales.
-```
-
-Consultas esperadas:
-
-```text
-findByRoleName(...)
-existsByRoleName(...)
-```
-
-Quién lo usa:
-
-```text
-- DataInitializer
-- StaffService
-- StateTransitionService indirectamente
-```
-
-## `StaffRepository.java`
-
-Repositorio para `Staff`.
-
-Qué hace:
-
-```text
-1. Buscar staff por ID.
-2. Buscar staff por username.
-3. Buscar staff por email.
-4. Listar staff activos.
-5. Buscar staff por rol.
-```
-
-Consultas esperadas:
-
-```text
-findByUsername(...)
-findByEmail(...)
-findByIsActiveTrue()
-findByRoleRoleName(...)
-```
-
-Quién lo usa:
-
-```text
-- StaffService
-- OrderService
-- DeliveryService
-- DataInitializer
-```
-
-Importante:
-
-```text
-Este repositorio no decide si un staff puede entregar o cambiar estados.
-Solo devuelve el staff. La validación ocurre en StaffService o en servicios de negocio.
+└── CustomerRepository.java
 ```
 
 ## `CustomerRepository.java`
 
-Repositorio para `Customer`.
+Repositorio manual para `Customer`.
+
+Implementación actual:
+
+```java
+public class CustomerRepository {
+    private final EntityManager entityManager;
+
+    public CustomerRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public void save(Customer customer) {
+        entityManager.persist(customer);
+    }
+
+    public Optional<Customer> findById(Long id) {
+        return Optional.ofNullable(entityManager.find(Customer.class, id));
+    }
+}
+```
 
 Qué hace:
 
 ```text
-1. Buscar cliente por ID.
-2. Buscar cliente por email.
-3. Buscar cliente por teléfono.
-4. Guardar clientes.
-5. Verificar duplicados.
+1. Recibe un EntityManager desde afuera.
+2. Persiste clientes con persist(...).
+3. Busca clientes por ID con entityManager.find(...).
+4. Devuelve Optional para representar que el cliente puede no existir.
 ```
 
-Consultas esperadas:
+Qué no hace:
 
 ```text
-findByEmail(...)
-findByPhone(...)
-existsByEmail(...)
+- No abre la conexión.
+- No crea el EntityManagerFactory.
+- No maneja reglas de negocio.
+- No decide transacciones por sí mismo.
 ```
 
-Quién lo usa:
+## Manejo de transacciones
+
+Como el proyecto no usa Spring Boot, no existe `@Transactional`.
+
+Las transacciones deben manejarse explícitamente desde una capa superior, normalmente desde `service` o desde una clase bootstrap/demo mientras el proyecto está en desarrollo.
+
+Ejemplo conceptual:
+
+```java
+EntityTransaction transaction = entityManager.getTransaction();
+
+try {
+    transaction.begin();
+    customerRepository.save(customer);
+    transaction.commit();
+} catch (RuntimeException exception) {
+    if (transaction.isActive()) {
+        transaction.rollback();
+    }
+    throw exception;
+}
+```
+
+La idea es simple: el repositorio ejecuta operaciones de persistencia, pero la unidad de trabajo completa la coordina otra capa.
+
+## Repositorios esperados
+
+A medida que el proyecto crezca, se pueden crear repositorios equivalentes para las demás entidades:
 
 ```text
-- CustomerService
-- OrderService
-- OrderQueryService
-- DeliveryService para confirmar recepción
+RoleRepository.java
+StaffRepository.java
+CustomerAddressRepository.java
+ProductRepository.java
+OrderStatusRepository.java
+OrderStatusTransitionRuleRepository.java
+CustomerOrderRepository.java
+OrderItemRepository.java
+OrderStatusHistoryRepository.java
+DeliveryRepository.java
 ```
 
-## `CustomerAddressRepository.java`
-
-Repositorio para `CustomerAddress`.
-
-Qué hace:
+Todos deberían seguir el mismo criterio:
 
 ```text
-1. Buscar direcciones activas de un cliente.
-2. Buscar la dirección principal de un cliente.
-3. Verificar que una dirección pertenece a un cliente.
-4. Guardar altas, ediciones y bajas lógicas de direcciones.
+1. Recibir EntityManager por constructor.
+2. Usar entityManager.find(...) para búsquedas por ID.
+3. Usar JPQL o Criteria API para consultas específicas.
+4. Devolver Optional cuando el resultado puede no existir.
+5. No mezclar lógica de negocio con acceso a datos.
 ```
 
-Consultas esperadas:
+## Consultas esperadas por entidad
+
+### `CustomerRepository`
 
 ```text
-findByIdAndIsActiveTrue(...)
-findByCustomerIdAndIsActiveTrue(...)
-findByCustomerIdAndIsPrimaryTrueAndIsActiveTrue(...)
-existsByIdAndCustomerIdAndIsActiveTrue(...)
+save(Customer customer)
+findById(Long id)
+findByEmail(String email)
+findByPhone(String phone)
+existsByEmail(String email)
 ```
 
-Quién lo usa:
+### `CustomerAddressRepository`
 
 ```text
-- CustomerAddressService
-- OrderService para validar deliveryAddressId al crear pedidos
-- OrderQueryService si se quiere mostrar datos estructurados de dirección
+findById(Long id)
+findActiveByCustomerId(Long customerId)
+findPrimaryActiveByCustomerId(Long customerId)
+existsActiveByIdAndCustomerId(Long addressId, Long customerId)
+save(CustomerAddress address)
 ```
 
-Importante:
+### `ProductRepository`
 
 ```text
-El repositorio no decide si una dirección puede usarse en un pedido.
-Solo devuelve datos. La validación de pertenencia vive en service.
+findById(Long id)
+findAvailable()
+findByProductCode(String productCode)
+findByCategory(ProductCategory category)
+save(Product product)
 ```
 
-## `ProductRepository.java`
-
-Repositorio para `Product`.
-
-Qué hace:
+### `CustomerOrderRepository`
 
 ```text
-1. Buscar producto por ID.
-2. Listar productos disponibles.
-3. Verificar existencia de producto.
-4. Filtrar productos por categoría.
-5. Buscar productos por código.
-6. Guardar productos.
+findById(Long id)
+findByOrderCode(String orderCode)
+findByCurrentStatusCode(OrderStatusCode statusCode)
+save(CustomerOrder order)
 ```
 
-Consultas esperadas:
+### `OrderStatusTransitionRuleRepository`
 
 ```text
-findByIsAvailableTrue()
-findByProductNameContainingIgnoreCase(...)
-findByCategoryAndIsAvailableTrue(...)
-findByProductCode(...)
+existsActiveTransition(fromStatus, toStatus, role)
+findActiveTransition(fromStatus, toStatus, role)
 ```
 
-Quién lo usa:
+## Naming recomendado
+
+Como no usamos Spring Data JPA, los nombres de métodos no generan consultas automáticamente.
+
+Eso significa que un método como:
+
+```java
+findByEmail(String email)
+```
+
+debe tener una implementación real con JPQL, por ejemplo:
+
+```java
+return entityManager
+    .createQuery("SELECT c FROM Customer c WHERE c.email = :email", Customer.class)
+    .setParameter("email", email)
+    .getResultStream()
+    .findFirst();
+```
+
+Esa diferencia es importante: en Spring Data el framework implementa el método; en este proyecto lo implementamos nosotros.
+
+## Errores comunes a evitar
 
 ```text
-- ProductService
-- OrderService
-- DataInitializer
+- Copiar ejemplos de Spring Data y dejar interfaces sin implementación.
+- Usar @Autowired en repositorios.
+- Usar @Transactional esperando que funcione sin Spring.
+- Abrir un EntityManager nuevo en cada método sin cerrar recursos.
+- Poner validaciones de negocio dentro del repository.
 ```
 
-## `OrderStatusRepository.java`
+## Resumen
 
-Repositorio para `OrderStatus`.
-
-Qué hace:
+El repositorio es una capa fina sobre JPA:
 
 ```text
-1. Buscar estado por código.
-2. Listar estados ordenados.
-3. Guardar estados iniciales.
-4. Verificar si un estado existe.
+Service -> Repository -> EntityManager -> MySQL
 ```
 
-Importante:
-
-```text
-Conviene consultar por statusCode.
-statusName queda mejor como etiqueta de UI que como clave de negocio.
-```
-
-Consultas esperadas:
-
-```text
-findByStatusCode(...)
-existsByStatusCode(...)
-findAllByOrderByStatusOrderAsc()
-```
-
-Quién lo usa:
-
-```text
-- OrderService
-- DeliveryService
-- StateTransitionService
-- DataInitializer
-```
-
-## `OrderStatusTransitionRuleRepository.java`
-
-Repositorio para `OrderStatusTransitionRule`.
-
-Qué hace:
-
-```text
-1. Buscar si existe una transición activa.
-2. Listar reglas activas.
-3. Guardar reglas iniciales.
-```
-
-Consulta clave:
-
-```text
-existsByFromStatusAndToStatusAndRoleAndIsActiveTrue(...)
-```
-
-O una variante por códigos:
-
-```text
-existsByFromStatusStatusCodeAndToStatusStatusCodeAndRoleRoleNameAndIsActiveTrue(...)
-```
-
-Quién lo usa:
-
-```text
-- StateTransitionService
-- DataInitializer
-```
-
-Importante:
-
-```text
-Este repositorio no cambia estados.
-Solo responde si existe una regla válida.
-```
-
-## `CustomerOrderRepository.java`
-
-Repositorio para `CustomerOrder`.
-
-Qué hace:
-
-```text
-1. Buscar pedido por código.
-2. Verificar si un código ya existe.
-3. Listar pedidos por estado.
-4. Listar pedidos por cliente.
-5. Listar pedidos por dirección de entrega.
-6. Guardar pedidos.
-```
-
-Consultas esperadas:
-
-```text
-findByOrderCode(...)
-existsByOrderCode(...)
-findByCurrentStatusStatusCode(...)
-findByCustomerCustomerId(...)
-findByDeliveryAddressId(...)
-```
-
-Quién lo usa:
-
-```text
-- OrderService
-- OrderQueryService
-- DeliveryService
-```
-
-Importante:
-
-```text
-orderCode debe ser único.
-La base de datos debe tener una restricción UNIQUE.
-El servicio igualmente valida antes para devolver un error claro.
-```
-
-## `OrderItemRepository.java`
-
-Repositorio para `OrderItem`.
-
-Qué hace:
-
-```text
-1. Buscar ítems por pedido.
-2. Guardar ítems.
-3. Eliminar ítems si algún caso futuro lo requiere.
-```
-
-Consultas esperadas:
-
-```text
-findByOrderOrderId(...)
-```
-
-Quién lo usa:
-
-```text
-- OrderService
-- OrderQueryService
-```
-
-Importante:
-
-```text
-OrderService suele crear los ítems junto con el pedido dentro de una misma transacción.
-```
-
-## `OrderStatusHistoryRepository.java`
-
-Repositorio para `OrderStatusHistory`.
-
-Qué hace:
-
-```text
-1. Guardar historial de estados.
-2. Consultar historial por pedido.
-3. Ordenar historial por fecha.
-```
-
-Consultas esperadas:
-
-```text
-findByOrderOrderCodeOrderByChangedAtAsc(...)
-findByOrderOrderIdOrderByChangedAtAsc(...)
-```
-
-Quién lo usa:
-
-```text
-- OrderService
-- DeliveryService
-- OrderQueryService
-```
-
-Regla relacionada:
-
-```text
-Todo cambio de estado debe tener un registro de historial.
-```
-
-## `DeliveryRepository.java`
-
-Repositorio para `Delivery`.
-
-Qué hace:
-
-```text
-1. Buscar entrega por pedido.
-2. Verificar si un pedido ya tiene entrega.
-3. Buscar entregas por repartidor.
-4. Guardar despacho, entrega y confirmación del cliente.
-```
-
-Consultas esperadas:
-
-```text
-findByOrderOrderCode(...)
-existsByOrderOrderId(...)
-findByOrderOrderId(...)
-findByCourierStaffStaffId(...)
-```
-
-Quién lo usa:
-
-```text
-- DeliveryService
-- OrderQueryService
-```
-
-Importante:
-
-```text
-Delivery.order debe ser UNIQUE para asegurar que un pedido tenga máximo una entrega.
-```
+Si el repositorio empieza a decidir reglas de negocio, la arquitectura se ensucia. Y después cuesta muchísimo mantenerla.

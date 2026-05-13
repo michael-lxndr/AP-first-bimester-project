@@ -2,699 +2,287 @@
 
 El paquete `presentation` contiene la interfaz del sistema.
 
-En este proyecto existirán dos presentaciones:
+En el entorno actual la presentación es JavaFX.
+
+Importante:
 
 ```text
-1. Consola: versión funcional inicial y presentable mientras se desarrolla JavaFX.
-2. JavaFX: interfaz gráfica final o avanzada.
+- No hay Spring Boot.
+- No hay ApplicationContext de Spring.
+- No hay inyección automática con @Autowired.
+- No hay consola implementada actualmente.
 ```
 
-Regla principal:
+La presentación debe mostrar datos, capturar acciones del usuario y delegar el trabajo a servicios. No debe contener reglas de negocio.
+
+## Estructura actual
+
+Código Java:
 
 ```text
-Presentation no contiene reglas de negocio.
-Presentation solo muestra datos, captura entrada del usuario y llama servicios.
+presentation/javafx
+├── JavaFxApplication.java
+├── JavaFxLauncher.java
+├── StageManager.java
+├── ViewLoader.java
+└── controller
+    └── MainController.java
 ```
 
-Importante para este modelo:
+Recursos:
 
 ```text
-La base actual no guarda password del staff.
-La identificación en UI es operativa/demostrativa usando username o selección de staff.
+src/main/resources/first/bimester/presentation/javafx
+├── style
+│   └── application.css
+└── view
+    └── main-view.fxml
 ```
 
-## Estructura
+## `JavaFxLauncher.java`
 
-```text
-presentation
-├── console
-│   ├── ConsoleApplicationRunner.java
-│   ├── MainMenu.java
-│   ├── AdminMenu.java
-│   ├── CookMenu.java
-│   ├── CourierMenu.java
-│   └── CustomerMenu.java
-│
-└── javafx
-    ├── JavaFxApplication.java
-    ├── StageManager.java
-    ├── ViewLoader.java
-    ├── controller
-    │   ├── MainController.java
-    │   ├── AdminController.java
-    │   ├── CookController.java
-    │   ├── CourierController.java
-    │   ├── CustomerController.java
-    │   ├── ProductController.java
-    │   └── OrderTrackingController.java
-    ├── model
-    │   ├── ProductTableModel.java
-    │   ├── OrderTableModel.java
-    │   └── OrderHistoryTableModel.java
-    └── util
-        ├── AlertHelper.java
-        └── FormValidator.java
-```
-
-# Console presentation
-
-La consola es la primera interfaz funcional. Sirve para probar todo el sistema mientras JavaFX se desarrolla.
-
-## `console/ConsoleApplicationRunner.java`
-
-Arranca la interfaz por consola cuando inicia Spring Boot.
+Clase puente para arrancar la aplicación JavaFX.
 
 Qué hace:
 
 ```text
-1. Espera que Spring Boot cargue el contexto.
-2. Obtiene los menús necesarios.
-3. Inicia MainMenu.
-4. Mantiene el flujo de interacción hasta que el usuario salga.
+1. Expone un main estándar.
+2. Llama a JavaFxApplication.main(args).
+3. Evita problemas al ejecutar directamente una clase que extiende Application.
+```
+
+Clase configurada en Maven:
+
+```text
+first.bimester.presentation.javafx.JavaFxLauncher
+```
+
+## `JavaFxApplication.java`
+
+Clase principal de JavaFX. Extiende `javafx.application.Application`.
+
+Qué hace actualmente:
+
+```text
+1. Recibe el primaryStage en start(...).
+2. Crea un StageManager.
+3. Registra el primaryStage.
+4. Muestra la vista principal.
+5. Finaliza JavaFX con Platform.exit() al cerrar.
 ```
 
 Qué no hace:
 
 ```text
-- No crea pedidos directamente.
-- No valida reglas de negocio.
-- No llama repositorios.
+- No levanta Spring Boot.
+- No crea un ApplicationContext.
+- No inyecta services automáticamente.
 ```
 
-## `console/MainMenu.java`
+## `StageManager.java`
 
-Menú principal de la consola.
-
-Opciones esperadas:
-
-```text
-1. Administrador
-2. Cocinero
-3. Repartidor
-4. Cliente
-5. Salir
-```
+Responsable de administrar la ventana principal.
 
 Qué hace:
 
 ```text
-1. Muestra opciones principales.
-2. Lee la opción del usuario.
-3. Redirige al menú correspondiente.
-4. Maneja opciones inválidas.
+1. Define la ruta del FXML principal.
+2. Define la ruta del CSS principal.
+3. Carga la vista con ViewLoader.
+4. Crea la Scene.
+5. Aplica estilos.
+6. Configura título, tamaño y posición de la ventana.
 ```
 
-## `console/AdminMenu.java`
-
-Menú del administrador.
-
-Servicios que usa:
+Vista actual:
 
 ```text
-CustomerService
-CustomerAddressService
-ProductService
-OrderService
-OrderQueryService
+/first/bimester/presentation/javafx/view/main-view.fxml
 ```
 
-Opciones esperadas:
+CSS actual:
+
+```text
+/first/bimester/presentation/javafx/style/application.css
+```
+
+## `ViewLoader.java`
+
+Responsable de cargar archivos FXML.
+
+Qué hace:
+
+```text
+1. Busca el recurso FXML en el classpath.
+2. Crea un FXMLLoader.
+3. Ejecuta loader.load().
+4. Lanza IllegalStateException si el archivo no existe o no puede cargarse.
+```
+
+Actualmente usa el comportamiento estándar de `FXMLLoader`, por lo que el controller se crea desde el `fx:controller` definido en el FXML.
+
+## `controller/MainController.java`
+
+Controller de la vista principal.
+
+Qué hace actualmente:
+
+```text
+1. Recibe acciones de botones desde main-view.fxml.
+2. Muestra qué rol fue seleccionado.
+3. Permite cerrar la aplicación.
+```
+
+Acciones actuales:
+
+```text
+openAdminView()
+openCookView()
+openCourierView()
+openCustomerView()
+exitApplication()
+```
+
+Esta clase todavía no ejecuta casos de uso reales. Es una base para conectar futuras pantallas.
+
+## `main-view.fxml`
+
+Vista principal de la aplicación.
+
+Contiene:
+
+```text
+- Título del sistema.
+- Subtítulo "Proyecto JavaFX + JPA".
+- Botones para Administrador, Cocinero, Repartidor y Cliente.
+- Label de estado.
+- Botón para salir.
+```
+
+Controller asociado:
+
+```text
+first.bimester.presentation.javafx.controller.MainController
+```
+
+## Cómo conectar servicios sin Spring Boot
+
+Como el proyecto no usa Spring, las dependencias deben conectarse manualmente.
+
+La idea recomendada es crear una clase de arranque propia, por ejemplo:
+
+```text
+ProjectBootstrap
+o
+AppBootstrap
+```
+
+Esa clase podría encargarse de crear:
+
+```text
+1. EntityManagerFactory.
+2. EntityManager.
+3. Repositories.
+4. Services.
+5. Controllers o factories para controllers.
+```
+
+Si un controller necesita servicios, hay dos caminos razonables:
+
+```text
+1. Mantener controllers simples y que StageManager les pase dependencias.
+2. Configurar FXMLLoader con una controllerFactory propia.
+```
+
+La segunda opción escala mejor cuando hay varias pantallas, porque evita crear lógica de construcción dentro de cada controller.
+
+## Regla principal para controllers
+
+```text
+Controller valida entrada simple de pantalla.
+Service valida reglas de negocio.
+Repository consulta y guarda datos.
+```
+
+Ejemplo:
+
+```text
+Correcto:
+MainController -> OrderService -> CustomerOrderRepository -> EntityManager
+
+Incorrecto:
+MainController -> EntityManager -> reglas de negocio dentro del botón
+```
+
+Si una acción de botón empieza a calcular totales, validar roles o decidir transiciones, esa lógica debe moverse a `service`.
+
+## Pantallas esperadas
+
+A futuro, la presentación JavaFX puede dividirse por rol:
+
+```text
+AdminView / AdminController
+CookView / CookController
+CourierView / CourierController
+CustomerView / CustomerController
+ProductView / ProductController
+OrderTrackingView / OrderTrackingController
+```
+
+Cada pantalla debe ser una capa fina sobre los servicios.
+
+## Flujos esperados por rol
+
+### Administrador
 
 ```text
 1. Registrar cliente.
 2. Registrar dirección de cliente.
 3. Registrar producto.
-4. Consultar menú.
-5. Crear pedido.
-6. Listar pedidos.
-7. Ver detalle de pedido.
-8. Volver.
+4. Crear pedido.
+5. Consultar pedidos.
 ```
 
-Flujo para crear pedido:
+### Cocinero
 
 ```text
-1. Pedir ID del administrador.
-2. Pedir ID del cliente.
-3. Listar direcciones activas del cliente.
-4. Pedir ID de dirección de entrega.
-5. Pedir productos, cantidades y notas especiales.
-6. Crear CreateOrderRequest.
-7. Llamar OrderService.createOrder.
-8. Mostrar resultado o error.
-```
-
-Flujo para registrar dirección:
-
-```text
-1. Pedir ID del cliente.
-2. Pedir alias, calle principal, número, referencia, ciudad, provincia y país.
-3. Preguntar si será dirección principal.
-4. Crear CreateCustomerAddressRequest.
-5. Llamar CustomerAddressService.createAddress.
-6. Mostrar resultado o error.
-```
-
-## `console/CookMenu.java`
-
-Menú del cocinero.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-OrderService
-```
-
-Opciones esperadas:
-
-```text
-1. Ver pedidos PENDING.
+1. Ver pedidos pendientes.
 2. Cambiar pedido a IN_PREPARATION.
-3. Ver pedidos IN_PREPARATION.
-4. Cambiar pedido a READY.
-5. Volver.
+3. Cambiar pedido a READY.
 ```
 
-Flujo para cambiar estado:
+### Repartidor
 
 ```text
-1. Pedir ID del cocinero.
-2. Pedir código del pedido.
-3. Elegir estado destino permitido.
-4. Crear ChangeOrderStatusRequest.
-5. Llamar OrderService.changeOrderStatus.
-6. Mostrar resultado o error.
-```
-
-## `console/CourierMenu.java`
-
-Menú del repartidor.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-DeliveryService
-CustomerAddressService opcionalmente
-```
-
-Opciones esperadas:
-
-```text
-1. Ver pedidos READY.
+1. Ver pedidos listos.
 2. Despachar pedido.
-3. Ver pedidos ON_THE_WAY.
-4. Confirmar entrega.
-5. Volver.
+3. Confirmar entrega.
 ```
 
-Flujo para despachar:
-
-```text
-1. Pedir ID del repartidor.
-2. Pedir código del pedido.
-3. Crear DispatchOrderRequest.
-4. Llamar DeliveryService.dispatchOrder.
-5. Mostrar resultado o error.
-```
-
-Flujo para confirmar entrega:
-
-```text
-1. Pedir ID del repartidor.
-2. Pedir código del pedido.
-3. Pedir nombre de quien recibe.
-4. Crear ConfirmDeliveryRequest.
-5. Llamar DeliveryService.confirmDelivery.
-6. Mostrar resultado o error.
-```
-
-## `console/CustomerMenu.java`
-
-Menú del cliente.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-DeliveryService
-```
-
-Opciones esperadas:
+### Cliente
 
 ```text
 1. Consultar pedido por código.
-2. Ver historial.
-3. Administrar direcciones.
-4. Confirmar recepción.
-5. Volver.
+2. Ver historial del pedido.
+3. Confirmar recepción.
 ```
 
-Flujo para consultar pedido:
+## Errores comunes a evitar
 
 ```text
-1. Pedir código del pedido.
-2. Llamar OrderQueryService.trackOrder.
-3. Mostrar estado actual.
-4. Mostrar historial.
-5. Mostrar datos de entrega si existen.
+- Documentar Spring Boot cuando el proyecto no lo usa.
+- Usar @Autowired en controllers JavaFX.
+- Poner EntityManager directamente en métodos de botones.
+- Cargar FXML con rutas absolutas del sistema operativo.
+- Mezclar CSS, lógica de negocio y acceso a datos en el controller.
 ```
 
-Flujo para confirmar recepción:
+## Resumen
+
+La presentación actual es JavaFX puro:
 
 ```text
-1. Pedir ID del cliente.
-2. Pedir código del pedido.
-3. Crear ConfirmReceiptRequest.
-4. Llamar DeliveryService.confirmCustomerReceipt.
-5. Mostrar resultado o error.
+JavaFxLauncher -> JavaFxApplication -> StageManager -> ViewLoader -> FXML -> Controller
 ```
 
-# JavaFX presentation
-
-JavaFX será la interfaz gráfica. Debe conectarse a los mismos servicios que usa la consola.
-
-La clave es esta:
-
-```text
-Consola y JavaFX usan los mismos services.
-No se duplica lógica de negocio.
-```
-
-## `javafx/JavaFxApplication.java`
-
-Punto de entrada visual de JavaFX.
-
-Qué hace:
-
-```text
-1. Inicia JavaFX.
-2. Levanta Spring Boot por debajo.
-3. Conecta JavaFX con el ApplicationContext de Spring.
-4. Muestra la ventana principal.
-5. Cierra Spring correctamente al salir.
-```
-
-Qué no hace:
-
-```text
-- No registra pedidos.
-- No valida estados.
-- No accede a repositorios.
-```
-
-## `javafx/StageManager.java`
-
-Administra ventanas y escenas.
-
-Qué hace:
-
-```text
-1. Abrir la pantalla principal.
-2. Cambiar entre pantallas.
-3. Volver al menú principal.
-4. Definir títulos de ventanas.
-5. Centralizar navegación.
-```
-
-Ejemplo conceptual:
-
-```text
-MainController llama StageManager.showAdminView()
-```
-
-## `javafx/ViewLoader.java`
-
-Carga archivos FXML.
-
-Qué hace:
-
-```text
-1. Buscar el archivo FXML.
-2. Cargar la vista.
-3. Crear o pedir el controller desde Spring.
-4. Devolver la vista lista para mostrar.
-```
-
-Importante:
-
-```text
-Los controllers de JavaFX deben poder recibir services de Spring.
-No deben crear services con new.
-```
-
-# JavaFX controllers
-
-## `javafx/controller/MainController.java`
-
-Controlador de la pantalla principal.
-
-Qué hace:
-
-```text
-1. Mostrar opciones de rol.
-2. Navegar a administrador, cocinero, repartidor o cliente.
-3. Cerrar la aplicación si el usuario lo solicita.
-```
-
-## `javafx/controller/AdminController.java`
-
-Controlador de la pantalla del administrador.
-
-Servicios que usa:
-
-```text
-CustomerService
-CustomerAddressService
-ProductService
-OrderService
-OrderQueryService
-```
-
-Qué hace:
-
-```text
-1. Leer formularios de cliente.
-2. Leer formularios de dirección.
-3. Leer formularios de producto.
-4. Leer formularios de pedido.
-4. Crear request DTOs.
-5. Llamar servicios.
-6. Mostrar respuestas en tablas o mensajes.
-```
-
-Qué no hace:
-
-```text
-- No calcula total.
-- No valida rol de administrador por sí mismo.
-- No crea entidades directamente.
-```
-
-## `javafx/controller/CookController.java`
-
-Controlador de la pantalla del cocinero.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-OrderService
-```
-
-Qué hace:
-
-```text
-1. Mostrar pedidos PENDING.
-2. Mostrar pedidos IN_PREPARATION.
-3. Permitir cambio a IN_PREPARATION.
-4. Permitir cambio a READY.
-5. Actualizar tablas después de cada cambio.
-```
-
-## `javafx/controller/CourierController.java`
-
-Controlador de la pantalla del repartidor.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-DeliveryService
-CustomerAddressService opcionalmente
-```
-
-Qué hace:
-
-```text
-1. Mostrar pedidos READY.
-2. Permitir despachar pedido.
-3. Mostrar pedidos ON_THE_WAY.
-4. Permitir confirmar entrega.
-5. Pedir receiverName.
-```
-
-## `javafx/controller/CustomerController.java`
-
-Controlador de la pantalla del cliente.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-DeliveryService
-```
-
-Qué hace:
-
-```text
-1. Pedir código del pedido.
-2. Mostrar estado actual.
-3. Mostrar historial.
-4. Mostrar datos de entrega.
-5. Permitir administrar direcciones si el alcance de UI lo incluye.
-6. Permitir confirmar recepción si corresponde.
-```
-
-Regla visual:
-
-```text
-El botón Confirmar recepción solo debería habilitarse si el pedido está DELIVERED y customerConfirmedAt está vacío.
-```
-
-Pero el service igual debe validar esa regla.
-
-## `javafx/controller/ProductController.java`
-
-Controlador específico para productos.
-
-Servicios que usa:
-
-```text
-ProductService
-```
-
-Qué hace:
-
-```text
-1. Registrar productos.
-2. Listar menú.
-3. Mostrar productos disponibles.
-4. Cambiar disponibilidad si se implementa.
-```
-
-## `javafx/controller/OrderTrackingController.java`
-
-Controlador para seguimiento de pedido.
-
-Servicios que usa:
-
-```text
-OrderQueryService
-DeliveryService opcionalmente
-```
-
-Qué hace:
-
-```text
-1. Buscar pedido por código.
-2. Mostrar estado actual.
-3. Mostrar historial en tabla.
-4. Mostrar entrega.
-5. Mostrar si el cliente ya confirmó recepción.
-```
-
-# JavaFX table models
-
-## `javafx/model/ProductTableModel.java`
-
-Modelo para mostrar productos en tabla JavaFX.
-
-Qué hace:
-
-```text
-1. Adaptar ProductResponse a columnas visibles.
-2. Exponer nombre, precio y disponibilidad.
-```
-
-## `javafx/model/OrderTableModel.java`
-
-Modelo para mostrar pedidos en tabla JavaFX.
-
-Qué hace:
-
-```text
-1. Adaptar OrderSummaryResponse a columnas visibles.
-2. Mostrar código, cliente, estado, total y fecha.
-```
-
-## `javafx/model/OrderHistoryTableModel.java`
-
-Modelo para mostrar historial en tabla JavaFX.
-
-Qué hace:
-
-```text
-1. Adaptar OrderHistoryResponse a columnas visibles.
-2. Mostrar estado anterior, estado nuevo, responsable, fecha y notas.
-```
-
-# JavaFX utilities
-
-## `javafx/util/AlertHelper.java`
-
-Utilidad para mensajes visuales.
-
-Qué hace:
-
-```text
-1. Mostrar mensajes de éxito.
-2. Mostrar errores.
-3. Mostrar confirmaciones.
-4. Evitar repetir código de alerts en todos los controllers.
-```
-
-## `javafx/util/FormValidator.java`
-
-Utilidad para validaciones simples de pantalla.
-
-Qué hace:
-
-```text
-1. Verificar campos vacíos.
-2. Verificar números básicos.
-3. Verificar selección de filas en tablas.
-4. Mostrar mensajes antes de llamar al service.
-```
-
-Importante:
-
-```text
-FormValidator no reemplaza validaciones de service.
-Solo mejora la experiencia del usuario.
-```
-
-# FXML y CSS
-
-Los archivos FXML viven en `src/main/resources`.
-
-```text
-resources/first/bimester/project/restaurant/presentation/javafx/view
-├── main-view.fxml
-├── admin-view.fxml
-├── cook-view.fxml
-├── courier-view.fxml
-├── customer-view.fxml
-├── product-view.fxml
-└── order-tracking-view.fxml
-```
-
-## `main-view.fxml`
-
-Pantalla principal.
-
-Debe mostrar:
-
-```text
-- Botón Administrador.
-- Botón Cocinero.
-- Botón Repartidor.
-- Botón Cliente.
-- Botón Salir.
-```
-
-## `admin-view.fxml`
-
-Pantalla del administrador.
-
-Debe permitir:
-
-```text
-- Registrar cliente.
-- Registrar direcciones del cliente.
-- Registrar producto.
-- Crear pedido.
-- Ver pedidos.
-```
-
-## `cook-view.fxml`
-
-Pantalla del cocinero.
-
-Debe permitir:
-
-```text
-- Ver pedidos pendientes.
-- Cambiar a IN_PREPARATION.
-- Ver pedidos en preparación.
-- Cambiar a READY.
-```
-
-## `courier-view.fxml`
-
-Pantalla del repartidor.
-
-Debe permitir:
-
-```text
-- Ver pedidos listos.
-- Despachar pedido.
-- Ver pedidos en camino.
-- Confirmar entrega.
-- Registrar receiverName.
-```
-
-## `customer-view.fxml`
-
-Pantalla del cliente.
-
-Debe permitir:
-
-```text
-- Ingresar código de pedido.
-- Ver estado actual.
-- Ver historial.
-- Administrar direcciones si se habilita autogestión del cliente.
-- Confirmar recepción.
-```
-
-## `product-view.fxml`
-
-Pantalla de productos.
-
-Debe permitir:
-
-```text
-- Registrar producto.
-- Listar productos.
-- Ver disponibilidad.
-```
-
-## `order-tracking-view.fxml`
-
-Pantalla de seguimiento.
-
-Debe mostrar:
-
-```text
-- Código del pedido.
-- Estado actual.
-- Historial.
-- Datos de entrega.
-- Confirmación del cliente.
-```
-
-## `application.css`
-
-Archivo de estilos.
-
-Qué hace:
-
-```text
-1. Define colores.
-2. Define espaciados.
-3. Define estilos de botones.
-4. Define estilos de tablas.
-5. Mejora presentación visual.
-```
+Esa cadena es suficiente para el proyecto académico y evita la complejidad de Spring Boot cuando el entorno pedido es JavaFX + JPA + Maven.
