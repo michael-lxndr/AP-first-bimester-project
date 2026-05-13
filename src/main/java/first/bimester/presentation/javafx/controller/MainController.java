@@ -1,32 +1,41 @@
 package first.bimester.presentation.javafx.controller;
 
+import first.bimester.presentation.javafx.StageManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 
 public class MainController {
 	@FXML
+	private Label statusLabel;
+
+	@FXML
 	private void openAdminView() {
-		// Después conectamos esto a StageManager.showAdminView().
-		System.out.println("Open admin view");
+		StageManager.getCurrent().showAdminView();
 	}
 
 	@FXML
 	private void openCookView() {
-		System.out.println("Open cook view");
+		StageManager.getCurrent().showCookView();
 	}
 
 	@FXML
 	private void openCourierView() {
-		System.out.println("Open courier view");
+		StageManager.getCurrent().showCourierView();
 	}
 
 	@FXML
 	private void openCustomerView() {
-		System.out.println("Open customer view");
+		StageManager.getCurrent().showCustomerView();
 	}
 
 	@FXML
 	private void exitApplication() {
 		Platform.exit();
+	}
+
+	@FXML
+	private void initialize() {
+		statusLabel.setText("Seleccioná una pantalla para ingresar al sistema");
 	}
 }
