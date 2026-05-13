@@ -78,6 +78,7 @@ CustomerAddress.reference        → reference
 CustomerAddress.postalCode       → postalCode
 CustomerAddress.city             → city
 CustomerAddress.province         → province
+CustomerAddress.country          → country
 CustomerAddress.isPrimary        → isPrimary
 CustomerAddress.isActive         → isActive
 ```
@@ -151,6 +152,13 @@ CustomerOrder.totalAmount                → totalAmount
 CustomerOrder.estimatedDeliveryAt        → estimatedDeliveryAt
 CustomerOrder.createdAt                  → createdAt
 CustomerOrder.currentStatusChangedAt     → currentStatusChangedAt
+```
+
+Importante:
+
+```text
+currentStatusCode es la clave operativa.
+currentStatusName es la etiqueta legible para UI.
 ```
 
 ### Para `OrderDetailResponse`

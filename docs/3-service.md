@@ -168,6 +168,13 @@ Método clave conceptual:
 validateStaffRole(staffId, requiredRole)
 ```
 
+Nota:
+
+```text
+En este modelo el staff se identifica operativamente por username o por ID.
+La base actual no modela password.
+```
+
 Flujo:
 
 ```text
@@ -269,7 +276,7 @@ createOrder(request)
 3. Buscar cliente.
 4. Validar que el cliente exista y esté activo.
 5. Validar deliveryAddressId con CustomerAddressService.
-6. Generar deliveryAddressSnapshot.
+6. Generar deliveryAddressSnapshot, incluyendo country efectivo.
 7. Validar que el pedido tenga al menos un producto.
 8. Buscar cada Product por ID.
 9. Validar que cada Product esté disponible.
@@ -377,12 +384,13 @@ dispatchOrder(request)
 3. Buscar staff repartidor.
 4. Validar que tenga rol COURIER.
 5. Verificar que no exista Delivery previa para ese pedido.
-6. Crear Delivery.
-7. Registrar dispatchedAt.
-8. Cambiar estado del pedido a ON_THE_WAY.
-9. Registrar OrderStatusHistory.
-10. Guardar todo dentro de una transacción.
-11. Devolver DeliveryResponse u OrderDetailResponse.
+6. Validar transición READY -> ON_THE_WAY con StateTransitionService.
+7. Crear Delivery.
+8. Registrar dispatchedAt.
+9. Cambiar estado del pedido a ON_THE_WAY y actualizar currentStatusChangedAt.
+10. Registrar OrderStatusHistory.
+11. Guardar todo dentro de una transacción.
+12. Devolver DeliveryResponse u OrderDetailResponse.
 ```
 
 ### Flujo para confirmar entrega por repartidor
@@ -394,13 +402,14 @@ confirmDelivery(request)
 2. Verificar que currentStatus sea ON_THE_WAY.
 3. Buscar Delivery del pedido.
 4. Validar que el courierStaff sea el repartidor correcto o tenga rol COURIER.
-5. Validar receiverName.
-6. Registrar deliveredAt.
-7. Registrar receiverName.
-8. Cambiar estado del pedido a DELIVERED.
-9. Registrar OrderStatusHistory.
-10. Guardar todo dentro de una transacción.
-11. Devolver DeliveryResponse u OrderDetailResponse.
+5. Validar transición ON_THE_WAY -> DELIVERED con StateTransitionService.
+6. Validar receiverName.
+7. Registrar deliveredAt.
+8. Registrar receiverName.
+9. Cambiar estado del pedido a DELIVERED y actualizar currentStatusChangedAt.
+10. Registrar OrderStatusHistory.
+11. Guardar todo dentro de una transacción.
+12. Devolver DeliveryResponse u OrderDetailResponse.
 ```
 
 ### Flujo para confirmar recepción por cliente
@@ -429,16 +438,14 @@ El estado ya es DELIVERED.
 La confirmación se guarda en Delivery.
 ```
 
-## Pasos de integración de las mejoras de FoodFlow2
+## Decisiones vigentes del modelo
 
 ```text
-1. Implementar CustomerAddressService antes de cambiar pantallas.
-2. Cambiar CreateOrderRequest para recibir deliveryAddressId y no solo texto libre.
-3. En OrderService.createOrder, validar dirección y generar snapshot antes de guardar.
-4. Extender ProductService para manejar ProductCategory y preparationTimeMinutes.
-5. Extender cálculo de totales: subtotalAmount, taxAmount, discountAmount, addressSurchargeAmount y totalAmount.
-6. Usar OrderItem.specialNote para notas por producto.
-7. Usar OrderItem.isReady solo para cocina; no reemplaza OrderStatus.
+1. CreateOrderRequest debe trabajar con deliveryAddressId y no con texto libre.
+2. OrderService.createOrder debe generar deliveryAddressSnapshot antes de persistir.
+3. StateTransitionService debe validar también los pasos del courier.
+4. OrderItem.specialNote y OrderItem.isReady son complementos del detalle, no reemplazos del estado global.
+5. La confirmación del cliente vive en Delivery y no en OrderStatus.
 ```
 
 Tradeoff importante:

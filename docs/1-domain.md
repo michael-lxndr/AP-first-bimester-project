@@ -98,6 +98,13 @@ isActive
 createdAt
 ```
 
+Nota:
+
+```text
+username es el identificador operativo único del staff en este modelo.
+El esquema relacional actual no incluye password.
+```
+
 Cómo se usa:
 
 ```text
@@ -184,6 +191,7 @@ reference
 postalCode
 city
 province
+country
 isPrimary
 isActive
 ```
@@ -206,6 +214,8 @@ Importante:
 ```text
 CustomerAddress puede cambiar con el tiempo. Por eso CustomerOrder también guarda deliveryAddressSnapshot.
 El snapshot preserva la dirección usada originalmente aunque el cliente edite o desactive la dirección después.
+city y province son obligatorias.
+country es obligatorio y usa Ecuador por defecto.
 ```
 
 ## `entity/Product.java`
@@ -285,6 +295,13 @@ Qué hace:
 3. Permite registrar historial usando estados origen y destino.
 4. Permite ordenar visualmente el flujo mediante statusOrder.
 5. Permite marcar si un estado es final usando isFinal.
+```
+
+Importante:
+
+```text
+statusCode es la clave operativa que conviene usar en reglas y consultas.
+statusName es la etiqueta visible para la interfaz.
 ```
 
 Campos importantes:
@@ -395,7 +412,7 @@ Relaciones:
 
 ```text
 CustomerOrder 1 ─── 1 Customer
-CustomerOrder 1 ─── 0..1 CustomerAddress deliveryAddress
+CustomerOrder 1 ─── 1 CustomerAddress deliveryAddress
 CustomerOrder 1 ─── 1 Staff registeredByStaff
 CustomerOrder 1 ─── 1 OrderStatus currentStatus
 CustomerOrder 1 ─── 1..* OrderItem
@@ -408,7 +425,7 @@ Reglas relacionadas:
 ```text
 - orderCode debe ser único.
 - Un pedido debe tener al menos un OrderItem.
-- Si se informa deliveryAddress, debe pertenecer al Customer del pedido.
+- deliveryAddress es obligatorio y debe pertenecer al Customer del pedido.
 - deliveryAddressSnapshot debe llenarse al crear el pedido.
 - totalAmount debe ser consistente con subtotalAmount, taxAmount, discountAmount y addressSurchargeAmount.
 - Al crear un pedido, su estado inicial debe ser PENDING.
@@ -502,6 +519,7 @@ Regla clave:
 
 ```text
 Todo cambio de estado debe registrarse en OrderStatusHistory.
+fromStatus es obligatorio; en el primer registro puede apoyarse en el default PENDING reservado en base de datos.
 ```
 
 ## `entity/Delivery.java`
@@ -549,6 +567,9 @@ Reglas relacionadas:
 - El pedido debe estar READY para ser despachado.
 - El pedido debe estar ON_THE_WAY para confirmar entrega.
 - El cliente solo puede confirmar recepción si el pedido está DELIVERED.
+- deliveredAt debe ser posterior o igual a dispatchedAt.
+- Si deliveredAt tiene valor, receiverName pasa a ser obligatorio.
+- customerConfirmedAt solo puede existir después de deliveredAt.
 ```
 
 Las reglas de negocio se validan en `DeliveryService`.

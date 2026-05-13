@@ -141,6 +141,7 @@ Qué hace:
 Consultas esperadas:
 
 ```text
+findByIdAndIsActiveTrue(...)
 findByCustomerIdAndIsActiveTrue(...)
 findByCustomerIdAndIsPrimaryTrueAndIsActiveTrue(...)
 existsByIdAndCustomerIdAndIsActiveTrue(...)
@@ -204,6 +205,13 @@ Qué hace:
 2. Listar estados ordenados.
 3. Guardar estados iniciales.
 4. Verificar si un estado existe.
+```
+
+Importante:
+
+```text
+Conviene consultar por statusCode.
+statusName queda mejor como etiqueta de UI que como clave de negocio.
 ```
 
 Consultas esperadas:
@@ -384,6 +392,7 @@ Consultas esperadas:
 ```text
 findByOrderOrderCode(...)
 existsByOrderOrderId(...)
+findByOrderOrderId(...)
 findByCourierStaffStaffId(...)
 ```
 

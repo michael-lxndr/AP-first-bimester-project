@@ -34,6 +34,7 @@ El producto no está disponible.
 La dirección no pertenece al cliente del pedido.
 El pedido ya fue confirmado por el cliente.
 La entrega aún no fue registrada por el repartidor.
+No se puede confirmar recepción si customerConfirmedAt ya tiene valor.
 ```
 
 Quién la lanza:
@@ -100,6 +101,7 @@ Ejemplos:
 No se puede pasar de PENDING a DELIVERED.
 No se puede despachar un pedido que no está READY.
 No se puede confirmar entrega si el pedido no está ON_THE_WAY.
+No se puede confirmar entrega sin receiverName.
 ```
 
 Quién la lanza:

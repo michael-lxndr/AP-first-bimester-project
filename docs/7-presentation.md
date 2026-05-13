@@ -16,6 +16,13 @@ Presentation no contiene reglas de negocio.
 Presentation solo muestra datos, captura entrada del usuario y llama servicios.
 ```
 
+Importante para este modelo:
+
+```text
+La base actual no guarda password del staff.
+La identificación en UI es operativa/demostrativa usando username o selección de staff.
+```
+
 ## Estructura
 
 ```text
@@ -141,7 +148,7 @@ Flujo para registrar dirección:
 
 ```text
 1. Pedir ID del cliente.
-2. Pedir alias, calle principal, número, referencia, ciudad y provincia.
+2. Pedir alias, calle principal, número, referencia, ciudad, provincia y país.
 3. Preguntar si será dirección principal.
 4. Crear CreateCustomerAddressRequest.
 5. Llamar CustomerAddressService.createAddress.

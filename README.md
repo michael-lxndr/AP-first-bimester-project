@@ -1,8 +1,149 @@
 # Restaurant Order Manager
 
-Proyecto académico para gestionar pedidos de restaurante desde su registro hasta la entrega y confirmación de recepción por parte del cliente.
+Proyecto académico para modelar y documentar la gestión completa de pedidos de restaurante: registro, preparación, despacho, entrega y confirmación de recepción.
 
-El sistema se basa en arquitectura por capas:
+## Fuente de verdad del modelo
+
+La documentación de este repositorio se alinea principalmente con estos archivos:
+
+```text
+assets/ROM - ER Diagram.sql
+assets/ER Diagram.puml
+assets/restaurant-order-complete-flow.puml
+```
+
+Si hay una diferencia entre un documento narrativo y esos assets, manda el modelo relacional/ER.
+
+## Flujo operativo principal
+
+```text
+PENDING → IN_PREPARATION → READY → ON_THE_WAY → DELIVERED
+```
+
+Pares código/etiqueta del catálogo de estados:
+
+```text
+PENDING         → Pendiente
+IN_PREPARATION  → En preparación
+READY           → Listo
+ON_THE_WAY      → En camino
+DELIVERED       → Entregado
+```
+
+Importante:
+
+```text
+- status_code es la clave operativa del flujo.
+- status_name es la etiqueta visible para la UI.
+- La confirmación del cliente NO crea un nuevo estado.
+- La confirmación del cliente se guarda en deliveries.customer_confirmed_at.
+```
+
+## Roles operativos
+
+```text
+ADMINISTRATOR
+COOK
+COURIER
+```
+
+Responsabilidades:
+
+```text
+- ADMINISTRATOR: registra clientes, direcciones, productos y pedidos.
+- COOK: mueve pedidos de PENDING a IN_PREPARATION y luego a READY.
+- COURIER: mueve pedidos de READY a ON_THE_WAY y luego a DELIVERED.
+- CUSTOMER: consulta seguimiento y confirma recepción, pero NO cambia estados operativos.
+```
+
+## Aclaración importante sobre identificación del staff
+
+El esquema actual guarda `staff.username`, `staff.email`, `staff.role_id` e `is_active`, pero NO modela contraseña.
+
+Eso significa que:
+
+```text
+- la identificación del staff en diagramas es operativa/demostrativa
+- no hay autenticación completa en el modelo relacional actual
+- las autorizaciones fuertes se apoyan en role_name + reglas de transición
+```
+
+## Modelo relacional vigente
+
+Tablas principales:
+
+```text
+roles
+staff
+customers
+customer_addresses
+products
+order_statuses
+order_status_transition_rules
+customer_orders
+order_items
+order_status_histories
+deliveries
+```
+
+Relaciones clave:
+
+```text
+- staff.role_id → roles.role_id
+- customer_addresses.customer_id → customers.customer_id
+- customer_orders.customer_id → customers.customer_id
+- customer_orders.registered_by_staff_id → staff.staff_id
+- customer_orders.current_status_id → order_statuses.status_id
+- customer_orders.delivery_address_id → customer_addresses.address_id
+- order_items.order_id → customer_orders.order_id
+- order_items.product_id → products.product_id
+- order_status_histories.order_id → customer_orders.order_id
+- order_status_histories.from_status_id/to_status_id → order_statuses.status_id
+- order_status_histories.changed_by_staff_id → staff.staff_id
+- deliveries.order_id → customer_orders.order_id
+- deliveries.courier_staff_id → staff.staff_id
+```
+
+## Reglas de negocio que YA están reflejadas en SQL/ER
+
+```text
+- order_code debe ser único.
+- Un pedido debe tener delivery_address_id obligatorio.
+- La dirección elegida debe pertenecer al cliente del pedido.
+- customer_orders.delivery_address_snapshot preserva el histórico de entrega.
+- city y province son obligatorias en customer_addresses.
+- country es obligatorio y usa Ecuador por defecto.
+- unit_price, production_cost y preparation_time_minutes tienen CHECKs.
+- total_amount no puede ser negativo.
+- current_status_changed_at acelera seguimiento.
+- Todo cambio de estado debe insertarse en order_status_histories.
+- deliveries.order_id es UNIQUE: un pedido tiene máximo una entrega.
+- delivered_at exige receiver_name.
+- customer_confirmed_at solo puede existir después de delivered_at.
+```
+
+## Reglas de transición por rol
+
+La tabla `order_status_transition_rules` documenta y hace trazable quién puede mover qué estado:
+
+```text
+PENDING         → IN_PREPARATION  : COOK
+IN_PREPARATION  → READY           : COOK
+READY           → ON_THE_WAY      : COURIER
+ON_THE_WAY      → DELIVERED       : COURIER
+```
+
+Consecuencia arquitectónica:
+
+```text
+- No conviene validar estados solo “a mano” contra strings sueltos.
+- La aplicación debería consultar las reglas activas de transición.
+- status_code + role_name son la combinación correcta para esa validación.
+```
+
+## Arquitectura objetivo
+
+El proyecto se documenta con arquitectura por capas:
 
 ```text
 Presentation Layer
@@ -14,512 +155,132 @@ Repository Layer
 Database Layer
 ```
 
-La idea central es simple: la presentación muestra pantallas o menús, los servicios aplican reglas de negocio, los repositorios acceden a la base de datos y las entidades representan las tablas.
-
-## Requerimiento base
-
-El sistema permite:
+Responsabilidad por capa:
 
 ```text
-- Registrar clientes.
-- Registrar varias direcciones por cliente.
-- Registrar productos.
-- Clasificar productos por categoría y tiempo de preparación.
-- Crear pedidos con uno o más productos.
-- Calcular el total del pedido.
-- Calcular subtotal, impuestos, descuentos y recargo por dirección.
-- Guardar notas generales del pedido y notas especiales por producto.
-- Controlar el flujo de estados.
-- Asignar responsabilidades por rol.
-- Registrar historial de cambios.
-- Despachar pedidos.
-- Confirmar entrega por parte del repartidor.
-- Confirmar recepción por parte del cliente.
-- Consultar estado actual e historial por código de pedido.
+- Presentation: captura datos y muestra resultados.
+- Service: valida reglas, calcula montos y coordina transacciones.
+- Repository: consulta y persiste entidades.
+- Database: aplica constraints, relaciones, índices y defaults.
 ```
 
-Flujo operativo principal:
-
-```text
-PENDING → IN_PREPARATION → READY → ON_THE_WAY → DELIVERED
-```
-
-Además del estado `DELIVERED`, el sistema guarda una confirmación adicional del cliente en `Delivery.customerConfirmedAt`. Esa confirmación no cambia el estado operativo del pedido; solo registra que el cliente confirmó la recepción.
-
-## Stack propuesto
-
-```text
-Java 25
-Spring Boot 4
-Gradle Kotlin DSL
-Spring Data JPA
-MySQL Driver
-Lombok
-Validation
-JavaFX
-```
-
-La consola se usa como presentación inicial mientras se desarrolla la interfaz gráfica. JavaFX será la presentación final o demostrable cuando esté conectada correctamente a los servicios.
-
-## Configuración del proyecto
-
-```text
-Project name: FirstBimesterProject
-Artifact: restaurant-order-manager
-Base package: first.bimester.project.restaurant
-```
-
-## Estructura del proyecto
-
-```text
-restaurant-order-manager
-│
-├── build.gradle.kts
-├── settings.gradle.kts
-│
-├── src
-│   ├── main
-│   │   ├── java
-│   │   │   └── first.bimester.project.restaurant
-│   │   │       ├── FirstBimesterProjectApplication.java
-│   │   │       │
-│   │   │       ├── config
-│   │   │       │   ├── DataInitializer.java
-│   │   │       │   └── JavaFxConfig.java
-│   │   │       │
-│   │   │       ├── domain
-│   │   │       │   ├── entity
-│   │   │       │   │   ├── Customer.java
-│   │   │       │   │   ├── CustomerAddress.java
-│   │   │       │   │   ├── CustomerOrder.java
-│   │   │       │   │   ├── Delivery.java
-│   │   │       │   │   ├── OrderItem.java
-│   │   │       │   │   ├── OrderStatus.java
-│   │   │       │   │   ├── OrderStatusHistory.java
-│   │   │       │   │   ├── OrderStatusTransitionRule.java
-│   │   │       │   │   ├── Product.java
-│   │   │       │   │   ├── Role.java
-│   │   │       │   │   └── Staff.java
-│   │   │       │   │
-│   │   │       │   └── enums
-│   │   │       │       ├── OrderStatusCode.java
-│   │   │       │       ├── ProductCategory.java
-│   │   │       │       └── RoleCode.java
-│   │   │       │
-│   │   │       ├── repository
-│   │   │       │   ├── RoleRepository.java
-│   │   │       │   ├── StaffRepository.java
-│   │   │       │   ├── CustomerRepository.java
-│   │   │       │   ├── CustomerAddressRepository.java
-│   │   │       │   ├── ProductRepository.java
-│   │   │       │   ├── OrderStatusRepository.java
-│   │   │       │   ├── OrderStatusTransitionRuleRepository.java
-│   │   │       │   ├── CustomerOrderRepository.java
-│   │   │       │   ├── OrderItemRepository.java
-│   │   │       │   ├── OrderStatusHistoryRepository.java
-│   │   │       │   └── DeliveryRepository.java
-│   │   │       │
-│   │   │       ├── service
-│   │   │       │   ├── CustomerService.java
-│   │   │       │   ├── CustomerAddressService.java
-│   │   │       │   ├── ProductService.java
-│   │   │       │   ├── StaffService.java
-│   │   │       │   ├── OrderService.java
-│   │   │       │   ├── OrderQueryService.java
-│   │   │       │   ├── DeliveryService.java
-│   │   │       │   └── StateTransitionService.java
-│   │   │       │
-│   │   │       ├── dto
-│   │   │       │   ├── request
-│   │   │       │   │   ├── CreateCustomerRequest.java
-│   │   │       │   │   ├── CreateCustomerAddressRequest.java
-│   │   │       │   │   ├── CreateProductRequest.java
-│   │   │       │   │   ├── CreateOrderRequest.java
-│   │   │       │   │   ├── CreateOrderItemRequest.java
-│   │   │       │   │   ├── ChangeOrderStatusRequest.java
-│   │   │       │   │   ├── DispatchOrderRequest.java
-│   │   │       │   │   ├── ConfirmDeliveryRequest.java
-│   │   │       │   │   └── ConfirmReceiptRequest.java
-│   │   │       │   │
-│   │   │       │   └── response
-│   │   │       │       ├── ProductResponse.java
-│   │   │       │       ├── CustomerResponse.java
-│   │   │       │       ├── CustomerAddressResponse.java
-│   │   │       │       ├── OrderSummaryResponse.java
-│   │   │       │       ├── OrderDetailResponse.java
-│   │   │       │       ├── OrderItemResponse.java
-│   │   │       │       ├── OrderHistoryResponse.java
-│   │   │       │       └── DeliveryResponse.java
-│   │   │       │
-│   │   │       ├── mapper
-│   │   │       │   ├── CustomerMapper.java
-│   │   │       │   ├── CustomerAddressMapper.java
-│   │   │       │   ├── ProductMapper.java
-│   │   │       │   ├── OrderMapper.java
-│   │   │       │   └── DeliveryMapper.java
-│   │   │       │
-│   │   │       ├── exception
-│   │   │       │   ├── BusinessException.java
-│   │   │       │   ├── ResourceNotFoundException.java
-│   │   │       │   ├── InvalidOrderStatusException.java
-│   │   │       │   ├── InvalidRoleException.java
-│   │   │       │   └── DuplicateResourceException.java
-│   │   │       │
-│   │   │       └── presentation
-│   │   │           ├── console
-│   │   │           │   ├── ConsoleApplicationRunner.java
-│   │   │           │   ├── MainMenu.java
-│   │   │           │   ├── AdminMenu.java
-│   │   │           │   ├── CookMenu.java
-│   │   │           │   ├── CourierMenu.java
-│   │   │           │   └── CustomerMenu.java
-│   │   │           │
-│   │   │           └── javafx
-│   │   │               ├── JavaFxApplication.java
-│   │   │               ├── StageManager.java
-│   │   │               ├── ViewLoader.java
-│   │   │               ├── controller
-│   │   │               │   ├── MainController.java
-│   │   │               │   ├── AdminController.java
-│   │   │               │   ├── CookController.java
-│   │   │               │   ├── CourierController.java
-│   │   │               │   ├── CustomerController.java
-│   │   │               │   ├── ProductController.java
-│   │   │               │   └── OrderTrackingController.java
-│   │   │               ├── model
-│   │   │               │   ├── ProductTableModel.java
-│   │   │               │   ├── OrderTableModel.java
-│   │   │               │   └── OrderHistoryTableModel.java
-│   │   │               └── util
-│   │   │                   ├── AlertHelper.java
-│   │   │                   └── FormValidator.java
-│   │   │
-│   │   └── resources
-│   │       ├── application.yaml
-│   │       └── first.bimester.project.restaurant
-│   │           └── presentation
-│   │               └── javafx
-│   │                   ├── view
-│   │                   │   ├── main-view.fxml
-│   │                   │   ├── admin-view.fxml
-│   │                   │   ├── cook-view.fxml
-│   │                   │   ├── courier-view.fxml
-│   │                   │   ├── customer-view.fxml
-│   │                   │   ├── product-view.fxml
-│   │                   │   └── order-tracking-view.fxml
-│   │                   └── style
-│   │                       └── application.css
-│   │
-│   └── test
-│       └── java.first.bimester.projectrestaurant
-│           ├── service
-│           │   ├── OrderServiceTest.java
-│           │   ├── DeliveryServiceTest.java
-│           │   └── StateTransitionServiceTest.java
-│           └── repository
-│               └── CustomerOrderRepositoryTest.java
-```
-
-## Documentación por paquete
-
-```text
-- docs/domain.md
-- docs/repository.md
-- docs/service.md
-- docs/dto.md
-- docs/mapper.md
-- docs/exception.md
-- docs/presentation.md
-```
-
-## Responsabilidad de cada capa
-
-### Presentation
-
-Muestra la aplicación al usuario.
-
-```text
-- Consola: interfaz funcional inicial.
-- JavaFX: interfaz gráfica final.
-```
-
-No decide reglas de negocio. Solo recibe datos, muestra información y llama servicios.
-
-### Service
-
-Contiene las reglas del restaurante.
-
-```text
-- Validar roles.
-- Validar que una dirección pertenezca al cliente antes de usarla en un pedido.
-- Validar flujo de estados.
-- Calcular subtotal, impuestos, descuentos, recargos y total.
-- Crear historial.
-- Crear entregas.
-- Confirmar entregas.
-- Confirmar recepción por cliente.
-```
-
-### Repository
-
-Accede a MySQL mediante Spring Data JPA.
-
-```text
-- Buscar entidades.
-- Guardar entidades.
-- Consultar direcciones por cliente.
-- Consultar pedidos por código, estado, cliente, dirección o repartidor.
-```
-
-No toma decisiones de negocio.
-
-### Domain
-
-Representa el modelo del sistema.
-
-```text
-- Entidades JPA.
-- Enums/códigos del dominio.
-- Relaciones del diagrama ER.
-- Direcciones reutilizables por cliente y snapshots históricos por pedido.
-```
-
-### DTO
-
-Transporta datos entre presentación y servicios.
-
-```text
-- Request: datos que entran.
-- Response: datos que salen.
-```
-
-### Mapper
-
-Convierte entidades en respuestas.
-
-```text
-Entity → Response DTO
-```
-
-### Exception
-
-Define errores claros de negocio.
-
-```text
-- Recurso no encontrado.
-- Rol inválido.
-- Estado inválido.
-- Recurso duplicado.
-- Error general de negocio.
-```
-
-## Flujos principales
-
-### Crear pedido
-
-```text
-AdminMenu/AdminController
-    ↓
-OrderService.createOrder
-    ↓
-CustomerRepository
-StaffRepository
-ProductRepository
-OrderStatusRepository
-CustomerOrderRepository
-OrderItemRepository
-OrderStatusHistoryRepository
-    ↓
-MySQL
-```
-
-Pasos:
-
-```text
-1. Validar que el staff sea ADMINISTRATOR.
-2. Validar cliente.
-3. Validar que la dirección elegida pertenezca al cliente y esté activa.
-4. Generar deliveryAddressSnapshot para no perder historial si el cliente edita su dirección.
-5. Validar que exista al menos un producto.
-6. Validar productos disponibles.
-7. Calcular subtotal de cada línea.
-8. Calcular subtotal del pedido.
-9. Calcular taxAmount, discountAmount y addressSurchargeAmount si aplican.
-10. Calcular totalAmount.
-11. Crear CustomerOrder con estado PENDING.
-12. Crear OrderItem por cada producto, incluyendo specialNote si existe.
-13. Crear primer OrderStatusHistory.
-14. Guardar todo en una transacción.
-```
-
-### Registrar dirección de cliente
-
-```text
-AdminMenu/AdminController o CustomerMenu/CustomerController
-    ↓
-CustomerAddressService.createAddress
-    ↓
-CustomerRepository
-CustomerAddressRepository
-```
-
-Pasos:
-
-```text
-1. Buscar cliente por ID.
-2. Verificar que el cliente exista y esté activo.
-3. Validar alias, calle principal y datos mínimos.
-4. Si la dirección se marca como principal, desmarcar las demás direcciones activas del cliente.
-5. Crear CustomerAddress.
-6. Guardar con CustomerAddressRepository.
-7. Devolver CustomerAddressResponse.
-```
-
-### Cambiar estado del pedido
-
-```text
-CookMenu/CookController
-    ↓
-OrderService.changeOrderStatus
-    ↓
-StateTransitionService
-    ↓
-OrderStatusTransitionRuleRepository
-```
-
-Pasos:
-
-```text
-1. Buscar pedido por código.
-2. Buscar staff que solicita el cambio.
-3. Buscar estado destino.
-4. Validar transición mediante OrderStatusTransitionRule.
-5. Actualizar currentStatus.
-6. Actualizar currentStatusChangedAt.
-7. Insertar OrderStatusHistory.
-8. Guardar todo en una transacción.
-```
-
-### Despachar pedido
-
-```text
-CourierMenu/CourierController
-    ↓
-DeliveryService.dispatchOrder
-```
-
-Pasos:
-
-```text
-1. Buscar pedido por código.
-2. Verificar que esté READY.
-3. Validar que el staff sea COURIER.
-4. Verificar que el pedido no tenga Delivery previa.
-5. Crear Delivery.
-6. Registrar dispatchedAt.
-7. Cambiar estado a ON_THE_WAY.
-8. Registrar historial.
-9. Guardar todo en una transacción.
-```
-
-### Confirmar entrega por repartidor
-
-```text
-CourierMenu/CourierController
-    ↓
-DeliveryService.confirmDelivery
-```
-
-Pasos:
-
-```text
-1. Buscar pedido por código.
-2. Verificar que esté ON_THE_WAY.
-3. Buscar Delivery del pedido.
-4. Validar receiverName.
-5. Registrar deliveredAt.
-6. Registrar receiverName.
-7. Cambiar estado a DELIVERED.
-8. Registrar historial.
-9. Guardar todo en una transacción.
-```
-
-### Confirmar recepción por cliente
-
-```text
-CustomerMenu/CustomerController
-    ↓
-DeliveryService.confirmCustomerReceipt
-```
-
-Pasos:
-
-```text
-1. Buscar pedido por código.
-2. Verificar que el pedido pertenezca al cliente.
-3. Verificar que el pedido esté DELIVERED.
-4. Verificar que existe Delivery.
-5. Verificar que deliveredAt no sea null.
-6. Verificar que customerConfirmedAt sea null.
-7. Registrar customerConfirmedAt.
-8. Registrar customerConfirmationNotes si existen.
-9. Devolver detalle actualizado.
-```
-
-## Reglas de negocio clave
-
-```text
-- Cada pedido tiene un código único.
-- Un pedido debe tener al menos un producto.
-- Un cliente puede tener muchas direcciones.
-- Una dirección solo puede usarse en pedidos del cliente dueño de esa dirección.
-- El pedido guarda una copia textual de la dirección para mantener historial.
-- El administrador registra pedidos.
-- El cocinero cambia PENDING → IN_PREPARATION → READY.
-- El repartidor cambia READY → ON_THE_WAY → DELIVERED.
-- No se puede entregar un pedido si no está ON_THE_WAY.
-- Todo cambio de estado debe registrarse en historial.
-- El cliente puede consultar estado e historial.
-- El cliente solo puede confirmar recepción cuando el repartidor ya confirmó entrega.
-- Las notas especiales por producto no modifican el catálogo; pertenecen al ítem del pedido.
-```
-
-## Novedades tomadas de `revisar/FoodFlow2`
-
-Se revisó el modelo de `FoodFlow2` y se integraron las mejoras que encajan con el diseño principal sin cambiar la arquitectura base:
-
-```text
-- Direccion        → CustomerAddress
-- CategoriaProducto → ProductCategory
-- notaEspecial     → OrderItem.specialNote
-- listo            → OrderItem.isReady
-- subtotal/iva/descuento/recargo → CustomerOrder campos financieros
-- prioritario/observaciones → CustomerOrder.isPriority/generalNotes
-- tiempoPreparacionMin/imagenUrl/costoProduccion → Product
-```
-
-No se copió la herencia `Usuario → Cliente/Cocinero/Repartidor/Administrador` porque este proyecto ya usa `Staff + Role + OrderStatusTransitionRule`. Mantener roles como catálogo deja las reglas de autorización trazables en base de datos y evita mezclar datos de login con responsabilidades operativas.
-
-## Pasos para terminar la integración funcional
-
-```text
-1. Crear CustomerAddressRepository con consultas por customerId, isActive e isPrimary.
-2. Crear CustomerAddressService para alta, baja lógica, selección principal y validación de pertenencia.
-3. Actualizar CreateOrderRequest para recibir deliveryAddressId en lugar de texto libre.
-4. En OrderService.createOrder, buscar CustomerAddress y validar customerId.
-5. Generar deliveryAddressSnapshot antes de guardar CustomerOrder.
-6. Actualizar OrderMapper para devolver addressId y deliveryAddressSnapshot.
-7. Actualizar consola/JavaFX para listar direcciones del cliente antes de crear el pedido.
-8. Si se usa Hibernate ddl-auto, revisar la migración generada; si se usa SQL manual, crear tabla customer_addresses y FK customer_orders.delivery_address_id.
-```
-
-La decisión importante, loco: una cosa es la dirección editable del cliente y otra es la dirección histórica del pedido. Si no guardás snapshot, editás una dirección hoy y te cambia el significado de pedidos viejos. Eso en negocio real es un bug silencioso.
-
-## Regla de oro del proyecto
+Regla de oro:
 
 ```text
 La presentación no contiene reglas de negocio.
-Las reglas del restaurante viven en service.
-Los repositorios solo buscan y guardan datos.
-Las entidades representan tablas y relaciones.
+Los repositorios no deciden negocio.
+Los servicios deciden negocio.
 ```
+
+## Stack verificado del proyecto
+
+Tomado de `build.gradle.kts`:
+
+```text
+Java 25
+Spring Boot 4.0.6
+Gradle Kotlin DSL
+Spring Data JPA
+Spring Validation
+MySQL Connector/J
+Lombok
+JavaFX 25.0.3
+```
+
+Además, `bootRun` está configurado para levantar:
+
+```text
+first.bimester.project.restaurant.presentation.javafx.JavaFxLauncher
+```
+
+## Qué describe la documentación de `docs/`
+
+Los archivos dentro de `docs/` describen la arquitectura objetivo por paquete, alineada al modelo ER:
+
+```text
+docs/1-domain.md
+docs/2-repository.md
+docs/3-service.md
+docs/4-dto.md
+docs/5-mapper.md
+docs/6-exception.md
+docs/7-presentation.md
+```
+
+## Flujos principales esperados
+
+### 1. Crear pedido
+
+```text
+1. Validar que el staff sea ADMINISTRATOR.
+2. Buscar o registrar el cliente.
+3. Buscar o registrar una dirección del cliente.
+4. Validar que la dirección pertenezca al cliente y esté activa.
+5. Generar deliveryAddressSnapshot.
+6. Validar que exista al menos un ítem.
+7. Validar productos disponibles.
+8. Calcular subtotal, impuestos, descuento, recargo y total.
+9. Asignar estado inicial PENDING.
+10. Insertar el pedido, sus ítems y el historial inicial en una transacción.
+```
+
+### 2. Cambiar estado en cocina
+
+```text
+1. Buscar el pedido por orderCode.
+2. Validar staff COOK.
+3. Buscar estado destino por status_code.
+4. Validar transición en order_status_transition_rules.
+5. Actualizar current_status_id y current_status_changed_at.
+6. Insertar OrderStatusHistory.
+```
+
+### 3. Despachar pedido
+
+```text
+1. Buscar el pedido por orderCode.
+2. Validar staff COURIER.
+3. Verificar que no exista delivery previa.
+4. Validar transición READY → ON_THE_WAY.
+5. Crear Delivery con dispatched_at.
+6. Actualizar estado e historial en una transacción.
+```
+
+### 4. Confirmar entrega
+
+```text
+1. Buscar el pedido y su Delivery.
+2. Validar transición ON_THE_WAY → DELIVERED.
+3. Registrar delivered_at y receiver_name.
+4. Actualizar estado e historial en una transacción.
+```
+
+### 5. Confirmar recepción por cliente
+
+```text
+1. Verificar que el pedido pertenezca al cliente.
+2. Verificar que el pedido esté DELIVERED.
+3. Verificar que exista Delivery y que delivered_at no sea null.
+4. Verificar que customer_confirmed_at siga vacío.
+5. Registrar customer_confirmed_at y customer_confirmation_notes.
+6. NO crear nuevo estado ni nuevo historial.
+```
+
+## Diagramas incluidos
+
+```text
+assets/ER Diagram.puml                         → diagrama entidad-relación
+assets/ROM - ER Diagram.sql                    → script SQL de referencia
+assets/restaurant-order-complete-flow.puml     → secuencia completa por rol
+```
+
+## Idea clave del negocio
+
+La dirección editable del cliente y la dirección histórica del pedido NO son la misma cosa.
+
+```text
+customer_addresses        → dato vivo del cliente
+delivery_address_snapshot → evidencia histórica del pedido
+```
+
+Si mezclás ambas, rompés trazabilidad. Y eso, hermano, en un sistema real es un bug silencioso de los feos.

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
+			 version="3.1">
+	<persistence-unit name="firstBimesterPU" transaction-type="RESOURCE_LOCAL">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+		<class>first.bimester.domain.entity.Customer</class>
+		<class>first.bimester.domain.entity.CustomerAddress</class>
+		<class>first.bimester.domain.entity.CustomerOrder</class>
+		<class>first.bimester.domain.entity.Delivery</class>
+		<class>first.bimester.domain.entity.OrderItem</class>
+		<class>first.bimester.domain.entity.OrderStatus</class>
+		<class>first.bimester.domain.entity.OrderStatusHistory</class>
+		<class>first.bimester.domain.entity.OrderStatusTransitionRule</class>
+		<class>first.bimester.domain.entity.Product</class>
+		<class>first.bimester.domain.entity.Role</class>
+		<class>first.bimester.domain.entity.Staff</class>
+
+		<properties>
+			<property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3307/first_bimester_project?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8"/>
+			<property name="jakarta.persistence.jdbc.user" value="root"/>
+			<property name="jakarta.persistence.jdbc.password" value="root"/>
+			<property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+
+			<property name="hibernate.hbm2ddl.auto" value="update"/>
+			<property name="hibernate.show_sql" value="true"/>
+			<property name="hibernate.format_sql" value="true"/>
+			<property name="jakarta.persistence.validation.mode" value="none"/>
+		</properties>
+	</persistence-unit>
+</persistence>

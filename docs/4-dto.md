@@ -83,6 +83,7 @@ reference
 postalCode
 city
 province
+country
 isPrimary
 ```
 
@@ -100,7 +101,9 @@ Validaciones esperadas:
 customerId: requerido
 alias: requerido
 mainStreet: requerida
-city/province: opcionales con valor por defecto si el negocio lo decide
+city: requerida
+province: requerida
+country: opcional, pero si no se informa debería resolverse como Ecuador
 ```
 
 ## `request/CreateProductRequest.java`
@@ -165,7 +168,7 @@ Validaciones esperadas:
 ```text
 customerId: requerido
 registeredByStaffId: requerido
-deliveryAddressId: requerido cuando el cliente ya tiene direcciones registradas
+deliveryAddressId: requerido
 items: mínimo un elemento
 ```
 
@@ -394,6 +397,7 @@ reference
 postalCode
 city
 province
+country
 isPrimary
 isActive
 ```
