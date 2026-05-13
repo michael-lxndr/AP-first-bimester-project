@@ -12,9 +12,8 @@ public class CustomerRepository {
 		this.entityManager = entityManager;
 	}
 
-	public Customer save(Customer customer) {
+	public void save(Customer customer) {
 		entityManager.persist(customer);
-		return customer;
 	}
 
 	public Optional<Customer> findById(Long id) {
