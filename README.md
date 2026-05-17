@@ -1,26 +1,20 @@
 # Restaurant Order Manager
 
-Proyecto académico de escritorio para gestionar pedidos de restaurante: registro de clientes, direcciones, productos, pedidos, cambios de estado, despacho y confirmación de entrega.
+Proyecto académico de escritorio para gestionar pedidos de restaurante con Java 21, JavaFX, JPA/Hibernate, MySQL, HikariCP, pools de hilos y pruebas unitarias.
 
-## Estado del proyecto
+El objetivo es simular el flujo completo de un pedido: registro, preparación, despacho, entrega y consulta por código.
 
-Este repositorio está configurado como una aplicación Java de escritorio con JavaFX, JPA/Hibernate y MySQL.
+## Estado Actual
 
-Importante para el entorno de trabajo actual:
+El proyecto quedó centralizado bajo un solo paquete raíz:
 
 ```text
-- No usa Spring Boot.
-- No usa Spring Data JPA.
-- No usa Gradle.
-- Usa Maven como gestor del proyecto.
-- Usa Java 21.
+com.restaurante.pedidos
 ```
 
-La persistencia se maneja con Jakarta Persistence + Hibernate mediante `EntityManager` y `persistence.xml`.
+La arquitectura se organiza por capas simples. No se usa Spring Boot; las dependencias se crean manualmente desde Java.
 
-## Tecnologías verificadas
-
-Tomado de `pom.xml` y de la estructura actual del proyecto:
+## Tecnologías
 
 ```text
 Java 21
@@ -28,59 +22,118 @@ Maven
 JavaFX 21.0.6
 Jakarta Persistence 3.1.0
 Hibernate ORM 6.6.3.Final
-Jakarta Validation API 3.1.0
+Hibernate HikariCP 6.6.3.Final
 MySQL Connector/J 9.1.0
 Lombok 1.18.46
-JUnit Jupiter API 5.10.2
+JUnit Jupiter 5.10.2
 ```
 
-## Requisitos para ejecutar
+## Estructura De Paquetes
 
 ```text
-JDK 21
-Maven 3.9 o superior
-MySQL 8 o compatible
-IDE recomendado: NetBeans, IntelliJ IDEA o VS Code con soporte Java/Maven
+src/main/java/com/restaurante/pedidos
+├── config
+│   ├── DatabaseConfig.java
+│   ├── SimulationConfig.java
+│   └── ThreadPoolConfig.java
+├── domain
+│   ├── OrderStatusCode.java
+│   ├── ProductCategory.java
+│   ├── RoleCode.java
+│   └── entity
+├── repository
+│   ├── CustomerRepository.java
+│   ├── RoleRepository.java
+│   └── StaffRepository.java
+├── service
+│   └── StaffService.java
+├── presentation
+│   ├── MainApp.java
+│   ├── JavaFxApplication.java
+│   ├── StageManager.java
+│   ├── ViewLoader.java
+│   ├── DashboardController.java
+│   ├── AdminController.java
+│   ├── CookController.java
+│   ├── DeliveryController.java
+│   └── CustomerController.java
+└── util
+    ├── OrderCodeGenerator.java
+    └── TimeSimulator.java
 ```
 
-Si se usa Lombok desde el IDE, hay que activar annotation processing. Si no, el proyecto puede compilar por Maven pero el IDE puede marcar falsos errores.
+Recursos JavaFX:
 
-## Configuración de base de datos
+```text
+src/main/resources/com/restaurante/pedidos/presentation
+├── style/application.css
+└── view
+    ├── admin-view.fxml
+    ├── cook-view.fxml
+    ├── customer-view.fxml
+    ├── delivery-view.fxml
+    └── main-view.fxml
+```
 
-La conexión está definida en:
+Pruebas unitarias:
+
+```text
+src/test/java/com/restaurante/pedidos
+└── util
+    ├── OrderCodeGeneratorTest.java
+    └── TimeSimulatorTest.java
+```
+
+## Reglas De Arquitectura
+
+```text
+presentation -> service -> repository -> domain
+```
+
+Reglas obligatorias:
+
+```text
+Los controllers JavaFX no contienen reglas de negocio.
+Los services coordinan reglas, validaciones, transacciones y casos de uso.
+Los repositories solo hablan con EntityManager.
+El domain no depende de presentation, service ni repository.
+Los pools de hilos se centralizan en ThreadPoolConfig.
+Los delays simulados se centralizan en SimulationConfig y TimeSimulator.
+```
+
+Esto es importante: si cada pantalla crea sus propios hilos, delays, EntityManager o reglas, el proyecto se vuelve imposible de probar. Primero la estructura, después la velocidad. Es así de fácil.
+
+## Configuración De Base De Datos
+
+Archivo principal:
 
 ```text
 src/main/resources/META-INF/persistence.xml
 ```
 
-Configuración actual:
-
-```text
-URL:      jdbc:mysql://localhost:3307/first_bimester_project
-Usuario:  root
-Password: root
-```
-
-Antes de ejecutar, crear la base de datos:
+Base esperada:
 
 ```sql
 CREATE DATABASE first_bimester_project;
 ```
 
-Si tu MySQL usa otro puerto, usuario o contraseña, actualizá `persistence.xml`.
+Conexión actual:
 
-## Cómo ejecutar
+```text
+URL:      jdbc:mysql://localhost:3307/first_bimester_project
+Usuario:  root
+Password: root
+Pool:     HikariCP mediante Hibernate
+```
+
+Si tu MySQL usa otro puerto, usuario o contraseña, modificá `persistence.xml`.
+
+## Cómo Ejecutar
 
 Desde la raíz del proyecto:
 
 ```bash
 mvn javafx:run
-```
-
-También está configurado `exec-maven-plugin` para levantar:
-
-```text
-first.bimester.presentation.javafx.JavaFxLauncher
 ```
 
 Comando alternativo:
@@ -89,65 +142,23 @@ Comando alternativo:
 mvn exec:java
 ```
 
-## Estructura principal
+Clase principal configurada:
 
 ```text
-src/main/java/first/bimester
-├── Main.java
-├── demo
-│   └── JpaInsertDemo.java
-├── domain
-│   ├── entity
-│   └── enums
-├── repository
-│   └── CustomerRepository.java
-└── presentation
-    └── javafx
-        ├── JavaFxApplication.java
-        ├── JavaFxLauncher.java
-        ├── StageManager.java
-        ├── ViewLoader.java
-        └── controller
-            └── MainController.java
+com.restaurante.pedidos.presentation.MainApp
 ```
 
-Recursos JavaFX y configuración JPA:
+## Cómo Ejecutar Tests
 
-```text
-src/main/resources
-├── META-INF/persistence.xml
-└── first/bimester/presentation/javafx
-    ├── style/application.css
-    └── view/main-view.fxml
+```bash
+mvn test
 ```
 
-## Arquitectura del proyecto
+Los tests deben ser unitarios siempre que sea posible. Si una prueba necesita MySQL real, ya no es unitaria: documentala como prueba de integración.
 
-La arquitectura esperada se organiza por capas simples:
+## Modelo De Negocio
 
-```text
-Presentation Layer  -> JavaFX
-Service Layer       -> reglas de negocio
-Repository Layer    -> acceso a datos con EntityManager
-Domain Layer        -> entidades JPA y enums
-Database Layer      -> MySQL
-```
-
-Regla de oro:
-
-```text
-La presentación no contiene reglas de negocio.
-Los repositorios no deciden reglas de negocio.
-Los servicios coordinan reglas, validaciones y transacciones.
-```
-
-En este entorno sin Spring Boot, las dependencias se crean de forma explícita. Si una pantalla necesita un servicio, el proyecto debe construirlo manualmente o mediante una clase bootstrap propia, no mediante `@Autowired` ni `ApplicationContext`.
-
-## Modelo de negocio
-
-El sistema modela el flujo de un pedido de restaurante.
-
-Estados operativos:
+Estados operativos del pedido:
 
 ```text
 PENDING -> IN_PREPARATION -> READY -> ON_THE_WAY -> DELIVERED
@@ -165,88 +176,89 @@ CUSTOMER
 Responsabilidades:
 
 ```text
-ADMINISTRATOR: registra clientes, direcciones, productos y pedidos.
-COOK: mueve pedidos de PENDING a IN_PREPARATION y luego a READY.
-COURIER: mueve pedidos de READY a ON_THE_WAY y luego a DELIVERED.
-CUSTOMER: consulta seguimiento y confirma recepción; no cambia estados operativos.
+ADMINISTRATOR: gestiona personal, productos, clientes y pedidos.
+COOK: toma pedidos pendientes y los prepara.
+COURIER: toma pedidos listos, los despacha y confirma entrega.
+CUSTOMER: consulta el estado del pedido por código.
 ```
 
-La confirmación del cliente no crea un nuevo estado. Se registra como dato de entrega en `deliveries.customer_confirmed_at`.
+## División Del Trabajo
 
-## Modelo relacional de referencia
-
-Tablas principales del modelo:
+El proyecto se divide entre tres personas. Cada persona trabaja una capa principal y entrega pruebas de lo que toca.
 
 ```text
-roles
-staff
-customers
-customer_addresses
-products
-order_statuses
-order_status_transition_rules
-customer_orders
-order_items
-order_status_histories
-deliveries
+Persona 1: Dominio, base de datos y repositorios.
+Persona 2: Servicios, reglas de negocio, state machine, simulación y pools de hilos.
+Persona 3: JavaFX, DTOs de pantalla, navegación y pruebas de presentación/utilidades.
 ```
 
-Relaciones clave:
+Guías detalladas:
 
 ```text
-staff.role_id -> roles.role_id
-customer_addresses.customer_id -> customers.customer_id
-customer_orders.customer_id -> customers.customer_id
-customer_orders.registered_by_staff_id -> staff.staff_id
-customer_orders.current_status_id -> order_statuses.status_id
-customer_orders.delivery_address_id -> customer_addresses.address_id
-order_items.order_id -> customer_orders.order_id
-order_items.product_id -> products.product_id
-order_status_histories.order_id -> customer_orders.order_id
-deliveries.order_id -> customer_orders.order_id
-deliveries.courier_staff_id -> staff.staff_id
+docs/persona-1-dominio-persistencia.md
+docs/persona-2-negocio-simulacion.md
+docs/persona-3-presentacion-pruebas.md
 ```
 
-## Assets incluidos
+## Contrato Entre Capas
+
+Persona 1 entrega repositorios con métodos claros.
+
+Persona 2 consume repositorios desde servicios y expone métodos simples para la UI.
+
+Persona 3 consume servicios, no repositories directamente.
+
+Ejemplo correcto:
 
 ```text
-assets/ER Diagram.png              -> imagen del diagrama entidad-relación
-assets/ER Diagram.puml             -> fuente PlantUML del diagrama ER
-assets/ROM - ER Diagram.sql        -> script SQL de referencia
-assets/ROM - Test Data.sql         -> datos de prueba
-assets/Tema del Proyecto Primer Bimestre.pdf -> enunciado académico
+AdminController -> StaffService -> StaffRepository -> EntityManager
 ```
 
-## Documentación por capa
+Ejemplo incorrecto:
 
 ```text
-docs/1-domain.md       -> entidades y enums del dominio
-docs/2-repository.md   -> repositorios con EntityManager, sin Spring Data
-docs/3-service.md      -> reglas de negocio esperadas
-docs/4-dto.md          -> objetos de entrada/salida esperados
-docs/5-mapper.md       -> conversión entre entidades y DTOs
-docs/6-exception.md    -> excepciones de negocio esperadas
-docs/7-presentation.md -> presentación JavaFX sin Spring Boot
+AdminController -> EntityManager
 ```
 
-## Convenciones importantes
+## Assets Incluidos
 
 ```text
-- Mantener Java 21 para que todos trabajen con el mismo JDK.
-- Usar Maven; no documentar comandos de Gradle.
-- No agregar Spring Boot salvo que el profesor cambie explícitamente el requerimiento.
-- Usar EntityManager en repositories.
-- Mantener las reglas de negocio fuera de los controllers JavaFX.
-- Mantener las entidades alineadas con el modelo ER y el SQL de assets/.
+assets/ER Diagram.png
+assets/ER Diagram.puml
+assets/ROM - ER Diagram.sql
+assets/ROM - Test Data.sql
+assets/Tema del Proyecto Primer Bimestre.pdf
 ```
 
-## Idea clave
-
-La dirección editable del cliente y la dirección histórica del pedido no son lo mismo:
+## Convenciones
 
 ```text
-customer_addresses        -> dato vivo del cliente
-delivery_address_snapshot -> evidencia histórica del pedido
+Usar Java 21.
+Usar Maven.
+No agregar Spring Boot.
+No crear paquetes nuevos sin necesidad real.
+No meter reglas de negocio en FXML ni controllers.
+No abrir hilos manualmente desde controllers.
+No duplicar delays ni configuración de tiempos.
+No mezclar DTOs de pantalla con entidades JPA si la pantalla no necesita la entidad completa.
 ```
 
-Mezclar esos conceptos rompe trazabilidad. Por eso el pedido debe conservar el snapshot de la dirección usada al momento de crearse.
+## Próximo Objetivo Técnico
+
+Completar las piezas faltantes manteniendo esta estructura:
+
+```text
+OrderRepository
+ProductRepository
+OrderStatusRepository
+TransitionRuleRepository
+OrderService
+OrderStateMachine
+KitchenService
+DeliveryService
+SimulationService
+DTOs para la UI
+Tests unitarios por servicio
+```
+
+No hay que crear paquetes por ansiedad. Hay que crear paquetes cuando separan responsabilidades reales. CONCEPTOS primero, código después.
