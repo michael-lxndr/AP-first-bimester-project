@@ -5,7 +5,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>first.bimester</groupId>
+	<groupId>com.restaurante.pedidos</groupId>
 	<artifactId>FirstBimesterProject</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
@@ -48,6 +48,11 @@
 			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-hikaricp</artifactId>
+			<version>${hibernate.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>jakarta.validation</groupId>
 			<artifactId>jakarta.validation-api</artifactId>
 			<version>${jakarta.validation.version}</version>
@@ -65,10 +70,10 @@
 			<version>${javafx.version}</version>
 		</dependency>
 
-		<!-- JUnit 5 para pruebas -->
+		<!-- JUnit 5 para pruebas unitarias -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
+			<artifactId>junit-jupiter</artifactId>
 			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
@@ -98,15 +103,20 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>3.5.0</version>
 				<configuration>
-					<mainClass>first.bimester.presentation.javafx.JavaFxLauncher</mainClass>
+					<mainClass>com.restaurante.pedidos.presentation.MainApp</mainClass>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.openjfx</groupId>
 				<artifactId>javafx-maven-plugin</artifactId>
 				<version>0.0.8</version>
 				<configuration>
-					<mainClass>first.bimester.presentation.javafx.JavaFxLauncher</mainClass>
+					<mainClass>com.restaurante.pedidos.presentation.MainApp</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>
