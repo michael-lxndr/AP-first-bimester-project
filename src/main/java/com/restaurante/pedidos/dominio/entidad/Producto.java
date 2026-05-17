@@ -16,55 +16,53 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "products")
+@Table(name = "productos")
 public class Producto {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "product_id", nullable = false)
+	@Column(name = "producto_id", nullable = false)
 	private Long id;
 
 	@Size(max = 20)
-	@Column(name = "product_code", length = 20)
-	private String productCode;
+	@Column(name = "codigo_producto", length = 20)
+	private String codigoProducto;
 
 	@Size(max = 120)
 	@NotNull
-	@Column(name = "product_name", nullable = false, length = 120)
-	private String productName;
+	@Column(name = "nombre_producto", nullable = false, length = 120)
+	private String nombreProducto;
 
 	@Size(max = 255)
-	@Column(name = "description")
-	private String description;
+	@Column(name = "descripcion")
+	private String descripcion;
 
 	@NotNull
-	@Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
-	private BigDecimal unitPrice;
+	@Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+	private BigDecimal precioUnitario;
 
 	@ColumnDefault("0.00")
-	@Column(name = "production_cost", precision = 10, scale = 2)
-	private BigDecimal productionCost;
+	@Column(name = "costo_produccion", precision = 10, scale = 2)
+	private BigDecimal costoProduccion;
 
 	@Size(max = 30)
 	@Enumerated(EnumType.STRING)
-	@Column(name = "category", length = 30)
+	@Column(name = "categoria", length = 30)
 	private CategoriaProducto categoria;
 
 	@ColumnDefault("15")
-	@Column(name = "preparation_time_minutes")
-	private Integer preparationTimeMinutes;
+	@Column(name = "tiempo_preparacion_minutos")
+	private Integer tiempoPreparacionMinutos;
 
 	@NotNull
 	@ColumnDefault("1")
-	@Column(name = "is_available", nullable = false)
-	private Boolean isAvailable;
+	@Column(name = "disponible", nullable = false)
+	private Boolean disponible;
 
 	@Size(max = 255)
-	@Column(name = "image_url")
-	private String imageUrl;
+	@Column(name = "url_imagen")
+	private String urlImagen;
 
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
-	@Column(name = "created_at")
-	private Instant createdAt;
-
-
+	@Column(name = "creado_en")
+	private Instant creadoEn;
 }

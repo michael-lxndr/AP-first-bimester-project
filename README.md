@@ -91,13 +91,13 @@ src/main/resources/META-INF/persistence.xml
 Base esperada:
 
 ```sql
-CREATE DATABASE first_bimester_project;
+CREATE DATABASE proyecto_primer_bimestre;
 ```
 
 Conexión actual:
 
 ```text
-URL:      jdbc:mysql://localhost:3307/first_bimester_project
+URL:      jdbc:mysql://localhost:3307/proyecto_primer_bimestre
 Usuario:  root
 Password: root
 Pool:     HikariCP mediante Hibernate

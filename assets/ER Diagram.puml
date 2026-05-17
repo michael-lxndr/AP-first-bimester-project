@@ -5,240 +5,230 @@ hide methods
 hide stereotypes
 skinparam linetype ortho
 
-entity "Rol" as Role {
-  *role_id : BIGINT <<PK>>
+entity "Rol" as Rol {
+  *rol_id : BIGINT <<PK>>
   --
-  role_name : VARCHAR(30) <<UK>>
+  codigo_rol : VARCHAR(30) <<UK>>
 }
 
-entity "Personal" as Staff {
-  *staff_id : BIGINT <<PK>>
+entity "Personal" as Personal {
+  *personal_id : BIGINT <<PK>>
   --
-  role_id : BIGINT <<FK>>
-  full_name : VARCHAR(120)
-  phone : VARCHAR(20)
-  email : VARCHAR(120) <<UK>>
-  username : VARCHAR(50) <<UK>>
-  is_active : BOOLEAN
-  created_at : DATETIME
+  rol_id : BIGINT <<FK>>
+  nombre_completo : VARCHAR(120)
+  telefono : VARCHAR(20)
+  correo_electronico : VARCHAR(120) <<UK>>
+  nombre_usuario : VARCHAR(50) <<UK>>
+  activo : BOOLEAN
+  creado_en : DATETIME
 }
 
-entity "Cliente" as Customer {
-  *customer_id : BIGINT <<PK>>
+entity "Cliente" as Cliente {
+  *cliente_id : BIGINT <<PK>>
   --
-  full_name : VARCHAR(120)
-  phone : VARCHAR(20)
-  email : VARCHAR(120) <<UK>>
-  is_active : BOOLEAN
-  created_at : DATETIME
+  nombre_completo : VARCHAR(120)
+  telefono : VARCHAR(20)
+  correo_electronico : VARCHAR(120) <<UK>>
+  activo : BOOLEAN
+  creado_en : DATETIME
 }
 
-entity "DireccionCliente" as CustomerAddress {
-  *address_id : BIGINT <<PK>>
+entity "DireccionCliente" as DireccionCliente {
+  *direccion_id : BIGINT <<PK>>
   --
-  customer_id : BIGINT <<FK>>
+  cliente_id : BIGINT <<FK>>
   alias : VARCHAR(50)
-  main_street : VARCHAR(150)
-  secondary_street : VARCHAR(150)
-  house_number : VARCHAR(10)
-  reference : VARCHAR(255)
-  postal_code : VARCHAR(10)
-  city : VARCHAR(50)
-  province : VARCHAR(50)
-  country : VARCHAR(50)
-  is_primary : BOOLEAN
-  is_active : BOOLEAN
+  calle_principal : VARCHAR(150)
+  calle_secundaria : VARCHAR(150)
+  numero_casa : VARCHAR(10)
+  referencia : VARCHAR(255)
+  codigo_postal : VARCHAR(10)
+  ciudad : VARCHAR(50)
+  provincia : VARCHAR(50)
+  pais : VARCHAR(50)
+  principal : BOOLEAN
+  activa : BOOLEAN
 }
 
-entity "Producto" as Product {
-  *product_id : BIGINT <<PK>>
+entity "Producto" as Producto {
+  *producto_id : BIGINT <<PK>>
   --
-  product_code : VARCHAR(20) <<UK>>
-  product_name : VARCHAR(120)
-  description : VARCHAR(255)
-  unit_price : DECIMAL(10,2)
-  production_cost : DECIMAL(10,2)
-  category : VARCHAR(30)
-  preparation_time_minutes : INT
-  is_available : BOOLEAN
-  image_url : VARCHAR(255)
-  created_at : DATETIME
+  codigo_producto : VARCHAR(20) <<UK>>
+  nombre_producto : VARCHAR(120)
+  descripcion : VARCHAR(255)
+  precio_unitario : DECIMAL(10,2)
+  costo_produccion : DECIMAL(10,2)
+  categoria : VARCHAR(30)
+  tiempo_preparacion_minutos : INT
+  disponible : BOOLEAN
+  url_imagen : VARCHAR(255)
+  creado_en : DATETIME
 }
 
-entity "EstadoPedido" as OrderStatus {
-  *status_id : BIGINT <<PK>>
+entity "EstadoPedido" as EstadoPedido {
+  *estado_id : BIGINT <<PK>>
   --
-  status_code : VARCHAR(30) <<UK>>
-  status_name : VARCHAR(50) <<UK>>
-  status_order : INT <<UK>>
-  is_final : BOOLEAN
+  codigo_estado : VARCHAR(30) <<UK>>
+  nombre_estado : VARCHAR(50) <<UK>>
+  orden_estado : INT <<UK>>
+  finalizado : BOOLEAN
 }
 
-entity "ReglaTransicionEstado" as OrderStatusTransitionRule {
-  *transition_rule_id : BIGINT <<PK>>
+entity "ReglaTransicionEstadoPedido" as ReglaTransicionEstadoPedido {
+  *regla_transicion_id : BIGINT <<PK>>
   --
-  from_status_id : BIGINT <<FK>>
-  to_status_id : BIGINT <<FK>>
-  role_id : BIGINT <<FK>>
-  is_active : BOOLEAN
+  estado_origen_id : BIGINT <<FK>>
+  estado_destino_id : BIGINT <<FK>>
+  rol_id : BIGINT <<FK>>
+  activa : BOOLEAN
 }
 
-entity "PedidoCliente" as CustomerOrder {
-  *order_id : BIGINT <<PK>>
+entity "PedidoCliente" as PedidoCliente {
+  *pedido_id : BIGINT <<PK>>
   --
-  order_code : VARCHAR(30) <<UK>>
-  customer_id : BIGINT <<FK>>
-  registered_by_staff_id : BIGINT <<FK>>
-  current_status_id : BIGINT <<FK>>
-  delivery_address_id : BIGINT <<FK>>
-  delivery_address_snapshot : VARCHAR(500)
-  delivery_instructions : VARCHAR(500)
-  subtotal_amount : DECIMAL(10,2)
-  tax_amount : DECIMAL(10,2)
-  discount_amount : DECIMAL(10,2)
-  address_surcharge_amount : DECIMAL(10,2)
-  total_amount : DECIMAL(10,2)
-  discount_code : VARCHAR(20)
-  is_priority : BOOLEAN
-  general_notes : VARCHAR(255)
-  created_at : DATETIME
-  estimated_delivery_at : DATETIME
-  current_status_changed_at : DATETIME
+  codigo_pedido : VARCHAR(30) <<UK>>
+  cliente_id : BIGINT <<FK>>
+  registrado_por_personal_id : BIGINT <<FK>>
+  estado_actual_id : BIGINT <<FK>>
+  direccion_entrega_id : BIGINT <<FK>>
+  snapshot_direccion_entrega : VARCHAR(500)
+  instrucciones_entrega : VARCHAR(500)
+  subtotal : DECIMAL(10,2)
+  impuesto : DECIMAL(10,2)
+  descuento : DECIMAL(10,2)
+  recargo_direccion : DECIMAL(10,2)
+  total : DECIMAL(10,2)
+  codigo_descuento : VARCHAR(20)
+  prioritario : BOOLEAN
+  notas_generales : VARCHAR(255)
+  creado_en : DATETIME
+  entrega_estimada_en : DATETIME
+  estado_actual_cambiado_en : DATETIME
 }
 
-entity "ItemPedido" as OrderItem {
-  *order_item_id : BIGINT <<PK>>
+entity "ItemPedido" as ItemPedido {
+  *item_pedido_id : BIGINT <<PK>>
   --
-  order_id : BIGINT <<FK>>
-  product_id : BIGINT <<FK>>
-  quantity : INT
-  product_name_snapshot : VARCHAR(120)
-  unit_price : DECIMAL(10,2)
-  line_total : DECIMAL(10,2)
-  special_note : VARCHAR(150)
-  is_ready : BOOLEAN
+  pedido_id : BIGINT <<FK>>
+  producto_id : BIGINT <<FK>>
+  cantidad : INT
+  snapshot_nombre_producto : VARCHAR(120)
+  precio_unitario : DECIMAL(10,2)
+  total_linea : DECIMAL(10,2)
+  nota_especial : VARCHAR(150)
+  listo : BOOLEAN
 }
 
-entity "HistorialEstadoPedido" as OrderStatusHistory {
-  *history_id : BIGINT <<PK>>
+entity "HistorialEstadoPedido" as HistorialEstadoPedido {
+  *historial_id : BIGINT <<PK>>
   --
-  order_id : BIGINT <<FK>>
-  from_status_id : BIGINT <<FK>> <<DEFAULT:PENDING>>
-  to_status_id : BIGINT <<FK>>
-  changed_by_staff_id : BIGINT <<FK>>
-  changed_at : DATETIME
-  notes : VARCHAR(255)
+  pedido_id : BIGINT <<FK>>
+  estado_origen_id : BIGINT <<FK>> <<DEFAULT:PENDIENTE>>
+  estado_destino_id : BIGINT <<FK>>
+  cambiado_por_personal_id : BIGINT <<FK>>
+  cambiado_en : DATETIME
+  notas : VARCHAR(255)
 }
 
-entity "Entrega" as Delivery {
-  *delivery_id : BIGINT <<PK>>
+entity "Entrega" as Entrega {
+  *entrega_id : BIGINT <<PK>>
   --
-  order_id : BIGINT <<FK>> <<UK>>
-  courier_staff_id : BIGINT <<FK>>
-  dispatched_at : DATETIME
-  delivered_at : DATETIME <<NULL>>
-  receiver_name : VARCHAR(120) <<NULL>>
-  customer_confirmed_at : DATETIME <<NULL>>
-  customer_confirmation_notes : VARCHAR(255) <<NULL>>
-  delivery_status : VARCHAR(30)
-  courier_notes : VARCHAR(500)
-  attempt_number : INT
+  pedido_id : BIGINT <<FK>> <<UK>>
+  repartidor_personal_id : BIGINT <<FK>>
+  despachado_en : DATETIME
+  entregado_en : DATETIME <<NULL>>
+  nombre_receptor : VARCHAR(120) <<NULL>>
+  confirmado_por_cliente_en : DATETIME <<NULL>>
+  notas_confirmacion_cliente : VARCHAR(255) <<NULL>>
+  estado_entrega : VARCHAR(30)
+  notas_repartidor : VARCHAR(500)
+  numero_intento : INT
 }
 
-Role ||--o{ Staff : tiene
-Role ||--o{ OrderStatusTransitionRule : autoriza
+Rol ||--o{ Personal : tiene
+Rol ||--o{ ReglaTransicionEstadoPedido : autoriza
 
-Customer ||--o{ CustomerOrder : realiza
-Customer ||--o{ CustomerAddress : posee
-CustomerAddress ||--o{ CustomerOrder : seleccionada_para
+Cliente ||--o{ PedidoCliente : realiza
+Cliente ||--o{ DireccionCliente : posee
+DireccionCliente ||--o{ PedidoCliente : seleccionada_para
 
-Staff ||--o{ CustomerOrder : registra
-Staff ||--o{ OrderStatusHistory : cambia
-Staff ||--o{ Delivery : reparte
+Personal ||--o{ PedidoCliente : registra
+Personal ||--o{ HistorialEstadoPedido : cambia
+Personal ||--o{ Entrega : reparte
 
-OrderStatus ||--o{ CustomerOrder : estado_actual
-OrderStatus ||--o{ OrderStatusTransitionRule : estado_origen
-OrderStatus ||--o{ OrderStatusTransitionRule : estado_destino
-OrderStatus ||--o{ OrderStatusHistory : desde_estado
-OrderStatus ||--o{ OrderStatusHistory : hacia_estado
+EstadoPedido ||--o{ PedidoCliente : estado_actual
+EstadoPedido ||--o{ ReglaTransicionEstadoPedido : estado_origen
+EstadoPedido ||--o{ ReglaTransicionEstadoPedido : estado_destino
+EstadoPedido ||--o{ HistorialEstadoPedido : desde_estado
+EstadoPedido ||--o{ HistorialEstadoPedido : hacia_estado
 
-CustomerOrder ||--|{ OrderItem : contiene
-CustomerOrder ||--o{ OrderStatusHistory : registra_historial
-CustomerOrder ||--o| Delivery : tiene
+PedidoCliente ||--|{ ItemPedido : contiene
+PedidoCliente ||--o{ HistorialEstadoPedido : registra_historial
+PedidoCliente ||--o| Entrega : tiene
 
-Product ||--o{ OrderItem : aparece_en
+Producto ||--o{ ItemPedido : aparece_en
 
-note right of CustomerOrder
-- order_code debe ser unico
-- una orden debe contener al menos un item
-- delivery_address_id referencia la direccion elegida
+note right of PedidoCliente
+- codigo_pedido debe ser unico
+- un pedido debe contener al menos un item
+- direccion_entrega_id referencia la direccion elegida
   por el cliente y es obligatoria porque define
   donde se realiza la entrega
-- delivery_address_snapshot preserva la direccion
+- snapshot_direccion_entrega preserva la direccion
   historica aunque luego el cliente edite sus direcciones
-  y admite hasta 500 caracteres
-- delivery_instructions guarda indicaciones especiales
+- instrucciones_entrega guarda indicaciones especiales
   para el repartidor
-- total_amount = subtotal_amount + tax_amount
-  + address_surcharge_amount - discount_amount
+- total = subtotal + impuesto + recargo_direccion - descuento
 - los montos no pueden ser negativos segun checks
   de base de datos
-- current_status_changed_at acelera consultas de seguimiento
-- al crear la orden debe insertarse tambien
+- estado_actual_cambiado_en acelera consultas de seguimiento
+- al crear el pedido debe insertarse tambien
   el primer registro en HistorialEstadoPedido
 end note
 
-note right of CustomerAddress
+note right of DireccionCliente
 - Un cliente puede registrar varias direcciones.
-- is_primary marca la direccion sugerida por defecto.
-- is_active permite ocultar direcciones sin borrar historial.
+- principal marca la direccion sugerida por defecto.
+- activa permite ocultar direcciones sin borrar historial.
 - Al crear un pedido se debe validar que la direccion
   pertenezca al cliente del pedido.
-- city y province son obligatorias pero no tienen
-  valor por defecto: deben venir del registro real
-  de direccion del cliente.
-- country es obligatorio y usa Ecuador por defecto.
+- ciudad y provincia son obligatorias.
+- pais es obligatorio y usa Ecuador por defecto.
 end note
 
-note right of Product
-- product_code facilita busqueda e integracion externa.
-- category clasifica menu: STARTER, MAIN_COURSE,
-  DRINK, DESSERT, COMBO.
-- preparation_time_minutes ayuda a estimar entrega.
-- image_url permite mostrar la imagen del producto.
-- unit_price, production_cost y preparation_time_minutes
+note right of Producto
+- codigo_producto facilita busqueda e integracion externa.
+- categoria clasifica menu: ENTRADA, PLATO_FUERTE,
+  BEBIDA, POSTRE, COMBO.
+- tiempo_preparacion_minutos ayuda a estimar entrega.
+- url_imagen permite mostrar la imagen del producto.
+- precio_unitario, costo_produccion y tiempo_preparacion_minutos
   tienen validaciones CHECK para evitar valores invalidos.
-- production_cost sirve para analisis interno,
-  no debe exponerse necesariamente al cliente.
 end note
 
-note right of OrderStatus
+note right of EstadoPedido
 Catalogo sugerido:
-- PENDING / Pendiente
-- IN_PREPARATION / En preparacion
-- READY / Listo
-- ON_THE_WAY / En camino
-- DELIVERED / Entregado
+- PENDIENTE / Pendiente
+- EN_PREPARACION / En preparacion
+- LISTO / Listo
+- EN_CAMINO / En camino
+- ENTREGADO / Entregado
 
-Los codigos se mantienen en ingles por compatibilidad
-con los enums Java persistidos con EnumType.STRING.
-
-DELIVERED representa que el repartidor
-confirmo la entrega.
+ENTREGADO representa que el repartidor confirmo la entrega.
 
 La confirmacion del cliente no se modela
 como nuevo estado; se guarda en Entrega
-mediante customer_confirmed_at.
+mediante confirmado_por_cliente_en.
 
-status_order tambien es unico y debe ser mayor a cero.
+orden_estado tambien es unico y debe ser mayor a cero.
 end note
 
-note right of OrderStatusTransitionRule
+note right of ReglaTransicionEstadoPedido
 Reglas de negocio trazables:
-- PENDING -> IN_PREPARATION : COOK
-- IN_PREPARATION -> READY : COOK
-- READY -> ON_THE_WAY : COURIER
-- ON_THE_WAY -> DELIVERED : COURIER
+- PENDIENTE -> EN_PREPARACION : COCINERO
+- EN_PREPARACION -> LISTO : COCINERO
+- LISTO -> EN_CAMINO : REPARTIDOR
+- EN_CAMINO -> ENTREGADO : REPARTIDOR
 
 No se permiten saltos ni retrocesos.
 
@@ -247,51 +237,45 @@ El Cliente no usa esta tabla porque
 no cambia el estado operativo del pedido.
 
 La base impide duplicar una regla mediante
-UNIQUE(from_status_id, to_status_id, role_id).
+UNIQUE(estado_origen_id, estado_destino_id, rol_id).
 end note
 
-note right of OrderStatusHistory
+note right of HistorialEstadoPedido
 - todo cambio de estado debe registrarse
-- from_status_id es obligatorio; si no se informa,
-  la base usa PENDING como estado inicial por defecto
-- changed_by_staff_id + changed_at cubren
+- estado_origen_id es obligatorio; si no se informa,
+  la base usa PENDIENTE como estado inicial por defecto
+- cambiado_por_personal_id + cambiado_en cubren
   quien hizo el cambio y cuando
-- notes permite guardar observaciones
+- notas permite guardar observaciones
   operativas o incidencias
 end note
 
-note right of OrderItem
-- product_name_snapshot preserva trazabilidad
+note right of ItemPedido
+- snapshot_nombre_producto preserva trazabilidad
   historica aunque cambie el nombre del producto
-- unit_price conserva el precio usado
+- precio_unitario conserva el precio usado
   al momento de crear el pedido
-- special_note permite observaciones por producto
-- is_ready permite seguimiento interno de cocina
+- nota_especial permite observaciones por producto
+- listo permite seguimiento interno de cocina
 end note
 
-note right of Delivery
-- dispatched_at se registra cuando el repartidor
+note right of Entrega
+- despachado_en se registra cuando el repartidor
   sale con el pedido
-- delivery_status permite distinguir DISPATCHED,
-  IN_TRANSIT, DELIVERED, FAILED y RETURNED
-- courier_notes guarda novedades del repartidor
-- attempt_number registra cuantos intentos de entrega hubo
-- delivered_at y receiver_name se registran
+- estado_entrega permite distinguir DESPACHADO,
+  EN_TRANSITO, ENTREGADO, FALLIDO y DEVUELTO
+- notas_repartidor guarda novedades del repartidor
+- numero_intento registra cuantos intentos de entrega hubo
+- entregado_en y nombre_receptor se registran
   cuando el repartidor confirma la entrega
-- customer_confirmed_at se registra cuando
+- confirmado_por_cliente_en se registra cuando
   el cliente confirma que recibio el pedido
-- delivered_at, receiver_name y customer_confirmed_at
+- entregado_en, nombre_receptor y confirmado_por_cliente_en
   son campos opcionales hasta que avance la entrega
-- si delivered_at tiene valor, receiver_name se vuelve
+- si entregado_en tiene valor, nombre_receptor se vuelve
   obligatorio por CHECK de base de datos
-- customer_confirmed_at solo puede existir despues
-  de delivered_at
-- el cliente solo puede confirmar si:
-  1. el pedido esta DELIVERED
-  2. existe Entrega
-  3. delivered_at no es null
-  4. el pedido pertenece a ese cliente
-  5. todavia no fue confirmado
+- confirmado_por_cliente_en solo puede existir despues
+  de entregado_en
 end note
 
 @enduml

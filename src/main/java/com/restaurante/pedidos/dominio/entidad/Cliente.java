@@ -14,35 +14,33 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "customers")
+@Table(name = "clientes")
 public class Cliente {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "customer_id", nullable = false)
+	@Column(name = "cliente_id", nullable = false)
 	private Long id;
 
 	@Size(max = 120)
 	@NotNull
-	@Column(name = "full_name", nullable = false, length = 120)
-	private String fullName;
+	@Column(name = "nombre_completo", nullable = false, length = 120)
+	private String nombreCompleto;
 
 	@Size(max = 20)
-	@Column(name = "phone", length = 20)
-	private String phone;
+	@Column(name = "telefono", length = 20)
+	private String telefono;
 
 	@Size(max = 120)
-	@Column(name = "email", length = 120)
-	private String email;
+	@Column(name = "correo_electronico", length = 120)
+	private String correoElectronico;
 
 	@NotNull
 	@ColumnDefault("1")
-	@Column(name = "is_active", nullable = false)
-	private Boolean isActive;
+	@Column(name = "activo", nullable = false)
+	private Boolean activo;
 
 	@NotNull
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
-	@Column(name = "created_at", nullable = false)
-	private Instant createdAt;
-
-
+	@Column(name = "creado_en", nullable = false)
+	private Instant creadoEn;
 }

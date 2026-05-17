@@ -11,32 +11,30 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @Entity
-@Table(name = "order_status_transition_rules")
+@Table(name = "reglas_transicion_estado_pedido")
 public class ReglaTransicionEstadoPedido {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "transition_rule_id", nullable = false)
+	@Column(name = "regla_transicion_id", nullable = false)
 	private Long id;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "from_status_id", nullable = false)
-	private EstadoPedido fromStatus;
+	@JoinColumn(name = "estado_origen_id", nullable = false)
+	private EstadoPedido estadoOrigen;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "to_status_id", nullable = false)
-	private EstadoPedido toStatus;
+	@JoinColumn(name = "estado_destino_id", nullable = false)
+	private EstadoPedido estadoDestino;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "role_id", nullable = false)
+	@JoinColumn(name = "rol_id", nullable = false)
 	private Rol rol;
 
 	@NotNull
 	@ColumnDefault("1")
-	@Column(name = "is_active", nullable = false)
-	private Boolean isActive;
-
-
+	@Column(name = "activa", nullable = false)
+	private Boolean activa;
 }

@@ -16,19 +16,19 @@ public class RepositorioRol {
 
 	public Optional<Rol> findByCode(CodigoRol codigoRol) {
 		try {
-			Rol role = entityManager
+			Rol rol = entityManager
 				.createQuery("select r from Rol r where r.codigoRol = :codigoRol", Rol.class)
 				.setParameter("codigoRol", codigoRol)
 				.getSingleResult();
 
-			return Optional.of(role);
+			return Optional.of(rol);
 		} catch (NoResultException exception) {
 			return Optional.empty();
 		}
 	}
 
-	public Rol save(Rol role) {
-		entityManager.persist(role);
-		return role;
+	public Rol save(Rol rol) {
+		entityManager.persist(rol);
+		return rol;
 	}
 }

@@ -14,48 +14,46 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @Entity
-@Table(name = "order_items")
+@Table(name = "items_pedido")
 public class ItemPedido {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "order_item_id", nullable = false)
+	@Column(name = "item_pedido_id", nullable = false)
 	private Long id;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "order_id", nullable = false)
-	private PedidoCliente order;
+	@JoinColumn(name = "pedido_id", nullable = false)
+	private PedidoCliente pedido;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "product_id", nullable = false)
-	private Producto product;
+	@JoinColumn(name = "producto_id", nullable = false)
+	private Producto producto;
 
 	@NotNull
-	@Column(name = "quantity", nullable = false)
-	private Integer quantity;
+	@Column(name = "cantidad", nullable = false)
+	private Integer cantidad;
 
 	@Size(max = 120)
 	@NotNull
-	@Column(name = "product_name_snapshot", nullable = false, length = 120)
-	private String productNameSnapshot;
+	@Column(name = "snapshot_nombre_producto", nullable = false, length = 120)
+	private String snapshotNombreProducto;
 
 	@NotNull
-	@Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
-	private BigDecimal unitPrice;
+	@Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+	private BigDecimal precioUnitario;
 
 	@NotNull
-	@Column(name = "line_total", nullable = false, precision = 10, scale = 2)
-	private BigDecimal lineTotal;
+	@Column(name = "total_linea", nullable = false, precision = 10, scale = 2)
+	private BigDecimal totalLinea;
 
 	@Size(max = 150)
-	@Column(name = "special_note", length = 150)
-	private String specialNote;
+	@Column(name = "nota_especial", length = 150)
+	private String notaEspecial;
 
 	@NotNull
 	@ColumnDefault("0")
-	@Column(name = "is_ready", nullable = false)
-	private Boolean isReady;
-
-
+	@Column(name = "listo", nullable = false)
+	private Boolean listo;
 }

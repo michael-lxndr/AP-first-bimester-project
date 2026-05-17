@@ -21,25 +21,25 @@ public class RepositorioPersonal {
 	}
 
 	public Optional<Personal> findByIdWithRol(Long id) {
-		List<Personal> staff = entityManager
+		List<Personal> personal = entityManager
 			.createQuery("select s from Personal s join fetch s.rol where s.id = :id", Personal.class)
 			.setParameter("id", id)
 			.getResultList();
 
-		return staff.stream().findFirst();
+		return personal.stream().findFirst();
 	}
 
-	public Personal save(Personal staff) {
-		entityManager.persist(staff);
-		return staff;
+	public Personal save(Personal personal) {
+		entityManager.persist(personal);
+		return personal;
 	}
 
-	public Personal update(Personal staff) {
-		return entityManager.merge(staff);
+	public Personal update(Personal personal) {
+		return entityManager.merge(personal);
 	}
 
-	public void delete(Personal staff) {
-		Personal managedPersonal = entityManager.contains(staff) ? staff : entityManager.merge(staff);
+	public void delete(Personal personal) {
+		Personal managedPersonal = entityManager.contains(personal) ? personal : entityManager.merge(personal);
 		entityManager.remove(managedPersonal);
 	}
 }

@@ -16,14 +16,12 @@ import lombok.*;
 public class Rol {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "role_id", nullable = false)
+	@Column(name = "rol_id", nullable = false)
 	private Long id;
 
 	@Size(max = 30)
 	@NotNull
 	@Enumerated(EnumType.STRING)
-	@Column(name = "role_name", nullable = false, length = 30)
+	@Column(name = "codigo_rol", nullable = false, length = 30)
 	private CodigoRol codigoRol;
-
-
 }

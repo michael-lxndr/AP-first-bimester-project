@@ -14,42 +14,40 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "order_status_histories")
+@Table(name = "historial_estados_pedido")
 public class HistorialEstadoPedido {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "history_id", nullable = false)
+	@Column(name = "historial_id", nullable = false)
 	private Long id;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "order_id", nullable = false)
-	private PedidoCliente order;
+	@JoinColumn(name = "pedido_id", nullable = false)
+	private PedidoCliente pedido;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@ColumnDefault("1")
-	@JoinColumn(name = "from_status_id", nullable = false)
-	private EstadoPedido fromStatus;
+	@JoinColumn(name = "estado_origen_id", nullable = false)
+	private EstadoPedido estadoOrigen;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "to_status_id", nullable = false)
-	private EstadoPedido toStatus;
+	@JoinColumn(name = "estado_destino_id", nullable = false)
+	private EstadoPedido estadoDestino;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "changed_by_staff_id", nullable = false)
-	private Personal changedByPersonal;
+	@JoinColumn(name = "cambiado_por_personal_id", nullable = false)
+	private Personal cambiadoPorPersonal;
 
 	@NotNull
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
-	@Column(name = "changed_at", nullable = false)
-	private Instant changedAt;
+	@Column(name = "cambiado_en", nullable = false)
+	private Instant cambiadoEn;
 
 	@Size(max = 255)
-	@Column(name = "notes")
-	private String notes;
-
-
+	@Column(name = "notas")
+	private String notas;
 }

@@ -14,41 +14,54 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "deliveries")
+@Table(name = "entregas")
 public class Entrega {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "delivery_id", nullable = false)
+	@Column(name = "entrega_id", nullable = false)
 	private Long id;
 
 	@NotNull
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "order_id", nullable = false)
-	private PedidoCliente order;
+	@JoinColumn(name = "pedido_id", nullable = false)
+	private PedidoCliente pedido;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "courier_staff_id", nullable = false)
-	private Personal courierPersonal;
+	@JoinColumn(name = "repartidor_personal_id", nullable = false)
+	private Personal repartidor;
 
 	@NotNull
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
-	@Column(name = "dispatched_at", nullable = false)
-	private Instant dispatchedAt;
+	@Column(name = "despachado_en", nullable = false)
+	private Instant despachadoEn;
 
-	@Column(name = "delivered_at")
-	private Instant deliveredAt;
+	@Column(name = "entregado_en")
+	private Instant entregadoEn;
 
 	@Size(max = 120)
-	@Column(name = "receiver_name", length = 120)
-	private String receiverName;
+	@Column(name = "nombre_receptor", length = 120)
+	private String nombreReceptor;
 
-	@Column(name = "customer_confirmed_at")
-	private Instant customerConfirmedAt;
+	@Column(name = "confirmado_por_cliente_en")
+	private Instant confirmadoPorClienteEn;
 
 	@Size(max = 255)
-	@Column(name = "customer_confirmation_notes")
-	private String customerConfirmationNotes;
+	@Column(name = "notas_confirmacion_cliente")
+	private String notasConfirmacionCliente;
 
+	@Size(max = 30)
+	@NotNull
+	@ColumnDefault("'DESPACHADO'")
+	@Column(name = "estado_entrega", nullable = false, length = 30)
+	private String estadoEntrega;
 
+	@Size(max = 500)
+	@Column(name = "notas_repartidor", length = 500)
+	private String notasRepartidor;
+
+	@NotNull
+	@ColumnDefault("1")
+	@Column(name = "numero_intento", nullable = false)
+	private Integer numeroIntento;
 }

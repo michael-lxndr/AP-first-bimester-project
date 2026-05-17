@@ -19,70 +19,70 @@ public class ServicioPersonal {
 		}
 	}
 
-	public Personal crear(CodigoRol roleCode, String fullName, String phone, String email, String username, boolean active) {
+	public Personal crear(CodigoRol codigoRol, String nombreCompleto, String telefono, String correoElectronico, String nombreUsuario, boolean activo) {
 		return executeInTransaction(entityManager -> {
-			Rol role = getOrCreateRol(entityManager, roleCode);
+			Rol rol = getOrCreateRol(entityManager, codigoRol);
 
-			Personal staff = Personal.builder()
-				.rol(role)
-				.fullName(fullName)
-				.phone(phone)
-				.email(email)
-				.username(username)
-				.isActive(active)
-				.createdAt(Instant.now())
+			Personal personal = Personal.builder()
+				.rol(rol)
+				.nombreCompleto(nombreCompleto)
+				.telefono(telefono)
+				.correoElectronico(correoElectronico)
+				.nombreUsuario(nombreUsuario)
+				.activo(activo)
+				.creadoEn(Instant.now())
 				.build();
 
-			return new RepositorioPersonal(entityManager).save(staff);
+			return new RepositorioPersonal(entityManager).save(personal);
 		});
 	}
 
-	public Personal modificar(Long staffId, CodigoRol roleCode, String fullName, String phone, String email, String username, boolean active) {
+	public Personal modificar(Long personalId, CodigoRol codigoRol, String nombreCompleto, String telefono, String correoElectronico, String nombreUsuario, boolean activo) {
 		return executeInTransaction(entityManager -> {
-			RepositorioPersonal staffRepository = new RepositorioPersonal(entityManager);
-			Personal staff = staffRepository.findByIdWithRol(staffId)
-				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + staffId));
-			Rol role = getOrCreateRol(entityManager, roleCode);
+			RepositorioPersonal repositorioPersonal = new RepositorioPersonal(entityManager);
+			Personal personal = repositorioPersonal.findByIdWithRol(personalId)
+				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + personalId));
+			Rol rol = getOrCreateRol(entityManager, codigoRol);
 
-			staff.setRol(role);
-			staff.setFullName(fullName);
-			staff.setPhone(phone);
-			staff.setEmail(email);
-			staff.setUsername(username);
-			staff.setIsActive(active);
+			personal.setRol(rol);
+			personal.setNombreCompleto(nombreCompleto);
+			personal.setTelefono(telefono);
+			personal.setCorreoElectronico(correoElectronico);
+			personal.setNombreUsuario(nombreUsuario);
+			personal.setActivo(activo);
 
-			return staffRepository.update(staff);
+			return repositorioPersonal.update(personal);
 		});
 	}
 
-	public void establecerActivo(Long staffId, boolean active) {
+	public void establecerActivo(Long personalId, boolean activo) {
 		executeInTransaction(entityManager -> {
-			RepositorioPersonal staffRepository = new RepositorioPersonal(entityManager);
-			Personal staff = staffRepository.findByIdWithRol(staffId)
-				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + staffId));
+			RepositorioPersonal repositorioPersonal = new RepositorioPersonal(entityManager);
+			Personal personal = repositorioPersonal.findByIdWithRol(personalId)
+				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + personalId));
 
-			staff.setIsActive(active);
-			staffRepository.update(staff);
+			personal.setActivo(activo);
+			repositorioPersonal.update(personal);
 			return null;
 		});
 	}
 
-	public void eliminar(Long staffId) {
+	public void eliminar(Long personalId) {
 		executeInTransaction(entityManager -> {
-			RepositorioPersonal staffRepository = new RepositorioPersonal(entityManager);
-			Personal staff = staffRepository.findByIdWithRol(staffId)
-				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + staffId));
+			RepositorioPersonal repositorioPersonal = new RepositorioPersonal(entityManager);
+			Personal personal = repositorioPersonal.findByIdWithRol(personalId)
+				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + personalId));
 
-			staffRepository.delete(staff);
+			repositorioPersonal.delete(personal);
 			return null;
 		});
 	}
 
-	private Rol getOrCreateRol(EntityManager entityManager, CodigoRol roleCode) {
-		RepositorioRol roleRepository = new RepositorioRol(entityManager);
+	private Rol getOrCreateRol(EntityManager entityManager, CodigoRol codigoRol) {
+		RepositorioRol repositorioRol = new RepositorioRol(entityManager);
 
-		return roleRepository.findByCode(roleCode)
-			.orElseGet(() -> roleRepository.save(Rol.builder().codigoRol(roleCode).build()));
+		return repositorioRol.findByCode(codigoRol)
+			.orElseGet(() -> repositorioRol.save(Rol.builder().codigoRol(codigoRol).build()));
 	}
 
 	private <T> T executeInTransaction(TransactionWork<T> work) {

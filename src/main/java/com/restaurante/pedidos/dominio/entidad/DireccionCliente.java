@@ -12,17 +12,17 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Setter
 @Entity
-@Table(name = "customer_addresses")
+@Table(name = "direcciones_cliente")
 public class DireccionCliente {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "address_id", nullable = false)
+	@Column(name = "direccion_id", nullable = false)
 	private Long id;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "customer_id", nullable = false)
-	private Cliente customer;
+	@JoinColumn(name = "cliente_id", nullable = false)
+	private Cliente cliente;
 
 	@Size(max = 50)
 	@NotNull
@@ -31,50 +31,48 @@ public class DireccionCliente {
 
 	@Size(max = 150)
 	@NotNull
-	@Column(name = "main_street", nullable = false, length = 150)
-	private String mainStreet;
+	@Column(name = "calle_principal", nullable = false, length = 150)
+	private String callePrincipal;
 
 	@Size(max = 150)
-	@Column(name = "secondary_street", length = 150)
-	private String secondaryStreet;
+	@Column(name = "calle_secundaria", length = 150)
+	private String calleSecundaria;
 
 	@Size(max = 10)
-	@Column(name = "house_number", length = 10)
-	private String houseNumber;
+	@Column(name = "numero_casa", length = 10)
+	private String numeroCasa;
 
 	@Size(max = 255)
-	@Column(name = "reference")
-	private String reference;
+	@Column(name = "referencia")
+	private String referencia;
 
 	@Size(max = 10)
-	@Column(name = "postal_code", length = 10)
-	private String postalCode;
+	@Column(name = "codigo_postal", length = 10)
+	private String codigoPostal;
 
 	@Size(max = 50)
 	@NotNull
-	@Column(name = "city", nullable = false, length = 50)
-	private String city;
+	@Column(name = "ciudad", nullable = false, length = 50)
+	private String ciudad;
 
 	@Size(max = 50)
 	@NotNull
-	@Column(name = "province", nullable = false, length = 50)
-	private String province;
+	@Column(name = "provincia", nullable = false, length = 50)
+	private String provincia;
 
 	@Size(max = 50)
 	@NotNull
 	@ColumnDefault("'Ecuador'")
-	@Column(name = "country", nullable = false, length = 50)
-	private String country;
+	@Column(name = "pais", nullable = false, length = 50)
+	private String pais;
 
 	@NotNull
 	@ColumnDefault("0")
-	@Column(name = "is_primary", nullable = false)
-	private Boolean isPrimary;
+	@Column(name = "principal", nullable = false)
+	private Boolean principal;
 
 	@NotNull
 	@ColumnDefault("1")
-	@Column(name = "is_active", nullable = false)
-	private Boolean isActive;
-
-
+	@Column(name = "activa", nullable = false)
+	private Boolean activa;
 }

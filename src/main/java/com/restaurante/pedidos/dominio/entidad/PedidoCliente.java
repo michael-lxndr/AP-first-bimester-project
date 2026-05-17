@@ -15,88 +15,91 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "customer_orders")
+@Table(name = "pedidos_cliente")
 public class PedidoCliente {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "order_id", nullable = false)
+	@Column(name = "pedido_id", nullable = false)
 	private Long id;
 
 	@Size(max = 30)
 	@NotNull
-	@Column(name = "order_code", nullable = false, length = 30)
-	private String orderCode;
+	@Column(name = "codigo_pedido", nullable = false, length = 30)
+	private String codigoPedido;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "customer_id", nullable = false)
-	private Cliente customer;
+	@JoinColumn(name = "cliente_id", nullable = false)
+	private Cliente cliente;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "registered_by_staff_id", nullable = false)
-	private Personal registeredByPersonal;
+	@JoinColumn(name = "registrado_por_personal_id", nullable = false)
+	private Personal registradoPorPersonal;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "current_status_id", nullable = false)
-	private EstadoPedido currentStatus;
+	@JoinColumn(name = "estado_actual_id", nullable = false)
+	private EstadoPedido estadoActual;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "delivery_address_id", nullable = false)
-	private DireccionCliente deliveryAddress;
+	@JoinColumn(name = "direccion_entrega_id", nullable = false)
+	private DireccionCliente direccionEntrega;
 
-	@Size(max = 255)
-	@Column(name = "delivery_address_snapshot")
-	private String deliveryAddressSnapshot;
+	@Size(max = 500)
+	@NotNull
+	@Column(name = "snapshot_direccion_entrega", nullable = false, length = 500)
+	private String snapshotDireccionEntrega;
 
-	@ColumnDefault("0.00")
-	@Column(name = "subtotal_amount", precision = 10, scale = 2)
-	private BigDecimal subtotalAmount;
-
-	@ColumnDefault("0.00")
-	@Column(name = "tax_amount", precision = 10, scale = 2)
-	private BigDecimal taxAmount;
+	@Size(max = 500)
+	@Column(name = "instrucciones_entrega", length = 500)
+	private String instruccionesEntrega;
 
 	@ColumnDefault("0.00")
-	@Column(name = "discount_amount", precision = 10, scale = 2)
-	private BigDecimal discountAmount;
+	@Column(name = "subtotal", precision = 10, scale = 2)
+	private BigDecimal subtotal;
 
 	@ColumnDefault("0.00")
-	@Column(name = "address_surcharge_amount", precision = 10, scale = 2)
-	private BigDecimal addressSurchargeAmount;
+	@Column(name = "impuesto", precision = 10, scale = 2)
+	private BigDecimal impuesto;
+
+	@ColumnDefault("0.00")
+	@Column(name = "descuento", precision = 10, scale = 2)
+	private BigDecimal descuento;
+
+	@ColumnDefault("0.00")
+	@Column(name = "recargo_direccion", precision = 10, scale = 2)
+	private BigDecimal recargoDireccion;
 
 	@NotNull
 	@ColumnDefault("0.00")
-	@Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
-	private BigDecimal totalAmount;
+	@Column(name = "total", nullable = false, precision = 10, scale = 2)
+	private BigDecimal total;
 
 	@Size(max = 20)
-	@Column(name = "discount_code", length = 20)
-	private String discountCode;
+	@Column(name = "codigo_descuento", length = 20)
+	private String codigoDescuento;
 
 	@NotNull
 	@ColumnDefault("0")
-	@Column(name = "is_priority", nullable = false)
-	private Boolean isPriority;
+	@Column(name = "prioritario", nullable = false)
+	private Boolean prioritario;
 
 	@Size(max = 255)
-	@Column(name = "general_notes")
-	private String generalNotes;
+	@Column(name = "notas_generales")
+	private String notasGenerales;
 
 	@NotNull
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
-	@Column(name = "created_at", nullable = false)
-	private Instant createdAt;
+	@Column(name = "creado_en", nullable = false)
+	private Instant creadoEn;
 
-	@Column(name = "estimated_delivery_at")
-	private Instant estimatedEntregaAt;
+	@Column(name = "entrega_estimada_en")
+	private Instant entregaEstimadaEn;
 
 	@NotNull
 	@ColumnDefault("CURRENT_TIMESTAMP(6)")
-	@Column(name = "current_status_changed_at", nullable = false)
-	private Instant currentStatusChangedAt;
-
-
+	@Column(name = "estado_actual_cambiado_en", nullable = false)
+	private Instant estadoActualCambiadoEn;
 }

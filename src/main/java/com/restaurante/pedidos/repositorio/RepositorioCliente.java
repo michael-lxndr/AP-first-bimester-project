@@ -12,8 +12,8 @@ public class RepositorioCliente {
 		this.entityManager = entityManager;
 	}
 
-	public void save(Cliente customer) {
-		entityManager.persist(customer);
+	public void save(Cliente cliente) {
+		entityManager.persist(cliente);
 	}
 
 	public Optional<Cliente> findById(Long id) {

@@ -21,140 +21,140 @@ public class ControladorAdministrador {
 	private final ServicioPersonal servicioPersonal = new ServicioPersonal();
 
 	@FXML
-	private TableView<Personal> staffTable;
+	private TableView<Personal> tablaPersonal;
 	@FXML
-	private TableColumn<Personal, Long> idColumn;
+	private TableColumn<Personal, Long> columnaId;
 	@FXML
-	private TableColumn<Personal, String> roleColumn;
+	private TableColumn<Personal, String> columnaRol;
 	@FXML
-	private TableColumn<Personal, String> fullNameColumn;
+	private TableColumn<Personal, String> columnaNombreCompleto;
 	@FXML
-	private TableColumn<Personal, String> usernameColumn;
+	private TableColumn<Personal, String> columnaNombreUsuario;
 	@FXML
-	private TableColumn<Personal, String> emailColumn;
+	private TableColumn<Personal, String> columnaCorreo;
 	@FXML
-	private TableColumn<Personal, String> activeColumn;
+	private TableColumn<Personal, String> columnaEstado;
 	@FXML
-	private ComboBox<CodigoRol> roleComboBox;
+	private ComboBox<CodigoRol> comboRol;
 	@FXML
-	private TextField fullNameField;
+	private TextField campoNombreCompleto;
 	@FXML
-	private TextField phoneField;
+	private TextField campoTelefono;
 	@FXML
-	private TextField emailField;
+	private TextField campoCorreo;
 	@FXML
-	private TextField usernameField;
+	private TextField campoNombreUsuario;
 	@FXML
-	private CheckBox activeCheckBox;
+	private CheckBox checkboxActivo;
 	@FXML
-	private Label messageLabel;
+	private Label etiquetaMensaje;
 
 	@FXML
 	private void initialize() {
-		roleComboBox.setItems(FXCollections.observableArrayList(CodigoRol.values()));
-		roleComboBox.getSelectionModel().select(CodigoRol.COOK);
-		activeCheckBox.setSelected(true);
+		comboRol.setItems(FXCollections.observableArrayList(CodigoRol.values()));
+		comboRol.getSelectionModel().select(CodigoRol.COCINERO);
+		checkboxActivo.setSelected(true);
 
-		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-		fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
-		usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
-		emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
-		roleColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatRol(cell.getValue())));
-		activeColumn.setCellValueFactory(cell -> new SimpleStringProperty(Boolean.TRUE.equals(cell.getValue().getIsActive()) ? "Activo" : "Inactivo"));
+		columnaId.setCellValueFactory(new PropertyValueFactory<>("id"));
+		columnaNombreCompleto.setCellValueFactory(new PropertyValueFactory<>("nombreCompleto"));
+		columnaNombreUsuario.setCellValueFactory(new PropertyValueFactory<>("nombreUsuario"));
+		columnaCorreo.setCellValueFactory(new PropertyValueFactory<>("correoElectronico"));
+		columnaRol.setCellValueFactory(cell -> new SimpleStringProperty(formatearRol(cell.getValue())));
+		columnaEstado.setCellValueFactory(cell -> new SimpleStringProperty(Boolean.TRUE.equals(cell.getValue().getActivo()) ? "Activo" : "Inactivo"));
 
-		staffTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, selectedPersonal) -> fillForm(selectedPersonal));
-		loadPersonal();
+		tablaPersonal.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, personalSeleccionado) -> llenarFormulario(personalSeleccionado));
+		cargarPersonal();
 	}
 
 	@FXML
 	private void crearPersonal() {
 		try {
-			validateForm();
+			validarFormulario();
 			servicioPersonal.crear(
-				roleComboBox.getValue(),
-				fullNameField.getText().trim(),
-				phoneField.getText().trim(),
-				emailField.getText().trim(),
-				usernameField.getText().trim(),
-				activeCheckBox.isSelected()
+				comboRol.getValue(),
+				campoNombreCompleto.getText().trim(),
+				campoTelefono.getText().trim(),
+				campoCorreo.getText().trim(),
+				campoNombreUsuario.getText().trim(),
+				checkboxActivo.isSelected()
 			);
 
-			showMessage("Personal creado correctamente.");
+			mostrarMensaje("Personal creado correctamente.");
 			limpiarFormulario();
-			loadPersonal();
+			cargarPersonal();
 		} catch (RuntimeException exception) {
-			showMessage("Error al crear: " + exception.getMessage());
+			mostrarMensaje("Error al crear: " + exception.getMessage());
 		}
 	}
 
 	@FXML
 	private void modificarPersonal() {
-		Personal selectedPersonal = getSelectedPersonal();
-		if (selectedPersonal == null) {
-			showMessage("Seleccioná un registro para modificar.");
+		Personal personalSeleccionado = obtenerPersonalSeleccionado();
+		if (personalSeleccionado == null) {
+			mostrarMensaje("Seleccioná un registro para modificar.");
 			return;
 		}
 
 		try {
-			validateForm();
+			validarFormulario();
 			servicioPersonal.modificar(
-				selectedPersonal.getId(),
-				roleComboBox.getValue(),
-				fullNameField.getText().trim(),
-				phoneField.getText().trim(),
-				emailField.getText().trim(),
-				usernameField.getText().trim(),
-				activeCheckBox.isSelected()
+				personalSeleccionado.getId(),
+				comboRol.getValue(),
+				campoNombreCompleto.getText().trim(),
+				campoTelefono.getText().trim(),
+				campoCorreo.getText().trim(),
+				campoNombreUsuario.getText().trim(),
+				checkboxActivo.isSelected()
 			);
 
-			showMessage("Personal actualizado correctamente.");
-			loadPersonal();
+			mostrarMensaje("Personal actualizado correctamente.");
+			cargarPersonal();
 		} catch (RuntimeException exception) {
-			showMessage("Error al modificar: " + exception.getMessage());
+			mostrarMensaje("Error al modificar: " + exception.getMessage());
 		}
 	}
 
 	@FXML
 	private void alternarActivo() {
-		Personal selectedPersonal = getSelectedPersonal();
-		if (selectedPersonal == null) {
-			showMessage("Seleccioná un registro para dar de alta o baja.");
+		Personal personalSeleccionado = obtenerPersonalSeleccionado();
+		if (personalSeleccionado == null) {
+			mostrarMensaje("Seleccioná un registro para dar de alta o baja.");
 			return;
 		}
 
-		boolean newActiveValue = !Boolean.TRUE.equals(selectedPersonal.getIsActive());
-		servicioPersonal.establecerActivo(selectedPersonal.getId(), newActiveValue);
-		showMessage(newActiveValue ? "Personal dado de alta." : "Personal dado de baja.");
-		loadPersonal();
+		boolean nuevoValorActivo = !Boolean.TRUE.equals(personalSeleccionado.getActivo());
+		servicioPersonal.establecerActivo(personalSeleccionado.getId(), nuevoValorActivo);
+		mostrarMensaje(nuevoValorActivo ? "Personal dado de alta." : "Personal dado de baja.");
+		cargarPersonal();
 	}
 
 	@FXML
 	private void eliminarPersonal() {
-		Personal selectedPersonal = getSelectedPersonal();
-		if (selectedPersonal == null) {
-			showMessage("Seleccioná un registro para eliminar.");
+		Personal personalSeleccionado = obtenerPersonalSeleccionado();
+		if (personalSeleccionado == null) {
+			mostrarMensaje("Seleccioná un registro para eliminar.");
 			return;
 		}
 
 		try {
-			servicioPersonal.eliminar(selectedPersonal.getId());
-			showMessage("Personal eliminado correctamente.");
+			servicioPersonal.eliminar(personalSeleccionado.getId());
+			mostrarMensaje("Personal eliminado correctamente.");
 			limpiarFormulario();
-			loadPersonal();
+			cargarPersonal();
 		} catch (RuntimeException exception) {
-			showMessage("No se pudo eliminar. Si tiene pedidos asociados, usá baja lógica. Detalle: " + exception.getMessage());
+			mostrarMensaje("No se pudo eliminar. Si tiene pedidos asociados, usá baja lógica. Detalle: " + exception.getMessage());
 		}
 	}
 
 	@FXML
 	private void limpiarFormulario() {
-		staffTable.getSelectionModel().clearSelection();
-		roleComboBox.getSelectionModel().select(CodigoRol.COOK);
-		fullNameField.clear();
-		phoneField.clear();
-		emailField.clear();
-		usernameField.clear();
-		activeCheckBox.setSelected(true);
+		tablaPersonal.getSelectionModel().clearSelection();
+		comboRol.getSelectionModel().select(CodigoRol.COCINERO);
+		campoNombreCompleto.clear();
+		campoTelefono.clear();
+		campoCorreo.clear();
+		campoNombreUsuario.clear();
+		checkboxActivo.setSelected(true);
 	}
 
 	@FXML
@@ -163,56 +163,56 @@ public class ControladorAdministrador {
 		stage.close();
 	}
 
-	private void loadPersonal() {
+	private void cargarPersonal() {
 		try {
-			staffTable.setItems(FXCollections.observableArrayList(servicioPersonal.buscarTodos()));
+			tablaPersonal.setItems(FXCollections.observableArrayList(servicioPersonal.buscarTodos()));
 		} catch (RuntimeException exception) {
-			showMessage("No se pudo conectar a la base de datos: " + exception.getMessage());
-			staffTable.setItems(FXCollections.observableArrayList());
+			mostrarMensaje("No se pudo conectar a la base de datos: " + exception.getMessage());
+			tablaPersonal.setItems(FXCollections.observableArrayList());
 		}
 	}
 
-	private void fillForm(Personal staff) {
-		if (staff == null) {
+	private void llenarFormulario(Personal personal) {
+		if (personal == null) {
 			return;
 		}
 
-		roleComboBox.getSelectionModel().select(staff.getRol().getCodigoRol());
-		fullNameField.setText(staff.getFullName());
-		phoneField.setText(staff.getPhone());
-		emailField.setText(staff.getEmail());
-		usernameField.setText(staff.getUsername());
-		activeCheckBox.setSelected(Boolean.TRUE.equals(staff.getIsActive()));
+		comboRol.getSelectionModel().select(personal.getRol().getCodigoRol());
+		campoNombreCompleto.setText(personal.getNombreCompleto());
+		campoTelefono.setText(personal.getTelefono());
+		campoCorreo.setText(personal.getCorreoElectronico());
+		campoNombreUsuario.setText(personal.getNombreUsuario());
+		checkboxActivo.setSelected(Boolean.TRUE.equals(personal.getActivo()));
 	}
 
-	private Personal getSelectedPersonal() {
-		return staffTable.getSelectionModel().getSelectedItem();
+	private Personal obtenerPersonalSeleccionado() {
+		return tablaPersonal.getSelectionModel().getSelectedItem();
 	}
 
-	private void validateForm() {
-		if (roleComboBox.getValue() == null) {
+	private void validarFormulario() {
+		if (comboRol.getValue() == null) {
 			throw new IllegalArgumentException("El rol es obligatorio.");
 		}
-		if (fullNameField.getText().isBlank()) {
+		if (campoNombreCompleto.getText().isBlank()) {
 			throw new IllegalArgumentException("El nombre completo es obligatorio.");
 		}
-		if (emailField.getText().isBlank()) {
-			throw new IllegalArgumentException("El email es obligatorio.");
+		if (campoCorreo.getText().isBlank()) {
+			throw new IllegalArgumentException("El correo es obligatorio.");
 		}
-		if (usernameField.getText().isBlank()) {
+		if (campoNombreUsuario.getText().isBlank()) {
 			throw new IllegalArgumentException("El usuario es obligatorio.");
 		}
 	}
 
-	private String formatRol(Personal staff) {
-		return switch (staff.getRol().getCodigoRol()) {
-			case ADMINISTRATOR -> "Administrador";
-			case COOK -> "Cocinero";
-			case COURIER -> "Entrega";
+	private String formatearRol(Personal personal) {
+		return switch (personal.getRol().getCodigoRol()) {
+			case ADMINISTRADOR -> "Administrador";
+			case COCINERO -> "Cocinero";
+			case REPARTIDOR -> "Repartidor";
 		};
 	}
 
-	private void showMessage(String message) {
-		messageLabel.setText(message);
+	private void mostrarMensaje(String mensaje) {
+		etiquetaMensaje.setText(mensaje);
 	}
 }

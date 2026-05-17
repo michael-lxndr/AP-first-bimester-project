@@ -2,601 +2,456 @@
 -- Sistema de Gestion de Pedidos de Restaurante - Diagrama ER
 -- MySQL 9.3
 --
--- Este script acompaña a:
+-- Este script acompana a:
 -- assets/ER Diagram.puml
 --
 -- Regla: las tablas, columnas y relaciones principales deben
 -- coincidir con el diagrama ER documentado en PlantUML.
---
--- Nota de compatibilidad: los codigos tecnicos de roles,
--- estados y categorias se mantienen en ingles porque la
--- aplicacion Java los persiste con EnumType.STRING.
 -- =========================================================
 
 -- Si queres recrear la base desde cero, descomenta estas lineas:
--- DROP DATABASE IF EXISTS first_bimester_project;
+-- DROP DATABASE IF EXISTS proyecto_primer_bimestre;
 
-CREATE DATABASE IF NOT EXISTS first_bimester_project
+CREATE DATABASE IF NOT EXISTS proyecto_primer_bimestre
 	CHARACTER SET utf8mb4
 	COLLATE utf8mb4_0900_ai_ci;
 
-USE first_bimester_project;
+USE proyecto_primer_bimestre;
 
 -- =========================================================
 -- 1. Roles
--- Descripcion: roles operativos del sistema.
 -- =========================================================
 
 CREATE TABLE roles (
-	role_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del rol',
-	role_name VARCHAR(30) NOT NULL COMMENT 'Codigo tecnico del rol (ADMINISTRATOR, COOK, COURIER)',
+	rol_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del rol',
+	codigo_rol VARCHAR(30) NOT NULL COMMENT 'Codigo del rol (ADMINISTRADOR, COCINERO, REPARTIDOR)',
 
-	CONSTRAINT pk_roles PRIMARY KEY (role_id),
-	CONSTRAINT uk_roles_role_name UNIQUE (role_name)
+	CONSTRAINT pk_roles PRIMARY KEY (rol_id),
+	CONSTRAINT uk_roles_codigo_rol UNIQUE (codigo_rol)
 ) ENGINE = InnoDB
 	COMMENT = 'Catalogo de roles del sistema';
 
 -- =========================================================
 -- 2. Personal
--- Descripcion: empleados del restaurante con rol asignado.
 -- =========================================================
 
-CREATE TABLE staff (
-	staff_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del personal',
-	role_id BIGINT NOT NULL COMMENT 'Rol asignado al miembro del personal',
-	full_name VARCHAR(120) NOT NULL COMMENT 'Nombre completo del empleado',
-	phone VARCHAR(20) COMMENT 'Numero de telefono',
-	email VARCHAR(120) NOT NULL COMMENT 'Correo electronico unico',
-	username VARCHAR(50) NOT NULL COMMENT 'Nombre de usuario para inicio de sesion',
-	is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el empleado esta activo',
-	created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha de creacion del registro',
+CREATE TABLE personal (
+	personal_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del personal',
+	rol_id BIGINT NOT NULL COMMENT 'Rol asignado al miembro del personal',
+	nombre_completo VARCHAR(120) NOT NULL COMMENT 'Nombre completo del empleado',
+	telefono VARCHAR(20) COMMENT 'Numero de telefono',
+	correo_electronico VARCHAR(120) NOT NULL COMMENT 'Correo electronico unico',
+	nombre_usuario VARCHAR(50) NOT NULL COMMENT 'Nombre de usuario para inicio de sesion',
+	activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el empleado esta activo',
+	creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha de creacion del registro',
 
-	CONSTRAINT pk_staff PRIMARY KEY (staff_id),
-	CONSTRAINT uk_staff_email UNIQUE (email),
-	CONSTRAINT uk_staff_username UNIQUE (username),
-
-	CONSTRAINT fk_staff_role
-		FOREIGN KEY (role_id)
-		REFERENCES roles (role_id)
+	CONSTRAINT pk_personal PRIMARY KEY (personal_id),
+	CONSTRAINT uk_personal_correo_electronico UNIQUE (correo_electronico),
+	CONSTRAINT uk_personal_nombre_usuario UNIQUE (nombre_usuario),
+	CONSTRAINT fk_personal_rol FOREIGN KEY (rol_id)
+		REFERENCES roles (rol_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Personal del restaurante: administradores, cocineros y repartidores';
 
-CREATE INDEX idx_staff_role_id ON staff (role_id);
-CREATE INDEX idx_staff_is_active ON staff (is_active);
+CREATE INDEX idx_personal_rol_id ON personal (rol_id);
+CREATE INDEX idx_personal_activo ON personal (activo);
 
 -- =========================================================
 -- 3. Clientes
--- Descripcion: clientes registrados en el sistema.
 -- =========================================================
 
-CREATE TABLE customers (
-	customer_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del cliente',
-	full_name VARCHAR(120) NOT NULL COMMENT 'Nombre completo del cliente',
-	phone VARCHAR(20) COMMENT 'Numero de telefono',
-	email VARCHAR(120) COMMENT 'Correo electronico',
-	is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el cliente esta activo',
-	created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha de registro',
+CREATE TABLE clientes (
+	cliente_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del cliente',
+	nombre_completo VARCHAR(120) NOT NULL COMMENT 'Nombre completo del cliente',
+	telefono VARCHAR(20) COMMENT 'Numero de telefono',
+	correo_electronico VARCHAR(120) COMMENT 'Correo electronico',
+	activo BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el cliente esta activo',
+	creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha de registro',
 
-	CONSTRAINT pk_customers PRIMARY KEY (customer_id),
-	CONSTRAINT uk_customers_email UNIQUE (email)
+	CONSTRAINT pk_clientes PRIMARY KEY (cliente_id),
+	CONSTRAINT uk_clientes_correo_electronico UNIQUE (correo_electronico)
 ) ENGINE = InnoDB
 	COMMENT = 'Clientes registrados del restaurante';
 
 -- =========================================================
 -- 4. Direcciones de cliente
--- Descripcion: varias direcciones por cliente.
 -- =========================================================
 
-CREATE TABLE customer_addresses (
-	address_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico de direccion',
-	customer_id BIGINT NOT NULL COMMENT 'Cliente propietario de la direccion',
+CREATE TABLE direcciones_cliente (
+	direccion_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico de direccion',
+	cliente_id BIGINT NOT NULL COMMENT 'Cliente propietario de la direccion',
 	alias VARCHAR(50) NOT NULL COMMENT 'Alias descriptivo, por ejemplo Casa o Trabajo',
-	main_street VARCHAR(150) NOT NULL COMMENT 'Calle principal',
-	secondary_street VARCHAR(150) COMMENT 'Calle secundaria o referencia cruzada',
-	house_number VARCHAR(10) COMMENT 'Numero de casa o edificio',
-	reference VARCHAR(255) COMMENT 'Referencia adicional, por ejemplo frente al parque',
-	postal_code VARCHAR(10) COMMENT 'Codigo postal',
-	city VARCHAR(50) NOT NULL COMMENT 'Ciudad',
-	province VARCHAR(50) NOT NULL COMMENT 'Provincia o estado',
-	country VARCHAR(50) NOT NULL DEFAULT 'Ecuador' COMMENT 'Pais',
-	is_primary BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si es la direccion principal',
-	is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si la direccion esta activa',
+	calle_principal VARCHAR(150) NOT NULL COMMENT 'Calle principal',
+	calle_secundaria VARCHAR(150) COMMENT 'Calle secundaria o referencia cruzada',
+	numero_casa VARCHAR(10) COMMENT 'Numero de casa o edificio',
+	referencia VARCHAR(255) COMMENT 'Referencia adicional, por ejemplo frente al parque',
+	codigo_postal VARCHAR(10) COMMENT 'Codigo postal',
+	ciudad VARCHAR(50) NOT NULL COMMENT 'Ciudad',
+	provincia VARCHAR(50) NOT NULL COMMENT 'Provincia o estado',
+	pais VARCHAR(50) NOT NULL DEFAULT 'Ecuador' COMMENT 'Pais',
+	principal BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si es la direccion principal',
+	activa BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si la direccion esta activa',
 
-	CONSTRAINT pk_customer_addresses PRIMARY KEY (address_id),
-
-	CONSTRAINT fk_customer_address_customer
-		FOREIGN KEY (customer_id)
-		REFERENCES customers (customer_id)
+	CONSTRAINT pk_direcciones_cliente PRIMARY KEY (direccion_id),
+	CONSTRAINT fk_direccion_cliente_cliente FOREIGN KEY (cliente_id)
+		REFERENCES clientes (cliente_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Direcciones de entrega de los clientes';
 
-CREATE INDEX idx_customer_addresses_customer_id ON customer_addresses (customer_id);
-CREATE INDEX idx_customer_addresses_customer_active ON customer_addresses (customer_id, is_active);
-CREATE INDEX idx_customer_addresses_primary ON customer_addresses (customer_id, is_primary);
+CREATE INDEX idx_direcciones_cliente_cliente_id ON direcciones_cliente (cliente_id);
+CREATE INDEX idx_direcciones_cliente_cliente_activa ON direcciones_cliente (cliente_id, activa);
+CREATE INDEX idx_direcciones_cliente_principal ON direcciones_cliente (cliente_id, principal);
 
 -- =========================================================
 -- 5. Productos
--- Descripcion: catalogo de productos del menu.
 -- =========================================================
 
-CREATE TABLE products (
-	product_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del producto',
-	product_code VARCHAR(20) COMMENT 'Codigo interno del producto',
-	product_name VARCHAR(120) NOT NULL COMMENT 'Nombre del producto',
-	description VARCHAR(255) COMMENT 'Descripcion detallada',
-	unit_price DECIMAL(10, 2) NOT NULL COMMENT 'Precio de venta unitario',
-	production_cost DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Costo de produccion',
-	category VARCHAR(30) COMMENT 'Categoria tecnica (STARTER, MAIN_COURSE, DRINK, DESSERT, COMBO)',
-	preparation_time_minutes INT DEFAULT 15 COMMENT 'Tiempo estimado de preparacion en minutos',
-	is_available BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el producto esta disponible',
-	image_url VARCHAR(255) COMMENT 'URL de imagen del producto',
-	created_at DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha de creacion',
+CREATE TABLE productos (
+	producto_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del producto',
+	codigo_producto VARCHAR(20) COMMENT 'Codigo interno del producto',
+	nombre_producto VARCHAR(120) NOT NULL COMMENT 'Nombre del producto',
+	descripcion VARCHAR(255) COMMENT 'Descripcion detallada',
+	precio_unitario DECIMAL(10, 2) NOT NULL COMMENT 'Precio de venta unitario',
+	costo_produccion DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Costo de produccion',
+	categoria VARCHAR(30) COMMENT 'Categoria (ENTRADA, PLATO_FUERTE, BEBIDA, POSTRE, COMBO)',
+	tiempo_preparacion_minutos INT DEFAULT 15 COMMENT 'Tiempo estimado de preparacion en minutos',
+	disponible BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si el producto esta disponible',
+	url_imagen VARCHAR(255) COMMENT 'URL de imagen del producto',
+	creado_en DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha de creacion',
 
-	CONSTRAINT pk_products PRIMARY KEY (product_id),
-	CONSTRAINT uk_products_product_code UNIQUE (product_code),
-	CONSTRAINT chk_products_unit_price CHECK (unit_price >= 0),
-	CONSTRAINT chk_products_production_cost CHECK (production_cost IS NULL OR production_cost >= 0),
-	CONSTRAINT chk_products_preparation_time CHECK (preparation_time_minutes IS NULL OR preparation_time_minutes > 0),
-	CONSTRAINT chk_products_category CHECK (
-		category IS NULL
-			OR category IN ('STARTER', 'MAIN_COURSE', 'DRINK', 'DESSERT', 'COMBO')
+	CONSTRAINT pk_productos PRIMARY KEY (producto_id),
+	CONSTRAINT uk_productos_codigo_producto UNIQUE (codigo_producto),
+	CONSTRAINT chk_productos_precio_unitario CHECK (precio_unitario >= 0),
+	CONSTRAINT chk_productos_costo_produccion CHECK (costo_produccion IS NULL OR costo_produccion >= 0),
+	CONSTRAINT chk_productos_tiempo_preparacion CHECK (tiempo_preparacion_minutos IS NULL OR tiempo_preparacion_minutos > 0),
+	CONSTRAINT chk_productos_categoria CHECK (
+		categoria IS NULL
+			OR categoria IN ('ENTRADA', 'PLATO_FUERTE', 'BEBIDA', 'POSTRE', 'COMBO')
 	)
 ) ENGINE = InnoDB
 	COMMENT = 'Catalogo de productos del menu';
 
-CREATE INDEX idx_products_category ON products (category);
-CREATE INDEX idx_products_is_available ON products (is_available);
+CREATE INDEX idx_productos_categoria ON productos (categoria);
+CREATE INDEX idx_productos_disponible ON productos (disponible);
 
 -- =========================================================
 -- 6. Estados de pedido
--- Descripcion: estados posibles del flujo de pedidos.
 -- =========================================================
 
-CREATE TABLE order_statuses (
-	status_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del estado',
-	status_code VARCHAR(30) NOT NULL COMMENT 'Codigo tecnico del estado (PENDING, IN_PREPARATION, etc.)',
-	status_name VARCHAR(50) NOT NULL COMMENT 'Nombre descriptivo del estado en espanol',
-	status_order INT NOT NULL COMMENT 'Orden secuencial del estado en el flujo',
-	is_final BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si es un estado final',
+CREATE TABLE estados_pedido (
+	estado_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del estado',
+	codigo_estado VARCHAR(30) NOT NULL COMMENT 'Codigo del estado (PENDIENTE, EN_PREPARACION, etc.)',
+	nombre_estado VARCHAR(50) NOT NULL COMMENT 'Nombre descriptivo del estado',
+	orden_estado INT NOT NULL COMMENT 'Orden secuencial del estado en el flujo',
+	finalizado BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si es un estado final',
 
-	CONSTRAINT pk_order_statuses PRIMARY KEY (status_id),
-	CONSTRAINT uk_order_statuses_status_code UNIQUE (status_code),
-	CONSTRAINT uk_order_statuses_status_name UNIQUE (status_name),
-	CONSTRAINT uk_order_statuses_status_order UNIQUE (status_order),
-	CONSTRAINT chk_order_statuses_status_order CHECK (status_order > 0)
+	CONSTRAINT pk_estados_pedido PRIMARY KEY (estado_id),
+	CONSTRAINT uk_estados_pedido_codigo_estado UNIQUE (codigo_estado),
+	CONSTRAINT uk_estados_pedido_nombre_estado UNIQUE (nombre_estado),
+	CONSTRAINT uk_estados_pedido_orden_estado UNIQUE (orden_estado),
+	CONSTRAINT chk_estados_pedido_orden_estado CHECK (orden_estado > 0)
 ) ENGINE = InnoDB
 	COMMENT = 'Estados posibles del flujo de pedidos';
 
 -- =========================================================
 -- 7. Reglas de transicion de estados
--- Descripcion: roles autorizados para cambiar entre estados.
 -- =========================================================
 
-CREATE TABLE order_status_transition_rules (
-	transition_rule_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico de la regla',
-	from_status_id BIGINT NOT NULL COMMENT 'Estado de origen',
-	to_status_id BIGINT NOT NULL COMMENT 'Estado de destino',
-	role_id BIGINT NOT NULL COMMENT 'Rol autorizado para realizar esta transicion',
-	is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si la regla esta activa',
+CREATE TABLE reglas_transicion_estado_pedido (
+	regla_transicion_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico de la regla',
+	estado_origen_id BIGINT NOT NULL COMMENT 'Estado de origen',
+	estado_destino_id BIGINT NOT NULL COMMENT 'Estado de destino',
+	rol_id BIGINT NOT NULL COMMENT 'Rol autorizado para realizar esta transicion',
+	activa BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'Indica si la regla esta activa',
 
-	CONSTRAINT pk_order_status_transition_rules PRIMARY KEY (transition_rule_id),
-
-	CONSTRAINT uk_transition_rule UNIQUE (
-		from_status_id,
-		to_status_id,
-		role_id
-	),
-
-	CONSTRAINT fk_rule_from_status
-		FOREIGN KEY (from_status_id)
-		REFERENCES order_statuses (status_id)
+	CONSTRAINT pk_reglas_transicion_estado_pedido PRIMARY KEY (regla_transicion_id),
+	CONSTRAINT uk_regla_transicion UNIQUE (estado_origen_id, estado_destino_id, rol_id),
+	CONSTRAINT fk_regla_estado_origen FOREIGN KEY (estado_origen_id)
+		REFERENCES estados_pedido (estado_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_rule_to_status
-		FOREIGN KEY (to_status_id)
-		REFERENCES order_statuses (status_id)
+	CONSTRAINT fk_regla_estado_destino FOREIGN KEY (estado_destino_id)
+		REFERENCES estados_pedido (estado_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_rule_role
-		FOREIGN KEY (role_id)
-		REFERENCES roles (role_id)
+	CONSTRAINT fk_regla_rol FOREIGN KEY (rol_id)
+		REFERENCES roles (rol_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Reglas de transicion entre estados de pedido por rol';
 
-CREATE INDEX idx_rule_from_status_id ON order_status_transition_rules (from_status_id);
-CREATE INDEX idx_rule_to_status_id ON order_status_transition_rules (to_status_id);
-CREATE INDEX idx_rule_role_id ON order_status_transition_rules (role_id);
+CREATE INDEX idx_reglas_estado_origen_id ON reglas_transicion_estado_pedido (estado_origen_id);
+CREATE INDEX idx_reglas_estado_destino_id ON reglas_transicion_estado_pedido (estado_destino_id);
+CREATE INDEX idx_reglas_rol_id ON reglas_transicion_estado_pedido (rol_id);
 
 -- =========================================================
 -- 8. Pedidos de cliente
--- Descripcion: pedidos realizados por clientes.
 -- =========================================================
 
-CREATE TABLE customer_orders (
-	order_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del pedido',
-	order_code VARCHAR(30) NOT NULL COMMENT 'Codigo unico del pedido, por ejemplo PED-2024-001',
-	customer_id BIGINT NOT NULL COMMENT 'Cliente que realiza el pedido',
-	registered_by_staff_id BIGINT NOT NULL COMMENT 'Personal que registro el pedido',
-	current_status_id BIGINT NOT NULL COMMENT 'Estado actual del pedido',
-	delivery_address_id BIGINT NOT NULL COMMENT 'Direccion de entrega seleccionada',
-	delivery_address_snapshot VARCHAR(500) NOT NULL COMMENT 'Copia de la direccion al momento del pedido',
-	delivery_instructions VARCHAR(500) COMMENT 'Instrucciones especiales de entrega',
-	subtotal_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Subtotal sin impuestos ni descuentos',
-	tax_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Monto de impuestos',
-	discount_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Monto de descuento aplicado',
-	address_surcharge_amount DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Recargo por direccion o zona de entrega',
-	total_amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT 'Monto total del pedido',
-	discount_code VARCHAR(20) COMMENT 'Codigo de descuento aplicado',
-	is_priority BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si es un pedido prioritario',
-	general_notes VARCHAR(255) COMMENT 'Notas generales del pedido',
-	created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha y hora de creacion',
-	estimated_delivery_at DATETIME(6) COMMENT 'Fecha y hora estimada de entrega',
-	current_status_changed_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Ultimo cambio de estado',
+CREATE TABLE pedidos_cliente (
+	pedido_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del pedido',
+	codigo_pedido VARCHAR(30) NOT NULL COMMENT 'Codigo unico del pedido, por ejemplo PED-2024-001',
+	cliente_id BIGINT NOT NULL COMMENT 'Cliente que realiza el pedido',
+	registrado_por_personal_id BIGINT NOT NULL COMMENT 'Personal que registro el pedido',
+	estado_actual_id BIGINT NOT NULL COMMENT 'Estado actual del pedido',
+	direccion_entrega_id BIGINT NOT NULL COMMENT 'Direccion de entrega seleccionada',
+	snapshot_direccion_entrega VARCHAR(500) NOT NULL COMMENT 'Copia de la direccion al momento del pedido',
+	instrucciones_entrega VARCHAR(500) COMMENT 'Instrucciones especiales de entrega',
+	subtotal DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Subtotal sin impuestos ni descuentos',
+	impuesto DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Monto de impuestos',
+	descuento DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Monto de descuento aplicado',
+	recargo_direccion DECIMAL(10, 2) DEFAULT 0.00 COMMENT 'Recargo por direccion o zona de entrega',
+	total DECIMAL(10, 2) NOT NULL DEFAULT 0.00 COMMENT 'Monto total del pedido',
+	codigo_descuento VARCHAR(20) COMMENT 'Codigo de descuento aplicado',
+	prioritario BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si es un pedido prioritario',
+	notas_generales VARCHAR(255) COMMENT 'Notas generales del pedido',
+	creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha y hora de creacion',
+	entrega_estimada_en DATETIME(6) COMMENT 'Fecha y hora estimada de entrega',
+	estado_actual_cambiado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Ultimo cambio de estado',
 
-	CONSTRAINT pk_customer_orders PRIMARY KEY (order_id),
-	CONSTRAINT uk_customer_orders_order_code UNIQUE (order_code),
-	CONSTRAINT chk_customer_orders_subtotal_amount CHECK (subtotal_amount IS NULL OR subtotal_amount >= 0),
-	CONSTRAINT chk_customer_orders_tax_amount CHECK (tax_amount IS NULL OR tax_amount >= 0),
-	CONSTRAINT chk_customer_orders_discount_amount CHECK (discount_amount IS NULL OR discount_amount >= 0),
-	CONSTRAINT chk_customer_orders_address_surcharge CHECK (address_surcharge_amount IS NULL OR address_surcharge_amount >= 0),
-	CONSTRAINT chk_customer_orders_total_amount CHECK (total_amount >= 0),
-
-	CONSTRAINT fk_order_customer
-		FOREIGN KEY (customer_id)
-		REFERENCES customers (customer_id)
+	CONSTRAINT pk_pedidos_cliente PRIMARY KEY (pedido_id),
+	CONSTRAINT uk_pedidos_cliente_codigo_pedido UNIQUE (codigo_pedido),
+	CONSTRAINT chk_pedidos_cliente_subtotal CHECK (subtotal IS NULL OR subtotal >= 0),
+	CONSTRAINT chk_pedidos_cliente_impuesto CHECK (impuesto IS NULL OR impuesto >= 0),
+	CONSTRAINT chk_pedidos_cliente_descuento CHECK (descuento IS NULL OR descuento >= 0),
+	CONSTRAINT chk_pedidos_cliente_recargo_direccion CHECK (recargo_direccion IS NULL OR recargo_direccion >= 0),
+	CONSTRAINT chk_pedidos_cliente_total CHECK (total >= 0),
+	CONSTRAINT fk_pedido_cliente FOREIGN KEY (cliente_id)
+		REFERENCES clientes (cliente_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_order_registered_staff
-		FOREIGN KEY (registered_by_staff_id)
-		REFERENCES staff (staff_id)
+	CONSTRAINT fk_pedido_personal_registro FOREIGN KEY (registrado_por_personal_id)
+		REFERENCES personal (personal_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_order_current_status
-		FOREIGN KEY (current_status_id)
-		REFERENCES order_statuses (status_id)
+	CONSTRAINT fk_pedido_estado_actual FOREIGN KEY (estado_actual_id)
+		REFERENCES estados_pedido (estado_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_order_delivery_address
-		FOREIGN KEY (delivery_address_id)
-		REFERENCES customer_addresses (address_id)
+	CONSTRAINT fk_pedido_direccion_entrega FOREIGN KEY (direccion_entrega_id)
+		REFERENCES direcciones_cliente (direccion_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Pedidos realizados por los clientes';
 
-CREATE INDEX idx_customer_orders_customer_id ON customer_orders (customer_id);
-CREATE INDEX idx_customer_orders_registered_staff_id ON customer_orders (registered_by_staff_id);
-CREATE INDEX idx_customer_orders_current_status_id ON customer_orders (current_status_id);
-CREATE INDEX idx_customer_orders_delivery_address_id ON customer_orders (delivery_address_id);
-CREATE INDEX idx_customer_orders_created_at ON customer_orders (created_at);
-CREATE INDEX idx_customer_orders_estimated_delivery_at ON customer_orders (estimated_delivery_at);
-CREATE INDEX idx_customer_orders_current_status_changed_at ON customer_orders (current_status_changed_at);
+CREATE INDEX idx_pedidos_cliente_cliente_id ON pedidos_cliente (cliente_id);
+CREATE INDEX idx_pedidos_cliente_personal_registro_id ON pedidos_cliente (registrado_por_personal_id);
+CREATE INDEX idx_pedidos_cliente_estado_actual_id ON pedidos_cliente (estado_actual_id);
+CREATE INDEX idx_pedidos_cliente_direccion_entrega_id ON pedidos_cliente (direccion_entrega_id);
+CREATE INDEX idx_pedidos_cliente_creado_en ON pedidos_cliente (creado_en);
+CREATE INDEX idx_pedidos_cliente_entrega_estimada_en ON pedidos_cliente (entrega_estimada_en);
+CREATE INDEX idx_pedidos_cliente_estado_actual_cambiado_en ON pedidos_cliente (estado_actual_cambiado_en);
 
 -- =========================================================
 -- 9. Items de pedido
--- Descripcion: productos individuales dentro de un pedido.
 -- =========================================================
 
-CREATE TABLE order_items (
-	order_item_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del item',
-	order_id BIGINT NOT NULL COMMENT 'Pedido al que pertenece',
-	product_id BIGINT NOT NULL COMMENT 'Producto solicitado',
-	quantity INT NOT NULL COMMENT 'Cantidad solicitada',
-	product_name_snapshot VARCHAR(120) NOT NULL COMMENT 'Nombre del producto al momento del pedido',
-	unit_price DECIMAL(10, 2) NOT NULL COMMENT 'Precio unitario al momento del pedido',
-	line_total DECIMAL(10, 2) NOT NULL COMMENT 'Total del item, cantidad por precio',
-	special_note VARCHAR(150) COMMENT 'Nota especial del cliente para este item',
-	is_ready BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si el item esta listo',
+CREATE TABLE items_pedido (
+	item_pedido_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del item',
+	pedido_id BIGINT NOT NULL COMMENT 'Pedido al que pertenece',
+	producto_id BIGINT NOT NULL COMMENT 'Producto solicitado',
+	cantidad INT NOT NULL COMMENT 'Cantidad solicitada',
+	snapshot_nombre_producto VARCHAR(120) NOT NULL COMMENT 'Nombre del producto al momento del pedido',
+	precio_unitario DECIMAL(10, 2) NOT NULL COMMENT 'Precio unitario al momento del pedido',
+	total_linea DECIMAL(10, 2) NOT NULL COMMENT 'Total del item, cantidad por precio',
+	nota_especial VARCHAR(150) COMMENT 'Nota especial del cliente para este item',
+	listo BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'Indica si el item esta listo',
 
-	CONSTRAINT pk_order_items PRIMARY KEY (order_item_id),
-
-	CONSTRAINT chk_order_items_quantity CHECK (quantity > 0),
-	CONSTRAINT chk_order_items_unit_price CHECK (unit_price >= 0),
-	CONSTRAINT chk_order_items_line_total CHECK (line_total >= 0),
-
-	CONSTRAINT fk_order_item_order
-		FOREIGN KEY (order_id)
-		REFERENCES customer_orders (order_id)
+	CONSTRAINT pk_items_pedido PRIMARY KEY (item_pedido_id),
+	CONSTRAINT chk_items_pedido_cantidad CHECK (cantidad > 0),
+	CONSTRAINT chk_items_pedido_precio_unitario CHECK (precio_unitario >= 0),
+	CONSTRAINT chk_items_pedido_total_linea CHECK (total_linea >= 0),
+	CONSTRAINT fk_item_pedido_pedido FOREIGN KEY (pedido_id)
+		REFERENCES pedidos_cliente (pedido_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_order_item_product
-		FOREIGN KEY (product_id)
-		REFERENCES products (product_id)
+	CONSTRAINT fk_item_pedido_producto FOREIGN KEY (producto_id)
+		REFERENCES productos (producto_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Detalles de productos en cada pedido';
 
-CREATE INDEX idx_order_items_order_id ON order_items (order_id);
-CREATE INDEX idx_order_items_product_id ON order_items (product_id);
-CREATE INDEX idx_order_items_is_ready ON order_items (is_ready);
+CREATE INDEX idx_items_pedido_pedido_id ON items_pedido (pedido_id);
+CREATE INDEX idx_items_pedido_producto_id ON items_pedido (producto_id);
+CREATE INDEX idx_items_pedido_listo ON items_pedido (listo);
 
 -- =========================================================
 -- 10. Historial de estados
--- Descripcion: auditoria de cambios de estado de pedidos.
 -- =========================================================
 
-CREATE TABLE order_status_histories (
-	history_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del historial',
-	order_id BIGINT NOT NULL COMMENT 'Pedido afectado',
-	from_status_id BIGINT NOT NULL DEFAULT 1 COMMENT 'Estado anterior; por defecto PENDING',
-	to_status_id BIGINT NOT NULL COMMENT 'Estado nuevo',
-	changed_by_staff_id BIGINT NOT NULL COMMENT 'Personal que realizo el cambio',
-	changed_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha y hora del cambio',
-	notes VARCHAR(255) COMMENT 'Notas adicionales del cambio',
+CREATE TABLE historial_estados_pedido (
+	historial_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico del historial',
+	pedido_id BIGINT NOT NULL COMMENT 'Pedido afectado',
+	estado_origen_id BIGINT NOT NULL DEFAULT 1 COMMENT 'Estado anterior; por defecto PENDIENTE',
+	estado_destino_id BIGINT NOT NULL COMMENT 'Estado nuevo',
+	cambiado_por_personal_id BIGINT NOT NULL COMMENT 'Personal que realizo el cambio',
+	cambiado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha y hora del cambio',
+	notas VARCHAR(255) COMMENT 'Notas adicionales del cambio',
 
-	CONSTRAINT pk_order_status_histories PRIMARY KEY (history_id),
-
-	CONSTRAINT fk_history_order
-		FOREIGN KEY (order_id)
-		REFERENCES customer_orders (order_id)
+	CONSTRAINT pk_historial_estados_pedido PRIMARY KEY (historial_id),
+	CONSTRAINT fk_historial_pedido FOREIGN KEY (pedido_id)
+		REFERENCES pedidos_cliente (pedido_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_history_from_status
-		FOREIGN KEY (from_status_id)
-		REFERENCES order_statuses (status_id)
+	CONSTRAINT fk_historial_estado_origen FOREIGN KEY (estado_origen_id)
+		REFERENCES estados_pedido (estado_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_history_to_status
-		FOREIGN KEY (to_status_id)
-		REFERENCES order_statuses (status_id)
+	CONSTRAINT fk_historial_estado_destino FOREIGN KEY (estado_destino_id)
+		REFERENCES estados_pedido (estado_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_history_changed_by_staff
-		FOREIGN KEY (changed_by_staff_id)
-		REFERENCES staff (staff_id)
+	CONSTRAINT fk_historial_personal_cambio FOREIGN KEY (cambiado_por_personal_id)
+		REFERENCES personal (personal_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Historial de auditoria de cambios de estado';
 
-CREATE INDEX idx_histories_order_id ON order_status_histories (order_id);
-CREATE INDEX idx_histories_from_status_id ON order_status_histories (from_status_id);
-CREATE INDEX idx_histories_to_status_id ON order_status_histories (to_status_id);
-CREATE INDEX idx_histories_changed_by_staff_id ON order_status_histories (changed_by_staff_id);
-CREATE INDEX idx_histories_changed_at ON order_status_histories (changed_at);
+CREATE INDEX idx_historial_pedido_id ON historial_estados_pedido (pedido_id);
+CREATE INDEX idx_historial_estado_origen_id ON historial_estados_pedido (estado_origen_id);
+CREATE INDEX idx_historial_estado_destino_id ON historial_estados_pedido (estado_destino_id);
+CREATE INDEX idx_historial_personal_cambio_id ON historial_estados_pedido (cambiado_por_personal_id);
+CREATE INDEX idx_historial_cambiado_en ON historial_estados_pedido (cambiado_en);
 
 -- =========================================================
 -- 11. Entregas
--- Descripcion: informacion logistica de entregas a domicilio.
 -- =========================================================
 
-CREATE TABLE deliveries (
-	delivery_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico de entrega',
-	order_id BIGINT NOT NULL COMMENT 'Pedido asociado',
-	courier_staff_id BIGINT NOT NULL COMMENT 'Repartidor asignado',
-	dispatched_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha y hora de despacho',
-	delivered_at DATETIME(6) NULL COMMENT 'Fecha y hora de entrega completada',
-	receiver_name VARCHAR(120) NULL COMMENT 'Nombre de quien recibio el pedido',
-	customer_confirmed_at DATETIME(6) NULL COMMENT 'Fecha de confirmacion del cliente',
-	customer_confirmation_notes VARCHAR(255) NULL COMMENT 'Notas de confirmacion del cliente',
-	delivery_status VARCHAR(30) NOT NULL DEFAULT 'DISPATCHED' COMMENT 'Estado tecnico de la entrega: DISPATCHED, IN_TRANSIT, DELIVERED, FAILED, RETURNED',
-	courier_notes VARCHAR(500) COMMENT 'Notas del repartidor sobre la entrega',
-	attempt_number INT NOT NULL DEFAULT 1 COMMENT 'Numero de intento de entrega',
+CREATE TABLE entregas (
+	entrega_id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'Identificador unico de entrega',
+	pedido_id BIGINT NOT NULL COMMENT 'Pedido asociado',
+	repartidor_personal_id BIGINT NOT NULL COMMENT 'Repartidor asignado',
+	despachado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) COMMENT 'Fecha y hora de despacho',
+	entregado_en DATETIME(6) NULL COMMENT 'Fecha y hora de entrega completada',
+	nombre_receptor VARCHAR(120) NULL COMMENT 'Nombre de quien recibio el pedido',
+	confirmado_por_cliente_en DATETIME(6) NULL COMMENT 'Fecha de confirmacion del cliente',
+	notas_confirmacion_cliente VARCHAR(255) NULL COMMENT 'Notas de confirmacion del cliente',
+	estado_entrega VARCHAR(30) NOT NULL DEFAULT 'DESPACHADO' COMMENT 'Estado de la entrega',
+	notas_repartidor VARCHAR(500) COMMENT 'Notas del repartidor sobre la entrega',
+	numero_intento INT NOT NULL DEFAULT 1 COMMENT 'Numero de intento de entrega',
 
-	CONSTRAINT pk_deliveries PRIMARY KEY (delivery_id),
-	CONSTRAINT uk_deliveries_order_id UNIQUE (order_id),
-	CONSTRAINT chk_delivery_status CHECK (delivery_status IN ('DISPATCHED', 'IN_TRANSIT', 'DELIVERED', 'FAILED', 'RETURNED')),
-
-	CONSTRAINT chk_deliveries_delivered_after_dispatched
-		CHECK (delivered_at IS NULL OR delivered_at >= dispatched_at),
-
-	CONSTRAINT chk_deliveries_receiver_when_delivered
-		CHECK (delivered_at IS NULL OR receiver_name IS NOT NULL),
-
-	CONSTRAINT chk_deliveries_customer_confirm_after_delivery
-		CHECK (
-			customer_confirmed_at IS NULL
-				OR (
-				delivered_at IS NOT NULL
-					AND customer_confirmed_at >= delivered_at
-				)
-			),
-
-	CONSTRAINT fk_delivery_order
-		FOREIGN KEY (order_id)
-		REFERENCES customer_orders (order_id)
+	CONSTRAINT pk_entregas PRIMARY KEY (entrega_id),
+	CONSTRAINT uk_entregas_pedido_id UNIQUE (pedido_id),
+	CONSTRAINT chk_entregas_estado CHECK (estado_entrega IN ('DESPACHADO', 'EN_TRANSITO', 'ENTREGADO', 'FALLIDO', 'DEVUELTO')),
+	CONSTRAINT chk_entregas_entregado_despues_despacho CHECK (entregado_en IS NULL OR entregado_en >= despachado_en),
+	CONSTRAINT chk_entregas_receptor_si_entregado CHECK (entregado_en IS NULL OR nombre_receptor IS NOT NULL),
+	CONSTRAINT chk_entregas_confirmacion_despues_entrega CHECK (
+		confirmado_por_cliente_en IS NULL
+			OR (entregado_en IS NOT NULL AND confirmado_por_cliente_en >= entregado_en)
+	),
+	CONSTRAINT fk_entrega_pedido FOREIGN KEY (pedido_id)
+		REFERENCES pedidos_cliente (pedido_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT,
-
-	CONSTRAINT fk_delivery_courier_staff
-		FOREIGN KEY (courier_staff_id)
-		REFERENCES staff (staff_id)
+	CONSTRAINT fk_entrega_repartidor FOREIGN KEY (repartidor_personal_id)
+		REFERENCES personal (personal_id)
 		ON UPDATE CASCADE
 		ON DELETE RESTRICT
 ) ENGINE = InnoDB
 	COMMENT = 'Informacion logistica de entregas a domicilio';
 
-CREATE INDEX idx_deliveries_courier_staff_id ON deliveries (courier_staff_id);
-CREATE INDEX idx_deliveries_dispatched_at ON deliveries (dispatched_at);
-CREATE INDEX idx_deliveries_delivered_at ON deliveries (delivered_at);
-CREATE INDEX idx_deliveries_customer_confirmed_at ON deliveries (customer_confirmed_at);
-CREATE INDEX idx_deliveries_delivery_status ON deliveries (delivery_status);
+CREATE INDEX idx_entregas_repartidor_personal_id ON entregas (repartidor_personal_id);
+CREATE INDEX idx_entregas_despachado_en ON entregas (despachado_en);
+CREATE INDEX idx_entregas_entregado_en ON entregas (entregado_en);
+CREATE INDEX idx_entregas_confirmado_por_cliente_en ON entregas (confirmado_por_cliente_en);
+CREATE INDEX idx_entregas_estado_entrega ON entregas (estado_entrega);
 
 -- =========================================================
 -- 12. Datos iniciales
 -- =========================================================
 
-INSERT INTO roles (role_name) VALUES
-	('ADMINISTRATOR'),
-	('COOK'),
-	('COURIER');
+INSERT INTO roles (codigo_rol) VALUES
+	('ADMINISTRADOR'),
+	('COCINERO'),
+	('REPARTIDOR');
 
--- status_id = 1 se reserva para PENDING porque
--- order_status_histories.from_status_id lo usa como default.
-INSERT INTO order_statuses (
-	status_id,
-	status_code,
-	status_name,
-	status_order,
-	is_final
-) VALUES
-	(1, 'PENDING', 'Pendiente', 1, FALSE),
-	(2, 'IN_PREPARATION', 'En preparacion', 2, FALSE),
-	(3, 'READY', 'Listo', 3, FALSE),
-	(4, 'ON_THE_WAY', 'En camino', 4, FALSE),
-	(5, 'DELIVERED', 'Entregado', 5, TRUE);
+-- estado_id = 1 se reserva para PENDIENTE porque
+-- historial_estados_pedido.estado_origen_id lo usa como default.
+INSERT INTO estados_pedido (estado_id, codigo_estado, nombre_estado, orden_estado, finalizado) VALUES
+	(1, 'PENDIENTE', 'Pendiente', 1, FALSE),
+	(2, 'EN_PREPARACION', 'En preparacion', 2, FALSE),
+	(3, 'LISTO', 'Listo', 3, FALSE),
+	(4, 'EN_CAMINO', 'En camino', 4, FALSE),
+	(5, 'ENTREGADO', 'Entregado', 5, TRUE);
 
-INSERT INTO order_status_transition_rules (
-	from_status_id,
-	to_status_id,
-	role_id,
-	is_active
-)
-SELECT
-	from_status.status_id,
-	to_status.status_id,
-	role.role_id,
-	TRUE
-FROM order_statuses from_status
-	JOIN order_statuses to_status
-	JOIN roles role
-WHERE from_status.status_code = 'PENDING'
-	AND to_status.status_code = 'IN_PREPARATION'
-	AND role.role_name = 'COOK';
+INSERT INTO reglas_transicion_estado_pedido (estado_origen_id, estado_destino_id, rol_id, activa)
+SELECT origen.estado_id, destino.estado_id, rol.rol_id, TRUE
+FROM estados_pedido origen
+	JOIN estados_pedido destino
+	JOIN roles rol
+WHERE origen.codigo_estado = 'PENDIENTE'
+	AND destino.codigo_estado = 'EN_PREPARACION'
+	AND rol.codigo_rol = 'COCINERO';
 
-INSERT INTO order_status_transition_rules (
-	from_status_id,
-	to_status_id,
-	role_id,
-	is_active
-)
-SELECT
-	from_status.status_id,
-	to_status.status_id,
-	role.role_id,
-	TRUE
-FROM order_statuses from_status
-	JOIN order_statuses to_status
-	JOIN roles role
-WHERE from_status.status_code = 'IN_PREPARATION'
-	AND to_status.status_code = 'READY'
-	AND role.role_name = 'COOK';
+INSERT INTO reglas_transicion_estado_pedido (estado_origen_id, estado_destino_id, rol_id, activa)
+SELECT origen.estado_id, destino.estado_id, rol.rol_id, TRUE
+FROM estados_pedido origen
+	JOIN estados_pedido destino
+	JOIN roles rol
+WHERE origen.codigo_estado = 'EN_PREPARACION'
+	AND destino.codigo_estado = 'LISTO'
+	AND rol.codigo_rol = 'COCINERO';
 
-INSERT INTO order_status_transition_rules (
-	from_status_id,
-	to_status_id,
-	role_id,
-	is_active
-)
-SELECT
-	from_status.status_id,
-	to_status.status_id,
-	role.role_id,
-	TRUE
-FROM order_statuses from_status
-	JOIN order_statuses to_status
-	JOIN roles role
-WHERE from_status.status_code = 'READY'
-	AND to_status.status_code = 'ON_THE_WAY'
-	AND role.role_name = 'COURIER';
+INSERT INTO reglas_transicion_estado_pedido (estado_origen_id, estado_destino_id, rol_id, activa)
+SELECT origen.estado_id, destino.estado_id, rol.rol_id, TRUE
+FROM estados_pedido origen
+	JOIN estados_pedido destino
+	JOIN roles rol
+WHERE origen.codigo_estado = 'LISTO'
+	AND destino.codigo_estado = 'EN_CAMINO'
+	AND rol.codigo_rol = 'REPARTIDOR';
 
-INSERT INTO order_status_transition_rules (
-	from_status_id,
-	to_status_id,
-	role_id,
-	is_active
-)
-SELECT
-	from_status.status_id,
-	to_status.status_id,
-	role.role_id,
-	TRUE
-FROM order_statuses from_status
-	JOIN order_statuses to_status
-	JOIN roles role
-WHERE from_status.status_code = 'ON_THE_WAY'
-	AND to_status.status_code = 'DELIVERED'
-	AND role.role_name = 'COURIER';
+INSERT INTO reglas_transicion_estado_pedido (estado_origen_id, estado_destino_id, rol_id, activa)
+SELECT origen.estado_id, destino.estado_id, rol.rol_id, TRUE
+FROM estados_pedido origen
+	JOIN estados_pedido destino
+	JOIN roles rol
+WHERE origen.codigo_estado = 'EN_CAMINO'
+	AND destino.codigo_estado = 'ENTREGADO'
+	AND rol.codigo_rol = 'REPARTIDOR';
 
 -- =========================================================
 -- 13. Personal demo opcional
 -- =========================================================
 
-INSERT INTO staff (
-	role_id,
-	full_name,
-	phone,
-	email,
-	username,
-	is_active
-)
-SELECT
-	role_id,
-	'Administrador del sistema',
-	'0000000000',
-	'admin@restaurant.local',
-	'admin',
-	TRUE
+INSERT INTO personal (rol_id, nombre_completo, telefono, correo_electronico, nombre_usuario, activo)
+SELECT rol_id, 'Administrador del sistema', '0000000000', 'admin@restaurant.local', 'admin', TRUE
 FROM roles
-WHERE role_name = 'ADMINISTRATOR';
+WHERE codigo_rol = 'ADMINISTRADOR';
 
-INSERT INTO staff (
-	role_id,
-	full_name,
-	phone,
-	email,
-	username,
-	is_active
-)
-SELECT
-	role_id,
-	'Cocinero principal',
-	'0000000001',
-	'cook@restaurant.local',
-	'cook',
-	TRUE
+INSERT INTO personal (rol_id, nombre_completo, telefono, correo_electronico, nombre_usuario, activo)
+SELECT rol_id, 'Cocinero principal', '0000000001', 'cook@restaurant.local', 'cook', TRUE
 FROM roles
-WHERE role_name = 'COOK';
+WHERE codigo_rol = 'COCINERO';
 
-INSERT INTO staff (
-	role_id,
-	full_name,
-	phone,
-	email,
-	username,
-	is_active
-)
-SELECT
-	role_id,
-	'Repartidor principal',
-	'0000000002',
-	'courier@restaurant.local',
-	'courier',
-	TRUE
+INSERT INTO personal (rol_id, nombre_completo, telefono, correo_electronico, nombre_usuario, activo)
+SELECT rol_id, 'Repartidor principal', '0000000002', 'courier@restaurant.local', 'courier', TRUE
 FROM roles
-WHERE role_name = 'COURIER';
+WHERE codigo_rol = 'REPARTIDOR';
 
 -- =========================================================
 -- 14. Productos demo opcionales
 -- =========================================================
 
-INSERT INTO products (
-	product_code,
-	product_name,
-	description,
-	unit_price,
-	production_cost,
-	category,
-	preparation_time_minutes,
-	is_available
+INSERT INTO productos (
+	codigo_producto,
+	nombre_producto,
+	descripcion,
+	precio_unitario,
+	costo_produccion,
+	categoria,
+	tiempo_preparacion_minutos,
+	disponible
 ) VALUES
-	('MAIN-001', 'Hamburguesa clasica', 'Hamburguesa con carne, queso y vegetales', 5.50, 2.25, 'MAIN_COURSE', 18, TRUE),
-	('MAIN-002', 'Pizza personal', 'Pizza individual de queso y pepperoni', 6.75, 2.80, 'MAIN_COURSE', 20, TRUE),
-	('START-001', 'Papas fritas', 'Porcion personal de papas fritas', 2.25, 0.80, 'STARTER', 10, TRUE),
-	('DRINK-001', 'Gaseosa', 'Bebida gaseosa personal', 1.50, 0.45, 'DRINK', 2, TRUE);
+	('PLATO-001', 'Hamburguesa clasica', 'Hamburguesa con carne, queso y vegetales', 5.50, 2.25, 'PLATO_FUERTE', 18, TRUE),
+	('PLATO-002', 'Pizza personal', 'Pizza individual de queso y pepperoni', 6.75, 2.80, 'PLATO_FUERTE', 20, TRUE),
+	('ENTRADA-001', 'Papas fritas', 'Porcion personal de papas fritas', 2.25, 0.80, 'ENTRADA', 10, TRUE),
+	('BEBIDA-001', 'Gaseosa', 'Bebida gaseosa personal', 1.50, 0.45, 'BEBIDA', 2, TRUE);
