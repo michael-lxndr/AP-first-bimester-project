@@ -1,59 +1,46 @@
-# Persona 3: JavaFX, DTOs Y Pruebas
+# Persona 3: Presentación Y Pruebas
 
-Tu responsabilidad es que la aplicación se pueda usar sin contaminar la UI con reglas de negocio. La pantalla muestra, captura eventos y llama services. Nada más.
+Tu responsabilidad es que la aplicación se pueda usar sin contaminar la UI con reglas de negocio.
 
 ## Paquetes A Tocar
 
 ```text
-src/main/java/com/restaurante/pedidos/presentation
-src/main/resources/com/restaurante/pedidos/presentation
-src/main/java/com/restaurante/pedidos/domain/dto cuando se creen DTOs de UI
+src/main/java/com/restaurante/pedidos/presentacion
+src/main/resources/com/restaurante/pedidos/presentacion
+src/main/java/com/restaurante/pedidos/dominio/dto cuando se creen DTOs de UI
 src/test/java/com/restaurante/pedidos
 ```
 
 ## Qué Debés Crear
 
 ```text
-OrderDTO
-OrderStatusDTO
+PedidoDTO
+EstadoPedidoDTO
 componentes reutilizables si una UI se repite
-pantallas completas para admin, cocinero, delivery y cliente
-tests unitarios de utilidades y mapeos simples
+pantallas completas para administrador, cocinero, repartidor y cliente
+pruebas unitarias de utilidades de dominio, servicios simples, DTOs y validadores
 ```
 
 Pantallas esperadas:
 
 ```text
-DashboardController: navegación principal.
-AdminController: gestión de personal, productos y pedidos.
-CookController: cola de preparación.
-DeliveryController: cola de entregas.
-CustomerController: consulta por código.
+ControladorPanelPrincipal: navegación principal.
+ControladorAdministrador: gestión de personal, productos y pedidos.
+ControladorCocinero: cola de preparación.
+ControladorRepartidor: cola de entregas.
+ControladorCliente: consulta por código.
 ```
 
 ## Reglas
 
 ```text
-No uses EntityManager en controllers.
-No uses repositories en controllers.
-No crees hilos desde controllers.
+No uses EntityManager en controladores.
+No uses repositorios en controladores.
+No crees hilos desde controladores.
 No dupliques lógica de estados en botones.
 No muestres entidades completas si un DTO alcanza.
 ```
 
-## Tests Esperados
-
-Priorizá tests simples y útiles:
-
-```text
-OrderCodeGeneratorTest
-TimeSimulatorTest
-tests de mappers DTO cuando existan
-tests de validadores si se crean reglas de formulario reutilizables
-```
-
-JavaFX se prueba con cuidado. Si no hay framework de UI testing configurado, no inventes pruebas frágiles de ventanas. Mejor testear servicios, DTOs, mappers y validadores.
-
 ## Entregable
 
-Al terminar, la UI debe poder navegar y llamar services sin conocer detalles de base de datos, transacciones ni pools de hilos.
+La UI debe navegar y llamar servicios sin conocer base de datos, transacciones ni pools de hilos.

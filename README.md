@@ -1,109 +1,86 @@
-# Restaurant Order Manager
+# Gestor De Pedidos Del Restaurante
 
 Proyecto académico de escritorio para gestionar pedidos de restaurante con Java 21, JavaFX, JPA/Hibernate, MySQL, HikariCP, pools de hilos y pruebas unitarias.
 
-El objetivo es simular el flujo completo de un pedido: registro, preparación, despacho, entrega y consulta por código.
-
-## Estado Actual
-
-El proyecto quedó centralizado bajo un solo paquete raíz:
+## Paquete Raíz
 
 ```text
 com.restaurante.pedidos
 ```
 
-La arquitectura se organiza por capas simples. No se usa Spring Boot; las dependencias se crean manualmente desde Java.
+## Capas Del Proyecto
 
-## Tecnologías
-
-```text
-Java 21
-Maven
-JavaFX 21.0.6
-Jakarta Persistence 3.1.0
-Hibernate ORM 6.6.3.Final
-Hibernate HikariCP 6.6.3.Final
-MySQL Connector/J 9.1.0
-Lombok 1.18.46
-JUnit Jupiter 5.10.2
-```
-
-## Estructura De Paquetes
+La estructura queda reducida a paquetes necesarios:
 
 ```text
 src/main/java/com/restaurante/pedidos
-├── config
-│   ├── DatabaseConfig.java
-│   ├── SimulationConfig.java
-│   └── ThreadPoolConfig.java
-├── domain
-│   ├── OrderStatusCode.java
-│   ├── ProductCategory.java
-│   ├── RoleCode.java
-│   └── entity
-├── repository
-│   ├── CustomerRepository.java
-│   ├── RoleRepository.java
-│   └── StaffRepository.java
-├── service
-│   └── StaffService.java
-├── presentation
-│   ├── MainApp.java
-│   ├── JavaFxApplication.java
-│   ├── StageManager.java
-│   ├── ViewLoader.java
-│   ├── DashboardController.java
-│   ├── AdminController.java
-│   ├── CookController.java
-│   ├── DeliveryController.java
-│   └── CustomerController.java
-└── util
-    ├── OrderCodeGenerator.java
-    └── TimeSimulator.java
+├── configuracion
+│   ├── ConfiguracionBaseDatos.java
+│   ├── ConfiguracionHilos.java
+│   └── ConfiguracionSimulacion.java
+├── dominio
+│   ├── CategoriaProducto.java
+│   ├── CodigoEstadoPedido.java
+│   ├── CodigoRol.java
+│   ├── GeneradorCodigoPedido.java
+│   └── entidad
+├── repositorio
+│   ├── RepositorioCliente.java
+│   ├── RepositorioPersonal.java
+│   └── RepositorioRol.java
+├── servicio
+│   ├── ServicioPersonal.java
+│   └── SimuladorTiempo.java
+└── presentacion
+    ├── AplicacionPrincipal.java
+    ├── AplicacionJavaFx.java
+    ├── GestorEscenas.java
+    ├── CargadorVistas.java
+    ├── ControladorPanelPrincipal.java
+    ├── ControladorAdministrador.java
+    ├── ControladorCocinero.java
+    ├── ControladorRepartidor.java
+    └── ControladorCliente.java
 ```
 
-Recursos JavaFX:
+No existe paquete `util`. Las clases que antes estaban ahí fueron movidas a una capa concreta:
 
 ```text
-src/main/resources/com/restaurante/pedidos/presentation
-├── style/application.css
-└── view
-    ├── admin-view.fxml
-    ├── cook-view.fxml
-    ├── customer-view.fxml
-    ├── delivery-view.fxml
-    └── main-view.fxml
+GeneradorCodigoPedido -> dominio
+SimuladorTiempo       -> servicio
 ```
 
-Pruebas unitarias:
+## Recursos JavaFX
 
 ```text
-src/test/java/com/restaurante/pedidos
-└── util
-    ├── OrderCodeGeneratorTest.java
-    └── TimeSimulatorTest.java
+src/main/resources/com/restaurante/pedidos/presentacion
+├── estilo/aplicacion.css
+└── vista
+    ├── vista-administrador.fxml
+    ├── vista-cocinero.fxml
+    ├── vista-cliente.fxml
+    ├── vista-principal.fxml
+    └── vista-repartidor.fxml
 ```
 
-## Reglas De Arquitectura
+## Regla De Dependencias
 
 ```text
-presentation -> service -> repository -> domain
+presentacion -> servicio -> repositorio -> dominio
 ```
 
 Reglas obligatorias:
 
 ```text
-Los controllers JavaFX no contienen reglas de negocio.
-Los services coordinan reglas, validaciones, transacciones y casos de uso.
-Los repositories solo hablan con EntityManager.
-El domain no depende de presentation, service ni repository.
-Los pools de hilos se centralizan en ThreadPoolConfig.
-Los delays simulados se centralizan en SimulationConfig y TimeSimulator.
+Los controladores JavaFX no contienen reglas de negocio.
+Los servicios coordinan reglas, validaciones, transacciones y casos de uso.
+Los repositorios solo hablan con EntityManager.
+El dominio no depende de presentación, servicio ni repositorio.
+Los pools de hilos se centralizan en ConfiguracionHilos.
+Los tiempos simulados se centralizan en ConfiguracionSimulacion y SimuladorTiempo.
 ```
 
-Esto es importante: si cada pantalla crea sus propios hilos, delays, EntityManager o reglas, el proyecto se vuelve imposible de probar. Primero la estructura, después la velocidad. Es así de fácil.
-
-## Configuración De Base De Datos
+## Base De Datos
 
 Archivo principal:
 
@@ -126,11 +103,7 @@ Password: root
 Pool:     HikariCP mediante Hibernate
 ```
 
-Si tu MySQL usa otro puerto, usuario o contraseña, modificá `persistence.xml`.
-
-## Cómo Ejecutar
-
-Desde la raíz del proyecto:
+## Ejecución
 
 ```bash
 mvn javafx:run
@@ -145,16 +118,22 @@ mvn exec:java
 Clase principal configurada:
 
 ```text
-com.restaurante.pedidos.presentation.MainApp
+com.restaurante.pedidos.presentacion.AplicacionPrincipal
 ```
 
-## Cómo Ejecutar Tests
+## Pruebas
 
 ```bash
 mvn test
 ```
 
-Los tests deben ser unitarios siempre que sea posible. Si una prueba necesita MySQL real, ya no es unitaria: documentala como prueba de integración.
+Las pruebas unitarias viven en:
+
+```text
+src/test/java/com/restaurante/pedidos
+├── dominio/GeneradorCodigoPedidoTest.java
+└── servicio/SimuladorTiempoTest.java
+```
 
 ## Modelo De Negocio
 
@@ -173,26 +152,15 @@ COURIER
 CUSTOMER
 ```
 
-Responsabilidades:
+## División Del Equipo
 
 ```text
-ADMINISTRATOR: gestiona personal, productos, clientes y pedidos.
-COOK: toma pedidos pendientes y los prepara.
-COURIER: toma pedidos listos, los despacha y confirma entrega.
-CUSTOMER: consulta el estado del pedido por código.
+Persona 1: dominio, entidades, base de datos y repositorios.
+Persona 2: servicios, reglas de negocio, máquina de estados, simulación y pools de hilos.
+Persona 3: presentación JavaFX, navegación, pantallas, DTOs de vista y pruebas.
 ```
 
-## División Del Trabajo
-
-El proyecto se divide entre tres personas. Cada persona trabaja una capa principal y entrega pruebas de lo que toca.
-
-```text
-Persona 1: Dominio, base de datos y repositorios.
-Persona 2: Servicios, reglas de negocio, state machine, simulación y pools de hilos.
-Persona 3: JavaFX, DTOs de pantalla, navegación y pruebas de presentación/utilidades.
-```
-
-Guías detalladas:
+Guías:
 
 ```text
 docs/persona-1-dominio-persistencia.md
@@ -200,65 +168,21 @@ docs/persona-2-negocio-simulacion.md
 docs/persona-3-presentacion-pruebas.md
 ```
 
-## Contrato Entre Capas
-
-Persona 1 entrega repositorios con métodos claros.
-
-Persona 2 consume repositorios desde servicios y expone métodos simples para la UI.
-
-Persona 3 consume servicios, no repositories directamente.
-
-Ejemplo correcto:
+## Pendientes Técnicos
 
 ```text
-AdminController -> StaffService -> StaffRepository -> EntityManager
+RepositorioPedido
+RepositorioProducto
+RepositorioEstadoPedido
+RepositorioReglaTransicionEstadoPedido
+ServicioPedido
+MaquinaEstadosPedido
+ServicioCocina
+ServicioEntrega
+ServicioSimulacion
+PedidoDTO
+EstadoPedidoDTO
+validadores de negocio
 ```
 
-Ejemplo incorrecto:
-
-```text
-AdminController -> EntityManager
-```
-
-## Assets Incluidos
-
-```text
-assets/ER Diagram.png
-assets/ER Diagram.puml
-assets/ROM - ER Diagram.sql
-assets/ROM - Test Data.sql
-assets/Tema del Proyecto Primer Bimestre.pdf
-```
-
-## Convenciones
-
-```text
-Usar Java 21.
-Usar Maven.
-No agregar Spring Boot.
-No crear paquetes nuevos sin necesidad real.
-No meter reglas de negocio en FXML ni controllers.
-No abrir hilos manualmente desde controllers.
-No duplicar delays ni configuración de tiempos.
-No mezclar DTOs de pantalla con entidades JPA si la pantalla no necesita la entidad completa.
-```
-
-## Próximo Objetivo Técnico
-
-Completar las piezas faltantes manteniendo esta estructura:
-
-```text
-OrderRepository
-ProductRepository
-OrderStatusRepository
-TransitionRuleRepository
-OrderService
-OrderStateMachine
-KitchenService
-DeliveryService
-SimulationService
-DTOs para la UI
-Tests unitarios por servicio
-```
-
-No hay que crear paquetes por ansiedad. Hay que crear paquetes cuando separan responsabilidades reales. CONCEPTOS primero, código después.
+No creen paquetes nuevos por ansiedad. Primero definan responsabilidad. Después código. Esa es la diferencia entre ordenar un proyecto y simplemente mover carpetas.
