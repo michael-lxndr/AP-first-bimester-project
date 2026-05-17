@@ -2,10 +2,10 @@ package com.restaurante.pedidos.servicio;
 
 import com.restaurante.pedidos.configuracion.ConfiguracionBaseDatos;
 import com.restaurante.pedidos.dominio.CodigoRol;
-import com.restaurante.pedidos.dominio.entidad.Rol;
 import com.restaurante.pedidos.dominio.entidad.Personal;
-import com.restaurante.pedidos.repositorio.RepositorioRol;
+import com.restaurante.pedidos.dominio.entidad.Rol;
 import com.restaurante.pedidos.repositorio.RepositorioPersonal;
+import com.restaurante.pedidos.repositorio.RepositorioRol;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 

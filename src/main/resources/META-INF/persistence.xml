@@ -21,7 +21,8 @@
 
 		<properties>
 			<property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
-			<property name="hibernate.hikari.jdbcUrl" value="jdbc:mysql://localhost:3307/proyecto_primer_bimestre?useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8"/>
+			<property name="hibernate.hikari.jdbcUrl"
+			          value="jdbc:mysql://localhost:3307/proyecto_primer_bimestre?createDatabaseIfNotExist=true&amp;useSSL=false&amp;serverTimezone=UTC&amp;characterEncoding=UTF-8"/>
 			<property name="hibernate.hikari.username" value="root"/>
 			<property name="hibernate.hikari.password" value="root"/>
 			<property name="hibernate.hikari.driverClassName" value="com.mysql.cj.jdbc.Driver"/>
