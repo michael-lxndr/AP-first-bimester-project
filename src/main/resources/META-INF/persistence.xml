@@ -7,17 +7,17 @@
 	<persistence-unit name="firstBimesterPU" transaction-type="RESOURCE_LOCAL">
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-		<class>com.restaurante.pedidos.domain.entity.Customer</class>
-		<class>com.restaurante.pedidos.domain.entity.CustomerAddress</class>
-		<class>com.restaurante.pedidos.domain.entity.CustomerOrder</class>
-		<class>com.restaurante.pedidos.domain.entity.Delivery</class>
-		<class>com.restaurante.pedidos.domain.entity.OrderItem</class>
-		<class>com.restaurante.pedidos.domain.entity.OrderStatus</class>
-		<class>com.restaurante.pedidos.domain.entity.OrderStatusHistory</class>
-		<class>com.restaurante.pedidos.domain.entity.OrderStatusTransitionRule</class>
-		<class>com.restaurante.pedidos.domain.entity.Product</class>
-		<class>com.restaurante.pedidos.domain.entity.Role</class>
-		<class>com.restaurante.pedidos.domain.entity.Staff</class>
+		<class>com.restaurante.pedidos.dominio.entidad.Cliente</class>
+		<class>com.restaurante.pedidos.dominio.entidad.DireccionCliente</class>
+		<class>com.restaurante.pedidos.dominio.entidad.PedidoCliente</class>
+		<class>com.restaurante.pedidos.dominio.entidad.Entrega</class>
+		<class>com.restaurante.pedidos.dominio.entidad.ItemPedido</class>
+		<class>com.restaurante.pedidos.dominio.entidad.EstadoPedido</class>
+		<class>com.restaurante.pedidos.dominio.entidad.HistorialEstadoPedido</class>
+		<class>com.restaurante.pedidos.dominio.entidad.ReglaTransicionEstadoPedido</class>
+		<class>com.restaurante.pedidos.dominio.entidad.Producto</class>
+		<class>com.restaurante.pedidos.dominio.entidad.Rol</class>
+		<class>com.restaurante.pedidos.dominio.entidad.Personal</class>
 
 		<properties>
 			<property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>

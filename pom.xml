@@ -103,7 +103,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>3.5.0</version>
 				<configuration>
-					<mainClass>com.restaurante.pedidos.presentation.MainApp</mainClass>
+					<mainClass>com.restaurante.pedidos.presentacion.AplicacionPrincipal</mainClass>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -116,7 +116,7 @@
 				<artifactId>javafx-maven-plugin</artifactId>
 				<version>0.0.8</version>
 				<configuration>
-					<mainClass>com.restaurante.pedidos.presentation.MainApp</mainClass>
+					<mainClass>com.restaurante.pedidos.presentacion.AplicacionPrincipal</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -1,6 +1,6 @@
 # Analisis De Arquitectura
 
-El proyecto fue refactorizado a una estructura por capas bajo el paquete raiz:
+El proyecto quedó organizado por capas en español bajo:
 
 ```text
 com.restaurante.pedidos
@@ -9,70 +9,58 @@ com.restaurante.pedidos
 ## Capas Actuales
 
 ```text
-config        -> configuracion transversal: JPA, HikariCP, pools y delays
-domain        -> entidades JPA y enums del negocio
-repository    -> acceso a datos con EntityManager
-service       -> casos de uso y reglas de negocio
-presentation  -> JavaFX, controllers, navegacion y carga de vistas
-util          -> utilidades reutilizables sin estado de UI ni base de datos
+configuracion -> JPA, HikariCP, pools de hilos y tiempos simulados
+dominio       -> entidades JPA, enums y lógica pura del dominio
+repositorio   -> acceso a datos con EntityManager
+servicio      -> casos de uso y reglas de negocio
+presentacion  -> JavaFX, controladores, navegación y carga de vistas
 ```
 
-## Estado Actual
+Se eliminó el paquete `util` porque no representaba una capa. Sus clases quedaron donde corresponde:
 
 ```text
-Domain: implementado con entidades JPA y enums.
-Repository: parcial; existen CustomerRepository, RoleRepository y StaffRepository.
-Service: parcial; existe StaffService.
-Presentation: parcial; existe estructura JavaFX centralizada.
-Config: centralizado con DatabaseConfig, ThreadPoolConfig y SimulationConfig.
-Tests: base inicial para utilidades.
+GeneradorCodigoPedido -> dominio
+SimuladorTiempo       -> servicio
 ```
 
 ## Regla Principal
 
 ```text
-presentation -> service -> repository -> domain
+presentacion -> servicio -> repositorio -> dominio
 ```
 
-La dependencia va hacia adentro. La UI no debe conocer `EntityManager`, los repositories no deben decidir reglas de negocio y el domain no debe depender de ninguna capa externa.
+La dependencia va hacia adentro. La UI no debe conocer `EntityManager`; los repositorios no deben decidir reglas de negocio; el dominio no debe depender de capas externas.
 
 ## Estructura Recomendada
 
 ```text
 src/main/java/com/restaurante/pedidos
-├── config
-│   ├── DatabaseConfig.java
-│   ├── SimulationConfig.java
-│   └── ThreadPoolConfig.java
-├── domain
-│   ├── entity
-│   ├── dto
-│   └── validator
-├── repository
-├── service
-├── presentation
-│   └── component
-└── util
+├── configuracion
+├── dominio
+│   └── entidad
+├── repositorio
+├── servicio
+└── presentacion
 ```
 
 ## Pendientes Criticos
 
 ```text
-OrderRepository
-ProductRepository
-OrderStatusRepository
-TransitionRuleRepository
-OrderService
-OrderStateMachine
-KitchenService
-DeliveryService
-SimulationService
-OrderDTO
-OrderStatusDTO
+RepositorioPedido
+RepositorioProducto
+RepositorioEstadoPedido
+RepositorioReglaTransicionEstadoPedido
+ServicioPedido
+MaquinaEstadosPedido
+ServicioCocina
+ServicioEntrega
+ServicioSimulacion
+PedidoDTO
+EstadoPedidoDTO
 validadores de negocio reutilizables
-tests unitarios de services
+pruebas unitarias de servicios
 ```
 
 ## Decision Importante
 
-No se agrega Spring Boot. Este proyecto usa Maven, JavaFX y JPA/Hibernate con configuracion manual. Eso obliga a ser prolijos con la direccion de dependencias, porque no hay contenedor que tape una mala arquitectura.
+No se agrega Spring Boot. Este proyecto usa Maven, JavaFX y JPA/Hibernate con configuración manual. Eso exige mantener bien la dirección de dependencias, porque no hay contenedor que tape una mala arquitectura.
