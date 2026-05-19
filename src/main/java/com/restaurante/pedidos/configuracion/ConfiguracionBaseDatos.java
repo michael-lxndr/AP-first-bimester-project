@@ -5,27 +5,27 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public final class ConfiguracionBaseDatos {
-	private static EntityManagerFactory entityManagerFactory;
+	private static EntityManagerFactory fabricaAdministradorDeEntidades;
 
 	private ConfiguracionBaseDatos() {
 	}
 
-	public static EntityManager createEntityManager() {
-		return getEntityManagerFactory().createEntityManager();
+	public static EntityManager crearAdministradorDeEntidad() {
+		return obtenerFabricaAdministradorDeEntidades().createEntityManager();
 	}
 
-	private static synchronized EntityManagerFactory getEntityManagerFactory() {
-		if (entityManagerFactory == null) {
-			entityManagerFactory = Persistence.createEntityManagerFactory("firstBimesterPU");
+	private static synchronized EntityManagerFactory obtenerFabricaAdministradorDeEntidades() {
+		if (fabricaAdministradorDeEntidades == null) {
+			fabricaAdministradorDeEntidades = Persistence.createEntityManagerFactory("primerBimestrePU");
 		}
 
-		return entityManagerFactory;
+		return fabricaAdministradorDeEntidades;
 	}
 
-	public static synchronized void close() {
-		if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
-			entityManagerFactory.close();
-			entityManagerFactory = null;
+	public static synchronized void cerrar() {
+		if (fabricaAdministradorDeEntidades != null && fabricaAdministradorDeEntidades.isOpen()) {
+			fabricaAdministradorDeEntidades.close();
+			fabricaAdministradorDeEntidades = null;
 		}
 	}
 }

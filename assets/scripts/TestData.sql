@@ -3,7 +3,7 @@
 -- MySQL 9.3
 --
 -- Usa este script despues de ejecutar:
--- assets/ROM - ER Diagram.sql
+-- assets/ER_Script.sql
 --
 -- ATENCION: este seed limpia los datos existentes de las tablas
 -- del modelo y vuelve a poblarlas con datos deterministicos.
@@ -39,7 +39,7 @@ BEGIN
 		          AND table_name = 'pedidos_cliente'
 		          AND column_name = 'delivery_address') THEN
 		SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'Schema mismatch: pedidos_cliente.delivery_address pertenece al modelo viejo. Ejecuta primero ROM - ER Diagram.sql recreando proyecto_primer_bimestre.';
+			SET MESSAGE_TEXT = 'Schema mismatch: pedidos_cliente.delivery_address pertenece al modelo viejo. Ejecuta primero ER_Script.sql recreando proyecto_primer_bimestre.';
 	END IF;
 
 	IF NOT EXISTS (SELECT 1
@@ -48,7 +48,7 @@ BEGIN
 		              AND table_name = 'pedidos_cliente'
 		              AND column_name = 'direccion_entrega_id') THEN
 		SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'Schema mismatch: falta pedidos_cliente.direccion_entrega_id. Ejecuta primero ROM - ER Diagram.sql.';
+			SET MESSAGE_TEXT = 'Schema mismatch: falta pedidos_cliente.direccion_entrega_id. Ejecuta primero ER_Script.sql.';
 	END IF;
 
 	IF EXISTS (SELECT 1
@@ -67,7 +67,7 @@ BEGIN
 		              AND table_name = 'pedidos_cliente'
 		              AND column_name = 'snapshot_direccion_entrega') THEN
 		SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'Schema mismatch: falta pedidos_cliente.snapshot_direccion_entrega. Ejecuta primero ROM - ER Diagram.sql.';
+			SET MESSAGE_TEXT = 'Schema mismatch: falta pedidos_cliente.snapshot_direccion_entrega. Ejecuta primero ER_Script.sql.';
 	END IF;
 
 	IF NOT EXISTS (SELECT 1
@@ -75,7 +75,7 @@ BEGIN
 	               WHERE table_schema = DATABASE()
 		              AND table_name = 'direcciones_cliente') THEN
 		SIGNAL SQLSTATE '45000'
-			SET MESSAGE_TEXT = 'Schema mismatch: falta direcciones_cliente. Ejecuta primero ROM - ER Diagram.sql.';
+			SET MESSAGE_TEXT = 'Schema mismatch: falta direcciones_cliente. Ejecuta primero ER_Script.sql.';
 	END IF;
 
 	IF NOT EXISTS (SELECT 1

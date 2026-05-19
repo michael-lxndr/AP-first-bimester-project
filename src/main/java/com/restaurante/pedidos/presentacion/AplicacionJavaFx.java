@@ -17,7 +17,7 @@ public class AplicacionJavaFx extends Application {
 	@Override
 	public void stop() {
 		ConfiguracionHilos.shutdown();
-		ConfiguracionBaseDatos.close();
+		ConfiguracionBaseDatos.cerrar();
 		Platform.exit();
 	}
 

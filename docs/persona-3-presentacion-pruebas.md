@@ -21,15 +21,15 @@ pantallas completas para administrador, cocinero, repartidor y cliente
 pruebas unitarias de utilidades de dominio, servicios simples, DTOs y validadores
 ```
 
-Pantallas esperadas:
+### Pantallas esperadas:
 
-```text
-ControladorPanelPrincipal: navegación principal.
-ControladorAdministrador: gestión de personal, productos y pedidos.
-ControladorCocinero: cola de preparación.
-ControladorRepartidor: cola de entregas.
-ControladorCliente: consulta por código.
-```
+
+- [ ] `ControladorPanelPrincipal: navegación principal.`
+- [ ] `ControladorAdministrador: gestión de personal, productos y pedidos.`
+- [ ] `ControladorCocinero: cola de preparación.`
+- [ ] `ControladorRepartidor: cola de entregas.`
+- [ ] `ControladorCliente: consulta por código.`
+
 
 ## Reglas
 

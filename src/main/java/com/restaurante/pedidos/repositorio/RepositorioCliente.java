@@ -6,17 +6,17 @@ import jakarta.persistence.EntityManager;
 import java.util.Optional;
 
 public class RepositorioCliente {
-	private final EntityManager entityManager;
+	private final EntityManager administradorDeEntidad;
 
-	public RepositorioCliente(EntityManager entityManager) {
-		this.entityManager = entityManager;
+	public RepositorioCliente(EntityManager administradorDeEntidad) {
+		this.administradorDeEntidad = administradorDeEntidad;
 	}
 
-	public void save(Cliente cliente) {
-		entityManager.persist(cliente);
+	public void guardar(Cliente cliente) {
+		administradorDeEntidad.persist(cliente);
 	}
 
-	public Optional<Cliente> findById(Long id) {
-		return Optional.ofNullable(entityManager.find(Cliente.class, id));
+	public Optional<Cliente> buscarPorId(Long id) {
+		return Optional.ofNullable(administradorDeEntidad.find(Cliente.class, id));
 	}
 }

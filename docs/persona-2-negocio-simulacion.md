@@ -21,15 +21,15 @@ ServicioSimulacion
 ServicioGestionPersonal si ServicioPersonal queda chico
 ```
 
-Responsabilidades mínimas:
+### Responsabilidades mínimas:
 
-```text
-ServicioPedido: crear pedido y consultar estado por código.
-MaquinaEstadosPedido: validar transiciones usando RepositorioReglaTransicionEstadoPedido.
-ServicioCocina: mover PENDING -> IN_PREPARATION -> READY.
-ServicioEntrega: mover READY -> ON_THE_WAY -> DELIVERED.
-ServicioSimulacion: orquestar demoras usando ConfiguracionHilos y SimuladorTiempo.
-```
+
+ - [ ] `ServicioPedido: crear pedido y consultar estado por código.`
+ - [ ] `MaquinaEstadosPedido: validar transiciones usando RepositorioReglaTransicionEstadoPedido.`
+ - [ ] `ServicioCocina: mover PENDING -> IN_PREPARATION -> READY.`
+ - [ ] `ServicioEntrega: mover READY -> ON_THE_WAY -> DELIVERED.`
+ - [ ] `ServicioSimulacion: orquestar demoras usando ConfiguracionHilos y SimuladorTiempo.`
+
 
 ## Reglas
 

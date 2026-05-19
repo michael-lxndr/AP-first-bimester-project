@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class DominioTest {
 	@Test
 	void datosDeInicioDeTodasLasEntidades() {
-		EntityManager entityManager = ConfiguracionBaseDatos.createEntityManager();
+		EntityManager entityManager = ConfiguracionBaseDatos.crearAdministradorDeEntidad();
 		EntityTransaction transaction = entityManager.getTransaction();
 		Instant ahora = Instant.now();
 
@@ -263,7 +263,7 @@ class DominioTest {
 			throw exception;
 		} finally {
 			entityManager.close();
-			ConfiguracionBaseDatos.close();
+			ConfiguracionBaseDatos.cerrar();
 		}
 	}
 }

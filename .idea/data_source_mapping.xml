@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
-    <file url="file://$PROJECT_DIR$/assets/ROM - ER Diagram.sql" value="89242525-bb86-40c2-996b-11c0ffb52890" />
-    <file url="file://$PROJECT_DIR$/assets/ROM - Test Data.sql" value="89242525-bb86-40c2-996b-11c0ffb52890" />
+    <file url="file://$PROJECT_DIR$/assets/scripts/ER_Script.sql" value="89242525-bb86-40c2-996b-11c0ffb52890" />
+    <file url="file://$PROJECT_DIR$/assets/scripts/TestData.sql" value="89242525-bb86-40c2-996b-11c0ffb52890" />
   </component>
 </project>

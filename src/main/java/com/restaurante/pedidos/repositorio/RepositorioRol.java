@@ -14,10 +14,10 @@ public class RepositorioRol {
 		this.entityManager = entityManager;
 	}
 
-	public Optional<Rol> findByCode(CodigoRol codigoRol) {
+	public Optional<Rol> buscarPorCodigo(CodigoRol codigoRol) {
 		try {
 			Rol rol = entityManager
-				.createQuery("select r from Rol r where r.codigoRol = :codigoRol", Rol.class)
+				.createQuery("SELECT r FROM Rol r WHERE r.codigoRol = :codigoRol", Rol.class)
 				.setParameter("codigoRol", codigoRol)
 				.getSingleResult();
 
@@ -27,7 +27,7 @@ public class RepositorioRol {
 		}
 	}
 
-	public Rol save(Rol rol) {
+	public Rol guardar(Rol rol) {
 		entityManager.persist(rol);
 		return rol;
 	}

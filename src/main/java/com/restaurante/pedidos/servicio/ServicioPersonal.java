@@ -14,8 +14,8 @@ import java.util.List;
 
 public class ServicioPersonal {
 	public List<Personal> buscarTodos() {
-		try (EntityManager entityManager = ConfiguracionBaseDatos.createEntityManager()) {
-			return new RepositorioPersonal(entityManager).findAllWithRol();
+		try (EntityManager entityManager = ConfiguracionBaseDatos.crearAdministradorDeEntidad()) {
+			return new RepositorioPersonal(entityManager).buscarPorRol();
 		}
 	}
 
@@ -33,14 +33,14 @@ public class ServicioPersonal {
 				.creadoEn(Instant.now())
 				.build();
 
-			return new RepositorioPersonal(entityManager).save(personal);
+			return new RepositorioPersonal(entityManager).guardar(personal);
 		});
 	}
 
 	public Personal modificar(Long personalId, CodigoRol codigoRol, String nombreCompleto, String telefono, String correoElectronico, String nombreUsuario, boolean activo) {
 		return executeInTransaction(entityManager -> {
 			RepositorioPersonal repositorioPersonal = new RepositorioPersonal(entityManager);
-			Personal personal = repositorioPersonal.findByIdWithRol(personalId)
+			Personal personal = repositorioPersonal.buscarPorIdConRol(personalId)
 				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + personalId));
 			Rol rol = getOrCreateRol(entityManager, codigoRol);
 
@@ -51,18 +51,18 @@ public class ServicioPersonal {
 			personal.setNombreUsuario(nombreUsuario);
 			personal.setActivo(activo);
 
-			return repositorioPersonal.update(personal);
+			return repositorioPersonal.actualizar(personal);
 		});
 	}
 
 	public void establecerActivo(Long personalId, boolean activo) {
 		executeInTransaction(entityManager -> {
 			RepositorioPersonal repositorioPersonal = new RepositorioPersonal(entityManager);
-			Personal personal = repositorioPersonal.findByIdWithRol(personalId)
+			Personal personal = repositorioPersonal.buscarPorIdConRol(personalId)
 				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + personalId));
 
 			personal.setActivo(activo);
-			repositorioPersonal.update(personal);
+			repositorioPersonal.actualizar(personal);
 			return null;
 		});
 	}
@@ -70,10 +70,10 @@ public class ServicioPersonal {
 	public void eliminar(Long personalId) {
 		executeInTransaction(entityManager -> {
 			RepositorioPersonal repositorioPersonal = new RepositorioPersonal(entityManager);
-			Personal personal = repositorioPersonal.findByIdWithRol(personalId)
+			Personal personal = repositorioPersonal.buscarPorIdConRol(personalId)
 				.orElseThrow(() -> new IllegalArgumentException("No existe personal con ID " + personalId));
 
-			repositorioPersonal.delete(personal);
+			repositorioPersonal.borrar(personal);
 			return null;
 		});
 	}
@@ -81,12 +81,12 @@ public class ServicioPersonal {
 	private Rol getOrCreateRol(EntityManager entityManager, CodigoRol codigoRol) {
 		RepositorioRol repositorioRol = new RepositorioRol(entityManager);
 
-		return repositorioRol.findByCode(codigoRol)
-			.orElseGet(() -> repositorioRol.save(Rol.builder().codigoRol(codigoRol).build()));
+		return repositorioRol.buscarPorCodigo(codigoRol)
+			.orElseGet(() -> repositorioRol.guardar(Rol.builder().codigoRol(codigoRol).build()));
 	}
 
 	private <T> T executeInTransaction(TransactionWork<T> work) {
-		try (EntityManager entityManager = ConfiguracionBaseDatos.createEntityManager()) {
+		try (EntityManager entityManager = ConfiguracionBaseDatos.crearAdministradorDeEntidad()) {
 			EntityTransaction transaction = entityManager.getTransaction();
 			try {
 				transaction.begin();
