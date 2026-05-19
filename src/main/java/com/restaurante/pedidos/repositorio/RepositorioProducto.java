@@ -20,7 +20,9 @@ public class RepositorioProducto {
 
 	public Optional<Producto> buscarPorCodigo(String codigo) {
 		return administradorDeEntidad
-			.createQuery("SELECT p FROM Producto p WHERE p.codigoProducto = :codigo", Producto.class)
+			.createQuery("""
+				SELECT p FROM Producto p WHERE p.codigoProducto = :codigo
+			""", Producto.class)
 			.setParameter("codigo", codigo)
 			.getResultList()
 			.stream()

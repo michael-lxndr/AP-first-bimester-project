@@ -18,7 +18,9 @@ public class RepositorioPersonal {
 	// ?	JPQL (Lenguaje de Consultas de Persistencia de Java)
 	public List<Personal> buscarPorRol() {
 		return administradorDeEntidad
-			.createQuery("SELECT p FROM Personal p JOIN FETCH p.rol ORDER BY p.id DESC", Personal.class)
+			.createQuery("""
+				SELECT p FROM Personal p JOIN FETCH p.rol ORDER BY p.id DESC
+			""", Personal.class)
 			.getResultList();
 	}
 
@@ -38,23 +40,23 @@ public class RepositorioPersonal {
 	public List<Personal> buscarRepartidoresDisponibles() {
 		return administradorDeEntidad
 			.createQuery("""
-					SELECT p
-					FROM Personal p
-					JOIN FETCH p.rol r
-					WHERE r.codigoRol = :rolRepartidor
-					  AND p.activo = true
-					  AND NOT EXISTS (
-					    SELECT 1
-					    FROM Entrega e
-					    JOIN e.pedido pedido
-					    JOIN pedido.estadoActual estadoPedido
-					    WHERE e.repartidor = p
-					      AND (
-					        estadoPedido.codigoEstado = :estadoEnCamino
-					        OR e.estadoEntrega IN :estadosEntregaActivos
-					      )
-					  )
-					ORDER BY p.id DESC
+				SELECT p
+				FROM Personal p
+				JOIN FETCH p.rol r
+				WHERE r.codigoRol = :rolRepartidor
+				  AND p.activo = true
+				  AND NOT EXISTS (
+				    SELECT 1
+				    FROM Entrega e
+				    JOIN e.pedido pedido
+				    JOIN pedido.estadoActual estadoPedido
+				    WHERE e.repartidor = p
+				      AND (
+				        estadoPedido.codigoEstado = :estadoEnCamino
+				        OR e.estadoEntrega IN :estadosEntregaActivos
+				      )
+				  )
+				ORDER BY p.id DESC
 			""", Personal.class)
 			.setParameter("rolRepartidor", CodigoRol.REPARTIDOR)
 			.setParameter("estadoEnCamino", CodigoEstadoPedido.EN_CAMINO)
@@ -64,7 +66,9 @@ public class RepositorioPersonal {
 
 	public Optional<Personal> buscarPorIdConRol(Long id) {
 		List<Personal> personal = administradorDeEntidad
-			.createQuery("SELECT p FROM Personal p JOIN FETCH p.rol WHERE p.id = :id", Personal.class)
+			.createQuery("""
+				SELECT p FROM Personal p JOIN FETCH p.rol WHERE p.id = :id
+			""", Personal.class)
 			.setParameter("id", id)
 			.getResultList();
 

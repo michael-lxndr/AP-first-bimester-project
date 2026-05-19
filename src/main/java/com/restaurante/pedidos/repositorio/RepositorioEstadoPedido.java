@@ -20,7 +20,9 @@ public class RepositorioEstadoPedido {
 
 	public Optional<EstadoPedido> buscarPorCodigo(CodigoEstadoPedido codigo) {
 		return administradorDeEntidad
-			.createQuery("SELECT e FROM EstadoPedido e WHERE e.codigoEstado = :codigo", EstadoPedido.class)
+			.createQuery("""
+				SELECT e FROM EstadoPedido e WHERE e.codigoEstado = :codigo
+			""", EstadoPedido.class)
 			.setParameter("codigo", codigo)
 			.getResultList()
 			.stream()
@@ -29,7 +31,9 @@ public class RepositorioEstadoPedido {
 
 	public List<EstadoPedido> listarOrdenados() {
 		return administradorDeEntidad
-			.createQuery("SELECT e FROM EstadoPedido e ORDER BY e.ordenEstado ASC", EstadoPedido.class)
+			.createQuery("""
+				SELECT e FROM EstadoPedido e ORDER BY e.ordenEstado ASC
+			""", EstadoPedido.class)
 			.getResultList();
 	}
 

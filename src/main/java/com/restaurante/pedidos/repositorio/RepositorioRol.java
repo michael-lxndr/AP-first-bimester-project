@@ -17,7 +17,9 @@ public class RepositorioRol {
 	public Optional<Rol> buscarPorCodigo(CodigoRol codigoRol) {
 		try {
 			Rol rol = entityManager
-				.createQuery("SELECT r FROM Rol r WHERE r.codigoRol = :codigoRol", Rol.class)
+				.createQuery("""
+					 SELECT r FROM Rol r WHERE r.codigoRol = :codigoRol
+				""", Rol.class)
 				.setParameter("codigoRol", codigoRol)
 				.getSingleResult();
 
