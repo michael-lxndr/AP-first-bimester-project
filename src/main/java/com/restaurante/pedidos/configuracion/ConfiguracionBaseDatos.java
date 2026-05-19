@@ -5,7 +5,7 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public final class ConfiguracionBaseDatos {
-	private static EntityManagerFactory fabricaAdministradorDeEntidades;
+	private static EntityManagerFactory laFabricaAdministradorDeEntidades;
 
 	private ConfiguracionBaseDatos() {
 	}
@@ -15,17 +15,17 @@ public final class ConfiguracionBaseDatos {
 	}
 
 	private static synchronized EntityManagerFactory obtenerFabricaAdministradorDeEntidades() {
-		if (fabricaAdministradorDeEntidades == null) {
-			fabricaAdministradorDeEntidades = Persistence.createEntityManagerFactory("primerBimestrePU");
+		if (laFabricaAdministradorDeEntidades == null) {
+			laFabricaAdministradorDeEntidades = Persistence.createEntityManagerFactory("primerBimestrePU");
 		}
 
-		return fabricaAdministradorDeEntidades;
+		return laFabricaAdministradorDeEntidades;
 	}
 
 	public static synchronized void cerrar() {
-		if (fabricaAdministradorDeEntidades != null && fabricaAdministradorDeEntidades.isOpen()) {
-			fabricaAdministradorDeEntidades.close();
-			fabricaAdministradorDeEntidades = null;
+		if (laFabricaAdministradorDeEntidades != null && laFabricaAdministradorDeEntidades.isOpen()) {
+			laFabricaAdministradorDeEntidades.close();
+			laFabricaAdministradorDeEntidades = null;
 		}
 	}
 }

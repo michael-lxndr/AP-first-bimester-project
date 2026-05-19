@@ -14,27 +14,31 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class DominioTest {
 	@Test
 	void datosDeInicioDeTodasLasEntidades() {
-		EntityManager entityManager = ConfiguracionBaseDatos.crearAdministradorDeEntidad();
-		EntityTransaction transaction = entityManager.getTransaction();
-		Instant ahora = Instant.now();
+		EntityTransaction transaccion = null;
 
-		try {
-			transaction.begin();
+		try (EntityManager administradorDeEntidad = ConfiguracionBaseDatos.crearAdministradorDeEntidad()) {
+
+			transaccion = administradorDeEntidad.getTransaction();
+
+			Instant ahora = Instant.now();
+
+			// ? comenzar (begin) transaccion
+			transaccion.begin();
 
 			Rol rolAdministrador = Rol.builder()
 				.codigoRol(CodigoRol.ADMINISTRADOR)
 				.build();
-			entityManager.persist(rolAdministrador);
+			administradorDeEntidad.persist(rolAdministrador);
 
 			Rol rolCocinero = Rol.builder()
 				.codigoRol(CodigoRol.COCINERO)
 				.build();
-			entityManager.persist(rolCocinero);
+			administradorDeEntidad.persist(rolCocinero);
 
 			Rol rolRepartidor = Rol.builder()
 				.codigoRol(CodigoRol.REPARTIDOR)
 				.build();
-			entityManager.persist(rolRepartidor);
+			administradorDeEntidad.persist(rolRepartidor);
 
 			EstadoPedido pendiente = EstadoPedido.builder()
 				.codigoEstado(CodigoEstadoPedido.PENDIENTE)
@@ -42,7 +46,7 @@ class DominioTest {
 				.ordenEstado(1)
 				.finalizado(false)
 				.build();
-			entityManager.persist(pendiente);
+			administradorDeEntidad.persist(pendiente);
 
 			EstadoPedido enPreparacion = EstadoPedido.builder()
 				.codigoEstado(CodigoEstadoPedido.EN_PREPARACION)
@@ -50,7 +54,7 @@ class DominioTest {
 				.ordenEstado(2)
 				.finalizado(false)
 				.build();
-			entityManager.persist(enPreparacion);
+			administradorDeEntidad.persist(enPreparacion);
 
 			EstadoPedido listo = EstadoPedido.builder()
 				.codigoEstado(CodigoEstadoPedido.LISTO)
@@ -58,7 +62,7 @@ class DominioTest {
 				.ordenEstado(3)
 				.finalizado(false)
 				.build();
-			entityManager.persist(listo);
+			administradorDeEntidad.persist(listo);
 
 			EstadoPedido enCamino = EstadoPedido.builder()
 				.codigoEstado(CodigoEstadoPedido.EN_CAMINO)
@@ -66,7 +70,7 @@ class DominioTest {
 				.ordenEstado(4)
 				.finalizado(false)
 				.build();
-			entityManager.persist(enCamino);
+			administradorDeEntidad.persist(enCamino);
 
 			EstadoPedido entregado = EstadoPedido.builder()
 				.codigoEstado(CodigoEstadoPedido.ENTREGADO)
@@ -74,7 +78,7 @@ class DominioTest {
 				.ordenEstado(5)
 				.finalizado(true)
 				.build();
-			entityManager.persist(entregado);
+			administradorDeEntidad.persist(entregado);
 
 			Cliente cliente = Cliente.builder()
 				.nombreCompleto("Juan Perez")
@@ -83,7 +87,7 @@ class DominioTest {
 				.activo(true)
 				.creadoEn(ahora)
 				.build();
-			entityManager.persist(cliente);
+			administradorDeEntidad.persist(cliente);
 
 			DireccionCliente direccionCliente = DireccionCliente.builder()
 				.cliente(cliente)
@@ -99,7 +103,7 @@ class DominioTest {
 				.principal(true)
 				.activa(true)
 				.build();
-			entityManager.persist(direccionCliente);
+			administradorDeEntidad.persist(direccionCliente);
 
 			Personal administrador = Personal.builder()
 				.rol(rolAdministrador)
@@ -110,7 +114,7 @@ class DominioTest {
 				.activo(true)
 				.creadoEn(ahora)
 				.build();
-			entityManager.persist(administrador);
+			administradorDeEntidad.persist(administrador);
 
 			Personal cocinero = Personal.builder()
 				.rol(rolCocinero)
@@ -121,7 +125,7 @@ class DominioTest {
 				.activo(true)
 				.creadoEn(ahora.plusSeconds(30))
 				.build();
-			entityManager.persist(cocinero);
+			administradorDeEntidad.persist(cocinero);
 
 			Personal repartidor = Personal.builder()
 				.rol(rolRepartidor)
@@ -132,7 +136,7 @@ class DominioTest {
 				.activo(true)
 				.creadoEn(ahora.plusSeconds(60))
 				.build();
-			entityManager.persist(repartidor);
+			administradorDeEntidad.persist(repartidor);
 
 			Producto productoPrincipal = Producto.builder()
 				.codigoProducto("PROD-001")
@@ -146,7 +150,7 @@ class DominioTest {
 				.urlImagen("https://example.com/pizza.jpg")
 				.creadoEn(ahora)
 				.build();
-			entityManager.persist(productoPrincipal);
+			administradorDeEntidad.persist(productoPrincipal);
 
 			Producto bebida = Producto.builder()
 				.codigoProducto("PROD-002")
@@ -160,7 +164,7 @@ class DominioTest {
 				.urlImagen("https://example.com/limonada.jpg")
 				.creadoEn(ahora.plusSeconds(90))
 				.build();
-			entityManager.persist(bebida);
+			administradorDeEntidad.persist(bebida);
 
 			PedidoCliente pedido = PedidoCliente.builder()
 				.codigoPedido(GeneradorCodigoPedido.generar())
@@ -182,7 +186,7 @@ class DominioTest {
 				.entregaEstimadaEn(ahora.plusSeconds(3000))
 				.estadoActualCambiadoEn(ahora.plusSeconds(180))
 				.build();
-			entityManager.persist(pedido);
+			administradorDeEntidad.persist(pedido);
 
 			ItemPedido itemPrincipal = ItemPedido.builder()
 				.pedido(pedido)
@@ -194,7 +198,7 @@ class DominioTest {
 				.notaEspecial("Sin cebolla")
 				.listo(true)
 				.build();
-			entityManager.persist(itemPrincipal);
+			administradorDeEntidad.persist(itemPrincipal);
 
 			ItemPedido itemBebida = ItemPedido.builder()
 				.pedido(pedido)
@@ -206,7 +210,7 @@ class DominioTest {
 				.notaEspecial("Poco hielo")
 				.listo(true)
 				.build();
-			entityManager.persist(itemBebida);
+			administradorDeEntidad.persist(itemBebida);
 
 			HistorialEstadoPedido historial = HistorialEstadoPedido.builder()
 				.pedido(pedido)
@@ -216,7 +220,7 @@ class DominioTest {
 				.cambiadoEn(ahora.plusSeconds(180))
 				.notas("Pedido entregado al repartidor")
 				.build();
-			entityManager.persist(historial);
+			administradorDeEntidad.persist(historial);
 
 			ReglaTransicionEstadoPedido regla = ReglaTransicionEstadoPedido.builder()
 				.estadoOrigen(listo)
@@ -224,7 +228,7 @@ class DominioTest {
 				.rol(rolRepartidor)
 				.activa(true)
 				.build();
-			entityManager.persist(regla);
+			administradorDeEntidad.persist(regla);
 
 			Entrega entrega = Entrega.builder()
 				.pedido(pedido)
@@ -238,9 +242,9 @@ class DominioTest {
 				.notasRepartidor("Entrega completada en el primer intento")
 				.numeroIntento(1)
 				.build();
-			entityManager.persist(entrega);
+			administradorDeEntidad.persist(entrega);
 
-			entityManager.flush();
+			administradorDeEntidad.flush();
 
 			assertNotNull(rolAdministrador.getId());
 			assertNotNull(entregado.getId());
@@ -255,14 +259,16 @@ class DominioTest {
 			assertNotNull(regla.getId());
 			assertNotNull(entrega.getId());
 
-			transaction.commit();
+			transaccion.commit();
+
 		} catch (RuntimeException exception) {
-			if (transaction.isActive()) {
-				transaction.rollback();
+			if (transaccion != null && transaccion.isActive()) {
+				transaccion.rollback();
 			}
+
 			throw exception;
+
 		} finally {
-			entityManager.close();
 			ConfiguracionBaseDatos.cerrar();
 		}
 	}
