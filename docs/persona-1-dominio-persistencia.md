@@ -1,178 +1,125 @@
-# Persona 1: Dominio y Persistencia
+# Persona 1: Dominio Y Persistencia
 
-Queda listo el modelo persistente y los repositorios para que la capa de servicio use entidades sin conocer SQL, HikariCP ni `EntityManager`.
+La persistencia queda alineada con la version aceptada: las entidades JPA viven en `dominio.entidad` y la frontera que usan los servicios son controladores JPA estilo NetBeans en `persistencia.controlador`.
 
-## Alcance implementado
+## Alcance Implementado
 
 ```text
 src/main/java/com/restaurante/pedidos/dominio
 src/main/java/com/restaurante/pedidos/dominio/entidad
-src/main/java/com/restaurante/pedidos/repositorio
+src/main/java/com/restaurante/pedidos/persistencia/controlador
+src/main/java/com/restaurante/pedidos/persistencia/excepcion
 src/main/java/com/restaurante/pedidos/configuracion/ConfiguracionBaseDatos.java
 src/main/resources/META-INF/persistence.xml
 ```
 
-## Repositorios disponibles
+## Controladores JPA
 
-| Repositorio                              | Responsabilidad                                                           |
-|------------------------------------------|---------------------------------------------------------------------------|
-| `RepositorioPedido`                      | Guardar, actualizar y buscar pedidos por código, estado o cola de cocina. |
-| `RepositorioProducto`                    | Buscar productos por id/código y listar productos disponibles.            |
-| `RepositorioEstadoPedido`                | Buscar estados por código y listar el flujo ordenado de estados.          |
-| `RepositorioReglaTransicionEstadoPedido` | Buscar transiciones activas permitidas para un rol y estado actual.       |
-| `RepositorioEntrega`                     | Guardar/actualizar entregas y buscar la entrega asociada a un pedido.     |
-| `RepositorioPersonal`                    | Buscar personal por rol y repartidores disponibles.                       |
-| `RepositorioRol`                         | Buscar roles por código.                                                  |
-| `RepositorioCliente`                     | Guardar y buscar clientes por id.                                         |
+| Controlador | Responsabilidad |
+|-------------|-----------------|
+| `ClientesJpaController` | Crear y buscar clientes. |
+| `DireccionesClienteJpaController` | Crear y buscar direcciones de cliente. |
+| `PedidosClienteJpaController` | Crear, editar y buscar pedidos por id, codigo, estado o cola de cocina. |
+| `ProductosJpaController` | Crear, editar y consultar productos disponibles por codigo o categoria. |
+| `EstadosPedidoJpaController` | Buscar estados por codigo y listar el flujo ordenado. |
+| `ReglasTransicionEstadoPedidoJpaController` | Buscar transiciones activas permitidas para un rol y estado actual. |
+| `EntregasJpaController` | Crear, editar y buscar entregas por pedido. |
+| `PersonalJpaController` | Crear, editar, borrar y buscar personal por rol o disponibilidad. |
+| `RolesJpaController` | Crear y buscar roles por codigo. |
 
-## Métodos mínimos esperados
+## Metodos Minimos
 
-- [x] `RepositorioPedido.buscarPorCodigo(String codigo)`
-- [x] `RepositorioPedido.buscarPorEstado(CodigoEstadoPedido estado)`
-- [x] `RepositorioPedido.buscarPendientesParaCocinero()`
-- [x] `RepositorioPedido.guardar(PedidoCliente pedido)`
-- [x] `RepositorioPersonal.buscarPorRol(CodigoRol rol)`
-- [x] `RepositorioPersonal.buscarRepartidoresDisponibles()`
-- [x] `RepositorioReglaTransicionEstadoPedido.buscarTransicionesValidas(CodigoRol rol, CodigoEstadoPedido estadoActual)`
+- [x] `PedidosClienteJpaController.findByCodigo(String codigo)`
+- [x] `PedidosClienteJpaController.findByEstado(CodigoEstadoPedido estado)`
+- [x] `PedidosClienteJpaController.findPendientesParaCocinero()`
+- [x] `PedidosClienteJpaController.create(PedidoCliente pedido)`
+- [x] `PersonalJpaController.findByRol(CodigoRol rol)`
+- [x] `PersonalJpaController.findRepartidoresDisponibles()`
+- [x] `ReglasTransicionEstadoPedidoJpaController.findTransicionesValidas(CodigoRol rol, CodigoEstadoPedido estadoActual)`
 
-## Convenciones de persistencia
+## Convenciones
 
-### EntityManager
+### Unidad De Persistencia
 
-Los repositorios reciben él `EntityManager` por constructor:
-
-```java
-new RepositorioPedido(administradorDeEntidad)
-```
-
-El repositorio **no crea**, **no cierra** y **no expone** él `EntityManager`. Eso mantiene separada la infraestructura de la capa de servicio.
-
-### Transacciones
-
-Los repositorios no hacen `begin`, `commit` ni `rollback`. La transacción pertenece a la capa que orquesta el caso de uso, normalmente servicio o prueba de integración.
-
-Ejemplo esperado:
-
-```java
-EntityManager em = ConfiguracionBaseDatos.crearAdministradorDeEntidad();
-em.getTransaction().begin();
-
-RepositorioPedido repositorioPedido = new RepositorioPedido(em);
-repositorioPedido.guardar(pedido);
-
-em.getTransaction().commit();
-em.close();
-```
-
-### JPQL
-
-Las consultas usan nombres de entidades y campos Java, no nombres de tablas o columnas SQL. Ejemplo:
-
-```java
-SELECT p FROM PedidoCliente p WHERE p.codigoPedido = :codigo
-```
-
-No se debe consultar directamente `pedidos_cliente.codigo_pedido` desde el repositorio.
-
-### Optional y listas
-
-- Las búsquedas de un solo resultado devuelven `Optional<T>`.
-- Las búsquedas de varios resultados devuelven `List<T>`.
-- Si no hay datos, se devuelve `Optional.empty()` o una lista vacía.
-
-## Detalle por clase
-
-### `RepositorioPedido`
-
-| Método                                       | Cómo funciona                                                                                                                                                  |
-|----------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `buscarPorCodigo(String codigo)`             | Busca un pedido por `codigoPedido` y trae el estado actual con `JOIN FETCH`. Devuelve `Optional<PedidoCliente>`.                                               |
-| `buscarPorEstado(CodigoEstadoPedido estado)` | Filtra por `pedido.estadoActual.codigoEstado` y ordena por `creadoEn ASC`.                                                                                     |
-| `buscarPendientesParaCocinero()`             | Filtra pedidos en `PENDIENTE` y ordena por `prioritario DESC, creadoEn ASC`. Así salen primero los prioritarios y, dentro de cada grupo, el primero que llegó. |
-| `guardar(PedidoCliente pedido)`              | Persiste un pedido nuevo con `persist` y devuelve la misma entidad.                                                                                            |
-| `actualizar(PedidoCliente pedido)`           | Actualiza una entidad administrada o separada con `merge`.                                                                                                     |
-| `buscarPorId(Long id)`                       | Busca por clave primaria usando `EntityManager.find`.                                                                                                          |
-
-### `RepositorioProducto`
-
-| Método                                                       | Cómo funciona                                                              |
-|--------------------------------------------------------------|----------------------------------------------------------------------------|
-| `buscarPorId(Long id)`                                       | Busca un producto por clave primaria.                                      |
-| `buscarPorCodigo(String codigo)`                             | Busca por `codigoProducto`.                                                |
-| `buscarDisponibles()`                                        | Lista productos con `disponible = true`, ordenados por categoría y nombre. |
-| `buscarDisponiblesPorCategoria(CategoriaProducto categoria)` | Lista productos disponibles de una categoría específica.                   |
-| `guardar(Producto producto)`                                 | Persiste un producto nuevo.                                                |
-| `actualizar(Producto producto)`                              | Actualiza un producto con `merge`.                                         |
-
-### `RepositorioEstadoPedido`
-
-| Método                                       | Cómo funciona                                           |
-|----------------------------------------------|---------------------------------------------------------|
-| `buscarPorId(Long id)`                       | Busca un estado por clave primaria.                     |
-| `buscarPorCodigo(CodigoEstadoPedido codigo)` | Busca el estado persistido asociado al enum de dominio. |
-| `listarOrdenados()`                          | Lista los estados por `ordenEstado ASC`.                |
-| `guardar(EstadoPedido estadoPedido)`         | Persiste un estado nuevo.                               |
-
-### `RepositorioReglaTransicionEstadoPedido`
-
-| Método                                                                      | Cómo funciona                                                                                                                              |
-|-----------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `buscarPorId(Long id)`                                                      | Busca una regla por clave primaria.                                                                                                        |
-| `buscarTransicionesValidas(CodigoRol rol, CodigoEstadoPedido estadoActual)` | Filtra reglas activas por rol permitido y estado de origen. Usa `JOIN FETCH` para traer origen, destino y rol dentro de la misma consulta. |
-| `guardar(ReglaTransicionEstadoPedido regla)`                                | Persiste una regla nueva.                                                                                                                  |
-
-Este repositorio no decide si el usuario puede cambiar el estado; solo devuelve las reglas persistidas que coinciden con los filtros.
-
-### `RepositorioEntrega`
-
-| Método                             | Cómo funciona                                                                    |
-|------------------------------------|----------------------------------------------------------------------------------|
-| `buscarPorId(Long id)`             | Busca una entrega por clave primaria.                                            |
-| `buscarPorPedidoId(Long pedidoId)` | Busca la entrega asociada a un pedido y trae pedido/repartidor con `JOIN FETCH`. |
-| `guardar(Entrega entrega)`         | Persiste una entrega nueva.                                                      |
-| `actualizar(Entrega entrega)`      | Actualiza una entrega con `merge`.                                               |
-
-### `RepositorioPersonal`
-
-| Método                            | Cómo funciona                                                                                                                                                                                       |
-|-----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `buscarPorRol()`                  | Método heredado de compatibilidad: lista personal con su rol, sin filtrar.                                                                                                                          |
-| `buscarPorRol(CodigoRol rol)`     | Filtra por `rol.codigoRol`. Este es el método que debe usar la capa de servicio cuando necesita un rol específico.                                                                                  |
-| `buscarRepartidoresDisponibles()` | Devuelve personal con rol `REPARTIDOR`, `activo = true` y sin entregas activas. Se considera activa una entrega cuyo pedido está `EN_CAMINO` o cuya `estadoEntrega` sea `DESPACHADO`/`EN_TRANSITO`. |
-| `buscarPorIdConRol(Long id)`      | Busca personal por id y trae el rol con `JOIN FETCH`.                                                                                                                                               |
-| `guardar`, `actualizar`, `borrar` | Operaciones básicas de persistencia; la transacción la maneja la capa superior.                                                                                                                     |
-
-## Configuración de base de datos
-
-El persistence unit del proyecto está en español:
+El proyecto usa una sola unidad de persistencia:
 
 ```xml
 <persistence-unit name="primerBimestrePU" transaction-type="RESOURCE_LOCAL">
 ```
 
-`ConfiguracionBaseDatos` usa ese mismo nombre para crear la fábrica de entidades. La fábrica se guarda como singleton estático y su creación/cierre están sincronizados para evitar inicializaciones duplicadas si varias partes del programa la piden al mismo tiempo.
+`ConfiguracionBaseDatos` centraliza el `EntityManagerFactory` y expone dos entradas:
 
-## Hilos y persistencia
+```java
+ConfiguracionBaseDatos.obtenerFabricaAdministradorDeEntidades();
+ConfiguracionBaseDatos.crearAdministradorDeEntidad();
+```
 
-No conviene implementar hilos dentro de los repositorios. En JPA, `EntityManager` **no es thread-safe**: no debe compartirse entre hilos.
+### Transacciones
 
-La convención segura es:
+Los controladores JPA abren, confirman y revierten transacciones en operaciones de escritura. La capa de presentacion no maneja `EntityManager` ni transacciones.
 
-1. Cada hilo o tarea crea su propio `EntityManager`.
-2. Ese hilo abre/cierra su propia transacción si va a escribir.
-3. El repositorio sé instancia con el `EntityManager` de ese hilo.
-4. Nunca se guarda un repositorio como singleton si contiene un `EntityManager`.
+Ejemplo esperado:
 
-La parte compartible entre hilos es él `EntityManagerFactory`, que ya queda centralizado en `ConfiguracionBaseDatos`.
+```java
+var fabrica = ConfiguracionBaseDatos.obtenerFabricaAdministradorDeEntidades();
+var pedidos = new PedidosClienteJpaController(fabrica);
+
+pedidos.create(pedido);
+```
+
+### Repositorios
+
+Los repositorios antiguos no son la API principal de Persona 2. Quedan como soporte interno para reutilizar consultas JPQL ya probadas dentro de los controladores JPA.
+
+Regla practica:
+
+```text
+Servicio -> *JpaController -> Repositorio interno opcional -> EntityManager -> BD
+```
+
+No agregues reglas de negocio en repositorios ni en controladores JPA. Las reglas viven en `servicio`.
+
+### Consultas Y Codigos
+
+Las busquedas de estados y roles deben usar enums persistidos (`CodigoEstadoPedido`, `CodigoRol`), no ids hardcodeados.
+
+Correcto:
+
+```java
+findByCodigo(CodigoEstadoPedido.PENDIENTE)
+findByRol(CodigoRol.REPARTIDOR)
+```
+
+Incorrecto:
+
+```java
+find(1L)
+find(3L)
+```
+
+## Base De Datos
+
+La fuente de verdad para nombres de tablas, columnas y datos semilla es:
+
+```text
+assets/scripts/ER_Script.sql
+```
+
+La conexion actual esta configurada en:
+
+```text
+src/main/resources/META-INF/persistence.xml
+```
 
 ## Reglas
 
 ```text
-No pongas reglas de negocio en repositorios.
-No devuelvas EntityManager fuera del repositorio.
-No cambies nombres de tablas sin revisar: assets/scripts/ER_Script.sql.
+No pongas reglas de negocio en controladores JPA.
+No expongas EntityManager a presentacion.
+No uses ids hardcodeados para estados o roles.
+No cambies nombres de tablas sin revisar assets/scripts/ER_Script.sql.
 ```
 
 ## Entregable
 
-Persona 2 puede usar estos repositorios desde servicios sin conocer SQL, HikariCP ni `EntityManager`. Persona 2 sigue siendo responsable de coordinar casos de uso, transacciones y reglas de negocio.
+Persona 2 puede crear pedidos, cambiar estados y consultar datos usando controladores JPA estilo NetBeans, sin conocer SQL, HikariCP ni detalles de `EntityManager`.

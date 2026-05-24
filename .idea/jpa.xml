@@ -2,7 +2,7 @@
 <project version="4">
   <component name="PersistenceUnitSettings">
     <persistence-units>
-      <persistence-unit moduleName="FirstBimesterProject" name="firstBimesterPU" framework="JPA" ormUnit="FirstBimesterProject:firstBimesterPU" defaultDataSourceId="89242525-bb86-40c2-996b-11c0ffb52890" />
+      <persistence-unit moduleName="FirstBimesterProject" name="primerBimestrePU" framework="JPA" ormUnit="FirstBimesterProject:primerBimestrePU" defaultDataSourceId="89242525-bb86-40c2-996b-11c0ffb52890" />
     </persistence-units>
   </component>
 </project>

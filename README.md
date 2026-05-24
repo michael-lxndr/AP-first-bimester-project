@@ -24,15 +24,26 @@ src/main/java/com/restaurante/pedidos
 │   ├── CodigoRol.java
 │   ├── GeneradorCodigoPedido.java
 │   └── entidad
+├── persistencia
+│   ├── controlador
+│   │   ├── ClientesJpaController.java
+│   │   ├── PedidosClienteJpaController.java
+│   │   └── ...
+│   └── excepcion
 ├── repositorio
-│   ├── RepositorioCliente.java
-│   ├── RepositorioPersonal.java
-│   └── RepositorioRol.java
+│   └── consultas JPQL internas de apoyo
 ├── servicio
+│   ├── FachadaServiciosPedido.java
+│   ├── MaquinaEstadosPedido.java
+│   ├── ServicioPedido.java
+│   ├── ServicioCocina.java
+│   ├── ServicioEntrega.java
 │   ├── ServicioPersonal.java
+│   ├── ServicioSimulacion.java
 │   └── SimuladorTiempo.java
 └── presentacion
     ├── AplicacionPrincipal.java
+    ├── AplicacionConsola.java
     ├── AplicacionJavaFx.java
     ├── GestorEscenas.java
     ├── CargadorVistas.java
@@ -66,7 +77,7 @@ src/main/resources/com/restaurante/pedidos/presentacion
 ## Regla De Dependencias
 
 ```text
-presentacion -> servicio -> repositorio -> dominio
+presentacion -> servicio -> persistencia.controlador -> dominio
 ```
 
 Reglas obligatorias:
@@ -74,7 +85,8 @@ Reglas obligatorias:
 ```text
 Los controladores JavaFX no contienen reglas de negocio.
 Los servicios coordinan reglas, validaciones, transacciones y casos de uso.
-Los repositorios solo hablan con EntityManager.
+Los controladores JPA concentran operaciones de persistencia estilo NetBeans.
+Los repositorios, si se usan, son apoyo interno de consultas JPQL y no API de negocio.
 El dominio no depende de presentación, servicio ni repositorio.
 Los pools de hilos se centralizan en ConfiguracionHilos.
 Los tiempos simulados se centralizan en ConfiguracionSimulacion y SimuladorTiempo.
@@ -97,7 +109,7 @@ CREATE DATABASE proyecto_primer_bimestre;
 Conexión actual:
 
 ```text
-URL:      jdbc:mysql://localhost:3307/proyecto_primer_bimestre
+URL:      jdbc:mysql://localhost:3306/proyecto_primer_bimestre
 Usuario:  root
 Password: root
 Pool:     HikariCP mediante Hibernate
@@ -185,35 +197,38 @@ La opción recomendada es correrlo con Maven (`mvn javafx:run`) porque JavaFX ne
 mvn test
 ```
 
-Las pruebas unitarias viven en:
+Las pruebas viven en:
 
 ```text
 src/test/java/com/restaurante/pedidos
+├── configuracion
 ├── dominio/GeneradorCodigoPedidoTest.java
+├── persistencia
+├── presentacion
+├── repositorio
 └── servicio/SimuladorTiempoTest.java
 ```
 
 ## Modelo De Negocio
 
-Estados operativos del pedido:
+Estados operativos del pedido (enum real en código/BD):
 
 ```text
-PENDING -> IN_PREPARATION -> READY -> ON_THE_WAY -> DELIVERED
+PENDIENTE -> EN_PREPARACION -> LISTO -> EN_CAMINO -> ENTREGADO
 ```
 
 Roles principales:
 
 ```text
-ADMINISTRATOR
-COOK
-COURIER
-CUSTOMER
+ADMINISTRADOR
+COCINERO
+REPARTIDOR
 ```
 
 ## División Del Equipo
 
 ```text
-Persona 1: dominio, entidades, base de datos y repositorios.
+Persona 1: dominio, entidades, base de datos y controladores JPA.
 Persona 2: servicios, reglas de negocio, máquina de estados, simulación y pools de hilos.
 Persona 3: presentación JavaFX, navegación, pantallas, DTOs de vista y pruebas.
 ```
@@ -226,18 +241,22 @@ docs/persona-2-negocio-simulacion.md
 docs/persona-3-presentacion-pruebas.md
 ```
 
+## Ejecución IDE + Maven (refactor Persona 2)
+
+- Unidad de persistencia única del proyecto: `primerBimestrePU`.
+- IntelliJ: verificar `.idea/jpa.xml` apuntando a `primerBimestrePU`.
+- NetBeans: `nbactions.xml` ejecuta `com.restaurante.pedidos.presentacion.AplicacionPrincipal` con Maven.
+- Maven CLI:
+
+```bash
+mvn test
+mvn javafx:run
+```
+
 ## Pendientes Técnicos
 
 ```text
-RepositorioPedido
-RepositorioProducto
-RepositorioEstadoPedido
-RepositorioReglaTransicionEstadoPedido
-ServicioPedido
-MaquinaEstadosPedido
-ServicioCocina
-ServicioEntrega
-ServicioSimulacion
+limpieza final de controladores JavaFX por caso de uso
 PedidoDTO
 EstadoPedidoDTO
 validadores de negocio
