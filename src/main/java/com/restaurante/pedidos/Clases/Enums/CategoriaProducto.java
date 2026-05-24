@@ -4,10 +4,7 @@
  */
 package com.restaurante.pedidos.Clases.Enums;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public enum CategoriaProducto {
         ENTRADA,
 	PLATO_FUERTE,

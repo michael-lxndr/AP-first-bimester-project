@@ -20,10 +20,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-/**
- *
- * @author Javier Montaño
- */
+
 @Entity
 @Table(name = "direcciones_cliente")
 @NamedQueries({

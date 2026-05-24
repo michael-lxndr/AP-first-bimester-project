@@ -9,18 +9,15 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import Clases.EstadosPedido;
-import Clases.ReglasTransicionEstadoPedido;
-import Clases.Roles;
-import Logica.exceptions.NonexistentEntityException;
+import com.restaurante.pedidos.Clases.EstadosPedido;
+import com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido;
+import com.restaurante.pedidos.Clases.Roles;
+import com.restaurante.pedidos.Logica.exceptions.NonexistentEntityException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class ReglasTransicionEstadoPedidoJpaController implements Serializable {
 
     public ReglasTransicionEstadoPedidoJpaController(EntityManagerFactory emf) {

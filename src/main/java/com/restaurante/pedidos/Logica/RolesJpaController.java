@@ -9,21 +9,18 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import Clases.Personal;
+import com.restaurante.pedidos.Clases.Personal;
 import java.util.ArrayList;
 import java.util.Collection;
-import Clases.ReglasTransicionEstadoPedido;
-import Clases.Roles;
-import Logica.exceptions.IllegalOrphanException;
-import Logica.exceptions.NonexistentEntityException;
+import com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido;
+import com.restaurante.pedidos.Clases.Roles;
+import com.restaurante.pedidos.Logica.exceptions.IllegalOrphanException;
+import com.restaurante.pedidos.Logica.exceptions.NonexistentEntityException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class RolesJpaController implements Serializable {
 
     public RolesJpaController(EntityManagerFactory emf) {

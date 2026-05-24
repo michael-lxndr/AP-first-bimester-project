@@ -4,14 +4,11 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import Clases.Enums.CodigoEstadoPedido;
-import Clases.EstadosPedido;
-import Clases.PedidosCliente;
+import com.restaurante.pedidos.Clases.Enums.CodigoEstadoPedido;
+import com.restaurante.pedidos.Clases.EstadosPedido;
+import com.restaurante.pedidos.Clases.PedidosCliente;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class MaquinaEstadosPedido {
 
     public boolean validarCambioEstado(CodigoEstadoPedido actual, CodigoEstadoPedido nuevo){

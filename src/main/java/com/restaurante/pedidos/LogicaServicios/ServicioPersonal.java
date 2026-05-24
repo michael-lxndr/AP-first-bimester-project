@@ -4,19 +4,16 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import Clases.Enums.CodigoRol;
-import Clases.Personal;
-import Clases.Roles;
-import Logica.PersonalJpaController;
-import Logica.RolesJpaController;
-import LogicaConfiguracion.JPABaseDeDatos;
+import com.restaurante.pedidos.Clases.Enums.CodigoRol;
+import com.restaurante.pedidos.Clases.Personal;
+import com.restaurante.pedidos.Clases.Roles;
+import com.restaurante.pedidos.Logica.PersonalJpaController;
+import com.restaurante.pedidos.Logica.RolesJpaController;
+import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 import java.util.Date;
 import java.util.List;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class ServicioPersonal {
 
     private PersonalJpaController personalControlador;

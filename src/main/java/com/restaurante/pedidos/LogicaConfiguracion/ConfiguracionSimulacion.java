@@ -6,10 +6,7 @@ package com.restaurante.pedidos.LogicaConfiguracion;
 
 import java.time.Duration;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class ConfiguracionSimulacion {
 
     private static final Duration MIN_KITCHEN_DELAY = Duration.ofSeconds(3);

@@ -4,14 +4,11 @@
  */
 package com.restaurante.pedidos.Logica.Utilidades;
 
-import LogicaConfiguracion.ConfiguracionSimulacion;
+import com.restaurante.pedidos.LogicaConfiguracion.ConfiguracionSimulacion;
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class SimularTiempo {
 
     private SimularTiempo() {

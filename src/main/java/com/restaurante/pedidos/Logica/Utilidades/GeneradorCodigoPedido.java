@@ -8,10 +8,7 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class GeneradorCodigoPedido {
     private static final SecureRandom random =
             new SecureRandom();

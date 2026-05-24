@@ -17,10 +17,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
-/**
- *
- * @author Javier Montaño
- */
+
 @Entity
 @Table(name = "reglas_transicion_estado_pedido")
 @NamedQueries({

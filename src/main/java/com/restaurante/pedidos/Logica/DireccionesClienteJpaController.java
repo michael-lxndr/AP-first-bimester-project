@@ -9,21 +9,18 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import Clases.Clientes;
-import Clases.DireccionesCliente;
-import Clases.PedidosCliente;
-import Logica.exceptions.IllegalOrphanException;
-import Logica.exceptions.NonexistentEntityException;
+import com.restaurante.pedidos.Clases.Clientes;
+import com.restaurante.pedidos.Clases.DireccionesCliente;
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.Logica.exceptions.IllegalOrphanException;
+import com.restaurante.pedidos.Logica.exceptions.NonexistentEntityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class DireccionesClienteJpaController implements Serializable {
 
     public DireccionesClienteJpaController(EntityManagerFactory emf) {

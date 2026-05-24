@@ -4,17 +4,14 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import Clases.EstadosPedido;
-import Clases.PedidosCliente;
-import LogicaConfiguracion.ConfiguracionHilos;
+import com.restaurante.pedidos.Clases.EstadosPedido;
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.LogicaConfiguracion.ConfiguracionHilos;
 import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class ServicioSimulacion {
 
     private final ServicioPedido servicioPedido;

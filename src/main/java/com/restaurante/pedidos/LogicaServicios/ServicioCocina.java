@@ -4,16 +4,13 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import Clases.EstadosPedido;
-import Clases.PedidosCliente;
-import Logica.EstadosPedidoJpaController;
-import Logica.PedidosClienteJpaController;
-import LogicaConfiguracion.JPABaseDeDatos;
+import com.restaurante.pedidos.Clases.EstadosPedido;
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.Logica.EstadosPedidoJpaController;
+import com.restaurante.pedidos.Logica.PedidosClienteJpaController;
+import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class ServicioCocina {
 
     private MaquinaEstadosPedido maquina;

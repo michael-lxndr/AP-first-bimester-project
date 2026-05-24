@@ -4,27 +4,24 @@
  */
 package com.restaurante.pedidos.Logica;
 
-import Clases.EstadosPedido;
+import com.restaurante.pedidos.Clases.EstadosPedido;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import Clases.HistorialEstadosPedido;
+import com.restaurante.pedidos.Clases.HistorialEstadosPedido;
 import java.util.ArrayList;
 import java.util.Collection;
-import Clases.PedidosCliente;
-import Clases.ReglasTransicionEstadoPedido;
-import Logica.exceptions.IllegalOrphanException;
-import Logica.exceptions.NonexistentEntityException;
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido;
+import com.restaurante.pedidos.Logica.exceptions.IllegalOrphanException;
+import com.restaurante.pedidos.Logica.exceptions.NonexistentEntityException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class EstadosPedidoJpaController implements Serializable {
 
     public EstadosPedidoJpaController(EntityManagerFactory emf) {

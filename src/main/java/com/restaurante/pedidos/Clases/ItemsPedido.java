@@ -18,10 +18,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
-/**
- *
- * @author Javier Montaño
- */
+
 @Entity
 @Table(name = "items_pedido")
 @NamedQueries({

@@ -4,22 +4,19 @@
 
 package com.restaurante.pedidos.Presentacion;
 
-import Clases.Clientes;
-import Clases.DireccionesCliente;
-import Clases.PedidosCliente;
-import Clases.Personal;
-import LogicaServicios.ServicioPedido;
-import LogicaServicios.ServicioPersonal;
-import LogicaServicios.ServicioSimulacion;
+import com.restaurante.pedidos.Clases.Clientes;
+import com.restaurante.pedidos.Clases.DireccionesCliente;
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.Clases.Personal;
+import com.restaurante.pedidos.LogicaServicios.ServicioPedido;
+import com.restaurante.pedidos.LogicaServicios.ServicioPersonal;
+import com.restaurante.pedidos.LogicaServicios.ServicioSimulacion;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class Main {
 
     private Scanner scanner;
@@ -46,8 +43,6 @@ public class Main {
             mostrarMenu();
 
             opcion = Integer.parseInt(scanner.nextLine());
-
-            scanner.nextLine();
 
             switch (opcion) {
                 case 1:
@@ -212,5 +207,3 @@ public class Main {
         System.out.println("\nEstado actual: " + estado);
     }
 }
-
-

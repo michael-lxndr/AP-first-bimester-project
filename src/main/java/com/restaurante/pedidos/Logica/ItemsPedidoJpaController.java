@@ -4,23 +4,20 @@
  */
 package com.restaurante.pedidos.Logica;
 
-import Clases.ItemsPedido;
+import com.restaurante.pedidos.Clases.ItemsPedido;
 import java.io.Serializable;
 import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import Clases.PedidosCliente;
-import Clases.Productos;
-import Logica.exceptions.NonexistentEntityException;
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.Clases.Productos;
+import com.restaurante.pedidos.Logica.exceptions.NonexistentEntityException;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-/**
- *
- * @author Javier Montaño
- */
+
 public class ItemsPedidoJpaController implements Serializable {
 
     public ItemsPedidoJpaController(EntityManagerFactory emf) {
