@@ -6,7 +6,7 @@ package com.restaurante.pedidos.Clases.Enums;
 
 
 public enum CodigoRol {
-        ADMINISTRADOR,
+	ADMINISTRADOR,
 	COCINERO,
 	REPARTIDOR
 

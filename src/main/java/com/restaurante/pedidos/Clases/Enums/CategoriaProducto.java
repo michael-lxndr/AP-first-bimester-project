@@ -6,7 +6,7 @@ package com.restaurante.pedidos.Clases.Enums;
 
 
 public enum CategoriaProducto {
-        ENTRADA,
+	ENTRADA,
 	PLATO_FUERTE,
 	BEBIDA,
 	POSTRE,

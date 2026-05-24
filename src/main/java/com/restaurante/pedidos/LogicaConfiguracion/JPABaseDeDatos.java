@@ -10,10 +10,10 @@ import javax.persistence.Persistence;
 
 public class JPABaseDeDatos {
 
-    private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("RestaurantPU");
+	private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("RestaurantPU");
 
-    public static EntityManagerFactory getEntityManagerFactory() {
-        return emf;
-    }
+	public static EntityManagerFactory getEntityManagerFactory() {
+		return emf;
+	}
 
 }

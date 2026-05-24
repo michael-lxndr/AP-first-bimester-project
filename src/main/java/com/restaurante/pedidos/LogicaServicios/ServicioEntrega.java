@@ -14,32 +14,32 @@ import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 
 public class ServicioEntrega {
 
-    private MaquinaEstadosPedido maquina;
-    private PedidosClienteJpaController pedidosClienteControlador;
-    private EstadosPedidoJpaController estadosPedidoControlador;
+	private final MaquinaEstadosPedido maquina;
+	private final PedidosClienteJpaController pedidosClienteControlador;
+	private final EstadosPedidoJpaController estadosPedidoControlador;
 
-    public ServicioEntrega() {
+	public ServicioEntrega() {
 
-        maquina = new MaquinaEstadosPedido();
+		maquina = new MaquinaEstadosPedido();
 
-        pedidosClienteControlador = new PedidosClienteJpaController(JPABaseDeDatos.getEntityManagerFactory());
-        estadosPedidoControlador = new EstadosPedidoJpaController(JPABaseDeDatos.getEntityManagerFactory());
-    }
+		pedidosClienteControlador = new PedidosClienteJpaController(JPABaseDeDatos.getEntityManagerFactory());
+		estadosPedidoControlador = new EstadosPedidoJpaController(JPABaseDeDatos.getEntityManagerFactory());
+	}
 
-    public void iniciarEntrega(PedidosCliente pedido) throws NonexistentEntityException, Exception {
+	public void iniciarEntrega(PedidosCliente pedido) throws Exception {
 
-        EstadosPedido estadoEnCamino = estadosPedidoControlador.findEstadosPedido(4L);
+		EstadosPedido estadoEnCamino = estadosPedidoControlador.findEstadosPedido(4L);
 
-        maquina.cambiarEstado(pedido, estadoEnCamino);
+		maquina.cambiarEstado(pedido, estadoEnCamino);
 
-        pedidosClienteControlador.edit(pedido);
-    }
+		pedidosClienteControlador.edit(pedido);
+	}
 
-    public void confirmarEntrega(PedidosCliente pedido) throws NonexistentEntityException, Exception {
+	public void confirmarEntrega(PedidosCliente pedido) throws Exception {
 
-        EstadosPedido estadoEntregado = estadosPedidoControlador.findEstadosPedido(5L);
-        maquina.cambiarEstado(pedido, estadoEntregado);
+		EstadosPedido estadoEntregado = estadosPedidoControlador.findEstadosPedido(5L);
+		maquina.cambiarEstado(pedido, estadoEntregado);
 
-        pedidosClienteControlador.edit(pedido);
-    }
+		pedidosClienteControlador.edit(pedido);
+	}
 }

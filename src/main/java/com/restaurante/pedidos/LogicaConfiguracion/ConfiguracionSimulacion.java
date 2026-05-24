@@ -9,7 +9,7 @@ import java.time.Duration;
 
 public class ConfiguracionSimulacion {
 
-    private static final Duration MIN_KITCHEN_DELAY = Duration.ofSeconds(3);
+	private static final Duration MIN_KITCHEN_DELAY = Duration.ofSeconds(3);
 	private static final Duration MAX_KITCHEN_DELAY = Duration.ofSeconds(8);
 	private static final Duration MIN_DELIVERY_DELAY = Duration.ofSeconds(5);
 	private static final Duration MAX_DELIVERY_DELAY = Duration.ofSeconds(12);

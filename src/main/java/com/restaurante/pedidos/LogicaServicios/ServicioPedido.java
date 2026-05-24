@@ -13,54 +13,54 @@ import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 
 public class ServicioPedido {
 
-    private PedidosClienteJpaController pedidosClienteControlador;
-    private EstadosPedidoJpaController estadosPedidoControlador;
+	private final PedidosClienteJpaController pedidosClienteControlador;
+	private final EstadosPedidoJpaController estadosPedidoControlador;
 
-    public ServicioPedido() {
-        pedidosClienteControlador =
-                new PedidosClienteJpaController(JPABaseDeDatos.getEntityManagerFactory());
+	public ServicioPedido() {
+		pedidosClienteControlador =
+			new PedidosClienteJpaController(JPABaseDeDatos.getEntityManagerFactory());
 
-        estadosPedidoControlador =
-                new EstadosPedidoJpaController(JPABaseDeDatos.getEntityManagerFactory());
-    }
+		estadosPedidoControlador =
+			new EstadosPedidoJpaController(JPABaseDeDatos.getEntityManagerFactory());
+	}
 
-    public void crearPedido(PedidosCliente nuevoPedido) throws Exception {
+	public void crearPedido(PedidosCliente nuevoPedido) throws Exception {
 
-        EstadosPedido estadoInicial = estadosPedidoControlador.findEstadosPedido(1L);
+		EstadosPedido estadoInicial = estadosPedidoControlador.findEstadosPedido(1L);
 
-        nuevoPedido.setEstadoActualId(estadoInicial);
+		nuevoPedido.setEstadoActualId(estadoInicial);
 
-        pedidosClienteControlador.create(nuevoPedido);
-    }
+		pedidosClienteControlador.create(nuevoPedido);
+	}
 
-    public void actualizar(PedidosCliente pedido) throws Exception {
-        pedidosClienteControlador.edit(pedido);
-    }
+	public void actualizar(PedidosCliente pedido) throws Exception {
+		pedidosClienteControlador.edit(pedido);
+	}
 
-    public PedidosCliente buscarPedidoPorCodigo(String codigo) {
-    return pedidosClienteControlador.findByCodigo(codigo);
-}
+	public PedidosCliente buscarPedidoPorCodigo(String codigo) {
+		return pedidosClienteControlador.findByCodigo(codigo);
+	}
 
-    public String consultarEstadoPorCodigo(String codigo) {
+	public String consultarEstadoPorCodigo(String codigo) {
 
-        PedidosCliente pedido = pedidosClienteControlador.findByCodigo(codigo);
+		PedidosCliente pedido = pedidosClienteControlador.findByCodigo(codigo);
 
-        if (pedido == null) {
-            return "Pedido no encontrado";
-        }
+		if (pedido == null) {
+			return "Pedido no encontrado";
+		}
 
-        return pedido.getEstadoActualId().getCodigoEstado();
-    }
+		return pedido.getEstadoActualId().getCodigoEstado();
+	}
 
-    public EstadosPedido buscarEstadoPorCodigo(String codigoEstado) {
+	public EstadosPedido buscarEstadoPorCodigo(String codigoEstado) {
 
-    for (EstadosPedido estado : estadosPedidoControlador.findEstadosPedidoEntities()) {
+		for (EstadosPedido estado : estadosPedidoControlador.findEstadosPedidoEntities()) {
 
-        if (estado.getCodigoEstado().equals(codigoEstado)) {
-            return estado;
-        }
-    }
+			if (estado.getCodigoEstado().equals(codigoEstado)) {
+				return estado;
+			}
+		}
 
-    return null;
-}
+		return null;
+	}
 }

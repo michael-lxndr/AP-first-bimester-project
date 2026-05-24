@@ -7,72 +7,72 @@ package com.restaurante.pedidos.LogicaServicios;
 import com.restaurante.pedidos.Clases.EstadosPedido;
 import com.restaurante.pedidos.Clases.PedidosCliente;
 import com.restaurante.pedidos.LogicaConfiguracion.ConfiguracionHilos;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class ServicioSimulacion {
 
-    private final ServicioPedido servicioPedido;
+	private final ServicioPedido servicioPedido;
 
-    public ServicioSimulacion(ServicioPedido servicioPedido) {
-        this.servicioPedido = servicioPedido;
-    }
+	public ServicioSimulacion(ServicioPedido servicioPedido) {
+		this.servicioPedido = servicioPedido;
+	}
 
-    public List<String> simularPedido(PedidosCliente pedido) {
+	public List<String> simularPedido(PedidosCliente pedido) {
 
-        List<String> estados = new ArrayList<>();
+		List<String> estados = new ArrayList<>();
 
-        ConfiguracionHilos.simulationExecutor().submit(() -> {
+		ConfiguracionHilos.simulationExecutor().submit(() -> {
 
-            try {
+			try {
 
-                String codigo = pedido.getCodigoPedido();
+				String codigo = pedido.getCodigoPedido();
 
-                cambiarEstado(codigo, "EN_PREPARACION");
-                estados.add("EN_PREPARACION");
-                Thread.sleep(2000);
+				cambiarEstado(codigo, "EN_PREPARACION");
+				estados.add("EN_PREPARACION");
+				Thread.sleep(2000);
 
-                cambiarEstado(codigo, "LISTO");
-                estados.add("LISTO");
-                Thread.sleep(2000);
+				cambiarEstado(codigo, "LISTO");
+				estados.add("LISTO");
+				Thread.sleep(2000);
 
-                cambiarEstado(codigo, "EN_CAMINO");
-                estados.add("EN_CAMINO");
-                Thread.sleep(2000);
+				cambiarEstado(codigo, "EN_CAMINO");
+				estados.add("EN_CAMINO");
+				Thread.sleep(2000);
 
-                cambiarEstado(codigo, "ENTREGADO");
-                estados.add("ENTREGADO");
+				cambiarEstado(codigo, "ENTREGADO");
+				estados.add("ENTREGADO");
 
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 
-        return estados;
-    }
+		return estados;
+	}
 
-    private void cambiarEstado(String codigoPedido, String estado) {
+	private void cambiarEstado(String codigoPedido, String estado) {
 
-        try {
+		try {
 
-            PedidosCliente pedido =
-                    servicioPedido.buscarPedidoPorCodigo(codigoPedido);
+			PedidosCliente pedido =
+				servicioPedido.buscarPedidoPorCodigo(codigoPedido);
 
-            if (pedido == null) {
-                return;
-            }
+			if (pedido == null) {
+				return;
+			}
 
-            EstadosPedido nuevoEstado =
-                    servicioPedido.buscarEstadoPorCodigo(estado);
+			EstadosPedido nuevoEstado =
+				servicioPedido.buscarEstadoPorCodigo(estado);
 
-            pedido.setEstadoActualId(nuevoEstado);
+			pedido.setEstadoActualId(nuevoEstado);
 
-            servicioPedido.actualizar(pedido);
+			servicioPedido.actualizar(pedido);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }

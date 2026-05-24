@@ -11,39 +11,39 @@ import com.restaurante.pedidos.Clases.PedidosCliente;
 
 public class MaquinaEstadosPedido {
 
-    public boolean validarCambioEstado(CodigoEstadoPedido actual, CodigoEstadoPedido nuevo){
+	public boolean validarCambioEstado(CodigoEstadoPedido actual, CodigoEstadoPedido nuevo) {
 
-        switch (actual){
+		switch (actual) {
 
-            case PENDIENTE:
-                return nuevo == CodigoEstadoPedido.EN_PREPARACION;
+			case PENDIENTE:
+				return nuevo == CodigoEstadoPedido.EN_PREPARACION;
 
-            case EN_PREPARACION:
-                return nuevo == CodigoEstadoPedido.LISTO;
+			case EN_PREPARACION:
+				return nuevo == CodigoEstadoPedido.LISTO;
 
-            case LISTO:
-                return nuevo == CodigoEstadoPedido.EN_CAMINO;
+			case LISTO:
+				return nuevo == CodigoEstadoPedido.EN_CAMINO;
 
-            case EN_CAMINO:
-                return nuevo == CodigoEstadoPedido.ENTREGADO;
+			case EN_CAMINO:
+				return nuevo == CodigoEstadoPedido.ENTREGADO;
 
-            default:
-                return false;
-        }
-    }
+			default:
+				return false;
+		}
+	}
 
-    public void cambiarEstado(PedidosCliente pedido, EstadosPedido nuevoEstadoEntidad){
+	public void cambiarEstado(PedidosCliente pedido, EstadosPedido nuevoEstadoEntidad) {
 
-        CodigoEstadoPedido actual = CodigoEstadoPedido.valueOf(pedido.getEstadoActualId().getCodigoEstado());
+		CodigoEstadoPedido actual = CodigoEstadoPedido.valueOf(pedido.getEstadoActualId().getCodigoEstado());
 
-        CodigoEstadoPedido nuevo = CodigoEstadoPedido.valueOf(nuevoEstadoEntidad.getCodigoEstado());
+		CodigoEstadoPedido nuevo = CodigoEstadoPedido.valueOf(nuevoEstadoEntidad.getCodigoEstado());
 
-        boolean valido = validarCambioEstado(actual, nuevo);
+		boolean valido = validarCambioEstado(actual, nuevo);
 
-        if (!valido) {
-            throw new IllegalStateException("Transaccion de estado inválida");
-        }
+		if (!valido) {
+			throw new IllegalStateException("Transaccion de estado inválida");
+		}
 
-        pedido.setEstadoActualId(nuevoEstadoEntidad);
-    }
+		pedido.setEstadoActualId(nuevoEstadoEntidad);
+	}
 }

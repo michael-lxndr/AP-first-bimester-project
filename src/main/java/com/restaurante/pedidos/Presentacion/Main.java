@@ -11,6 +11,7 @@ import com.restaurante.pedidos.Clases.Personal;
 import com.restaurante.pedidos.LogicaServicios.ServicioPedido;
 import com.restaurante.pedidos.LogicaServicios.ServicioPersonal;
 import com.restaurante.pedidos.LogicaServicios.ServicioSimulacion;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -19,191 +20,191 @@ import java.util.Scanner;
 
 public class Main {
 
-    private Scanner scanner;
-    private ServicioPedido servicioPedido;
-    private ServicioSimulacion servicioSimulacion;
-    private ServicioPersonal servicioPersonal;
+	private Scanner scanner;
+	private ServicioPedido servicioPedido;
+	private ServicioSimulacion servicioSimulacion;
+	private ServicioPersonal servicioPersonal;
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
 
-        Main app = new Main();
+		Main app = new Main();
 
-        app.scanner = new Scanner(System.in);
-        app.servicioPedido = new ServicioPedido();
-        app.servicioSimulacion = new ServicioSimulacion(app.servicioPedido);
-        app.servicioPersonal = new ServicioPersonal();
+		app.scanner = new Scanner(System.in);
+		app.servicioPedido = new ServicioPedido();
+		app.servicioSimulacion = new ServicioSimulacion(app.servicioPedido);
+		app.servicioPersonal = new ServicioPersonal();
 
-        app.iniciarSistema();
-    }
+		app.iniciarSistema();
+	}
 
-    public void iniciarSistema() {
-        int opcion;
+	public void iniciarSistema() {
+		int opcion;
 
-        do {
-            mostrarMenu();
+		do {
+			mostrarMenu();
 
-            opcion = Integer.parseInt(scanner.nextLine());
+			opcion = Integer.parseInt(scanner.nextLine());
 
-            switch (opcion) {
-                case 1:
-                    crearPedido();
-                    break;
+			switch (opcion) {
+				case 1:
+					crearPedido();
+					break;
 
-                case 2:
-                    simularPedido();
-                    break;
+				case 2:
+					simularPedido();
+					break;
 
-                case 3:
-                    consultarEstadoPedido();
-                    break;
+				case 3:
+					consultarEstadoPedido();
+					break;
 
-                case 4:
-                    gestionarPersonal();
-                    break;
+				case 4:
+					gestionarPersonal();
+					break;
 
-                case 0:
+				case 0:
 
-                    System.out.println("\nSaliendo del sistema...");
-                    break;
+					System.out.println("\nSaliendo del sistema...");
+					break;
 
-                default:
+				default:
 
-                    System.out.println("\nOpcion no válida");
-            }
-        } while (opcion != 0);
-    }
+					System.out.println("\nOpcion no válida");
+			}
+		} while (opcion != 0);
+	}
 
-    private void mostrarMenu(){
+	private void mostrarMenu() {
 
-        System.out.println("RESTAURANT DELIVERY SYSTEM");
+		System.out.println("RESTAURANT DELIVERY SYSTEM");
 
-        System.out.println("1. Crear Pedido");
-        System.out.println("2. Simular Pedido");
-        System.out.println("3. Consultar Estado Pedido");
-        System.out.println("4. Gestionar Personal");
-        System.out.println("0. Salir");
-        System.out.println("\nSeleccione una opción: ");
-    }
+		System.out.println("1. Crear Pedido");
+		System.out.println("2. Simular Pedido");
+		System.out.println("3. Consultar Estado Pedido");
+		System.out.println("4. Gestionar Personal");
+		System.out.println("0. Salir");
+		System.out.println("\nSeleccione una opción: ");
+	}
 
-    private void gestionarPersonal(){
-        mostrarMenuPersonal ();
+	private void gestionarPersonal() {
+		mostrarMenuPersonal();
 
-        int op = Integer.parseInt(scanner.nextLine());
+		int op = Integer.parseInt(scanner.nextLine());
 
-        servicioPersonal.ejecutarOpcion(op);
-    }
+		servicioPersonal.ejecutarOpcion(op);
+	}
 
-    private void mostrarMenuPersonal() {
-        System.out.println("\nGESTION PERSONAL");
-        System.out.println("1. Ver Personal");
-        System.out.println("2. Asignar Repartidor");
-        System.out.println("0. Volver");
-        System.out.println("Seleccione una opción: ");
-    }
+	private void mostrarMenuPersonal() {
+		System.out.println("\nGESTION PERSONAL");
+		System.out.println("1. Ver Personal");
+		System.out.println("2. Asignar Repartidor");
+		System.out.println("0. Volver");
+		System.out.println("Seleccione una opción: ");
+	}
 
-    private void crearPedido(){
+	private void crearPedido() {
 
-            try {
-            System.out.println(" Creación de un pedido ");
+		try {
+			System.out.println(" Creación de un pedido ");
 
-            System.out.print("Código de pedido: ");
-            String codigo = scanner.nextLine();
+			System.out.print("Código de pedido: ");
+			String codigo = scanner.nextLine();
 
-            System.out.print("Dirección de entrega: ");
-            String direccionTexto = scanner.nextLine();
+			System.out.print("Dirección de entrega: ");
+			String direccionTexto = scanner.nextLine();
 
-            System.out.print("Total de pedido: ");
-            BigDecimal total = new BigDecimal(scanner.nextLine());
+			System.out.print("Total de pedido: ");
+			BigDecimal total = new BigDecimal(scanner.nextLine());
 
-            // 1. Clientes, creamos las entidades
-            Clientes cliente = new Clientes();
-            cliente.setClienteId(1L);
+			// 1. Clientes, creamos las entidades
+			Clientes cliente = new Clientes();
+			cliente.setClienteId(1L);
 
-            // 2. Direcciones
-            DireccionesCliente direccion = new DireccionesCliente();
-            direccion.setDireccionId(1L);
+			// 2. Direcciones
+			DireccionesCliente direccion = new DireccionesCliente();
+			direccion.setDireccionId(1L);
 
-            // 3. Peronal encargado
-            Personal personal = new Personal();
-            personal.setPersonalId(1L);
+			// 3. Peronal encargado
+			Personal personal = new Personal();
+			personal.setPersonalId(1L);
 
-            // 4. Pedidos a crear
-            PedidosCliente pedido = new PedidosCliente();
-            pedido.setCodigoPedido(codigo);
+			// 4. Pedidos a crear
+			PedidosCliente pedido = new PedidosCliente();
+			pedido.setCodigoPedido(codigo);
 
-            pedido.setSnapshotDireccionEntrega(direccionTexto);
+			pedido.setSnapshotDireccionEntrega(direccionTexto);
 
-            pedido.setTotal(total);
+			pedido.setTotal(total);
 
-            pedido.setPrioritario(false);
+			pedido.setPrioritario(false);
 
-            pedido.setCreadoEn(new Date());
+			pedido.setCreadoEn(new Date());
 
-            pedido.setClienteId(cliente);
+			pedido.setClienteId(cliente);
 
-            pedido.setDireccionEntregaId(direccion);
+			pedido.setDireccionEntregaId(direccion);
 
-            pedido.setRegistradoPorPersonalId(personal);
+			pedido.setRegistradoPorPersonalId(personal);
 
-            // Lo guardamos al pedido
+			// Lo guardamos al pedido
 
-            servicioPedido.crearPedido(pedido);
+			servicioPedido.crearPedido(pedido);
 
-            System.out.println("\nPedido creado correctamente");
-            System.out.println("Estado incial: PENDIENTE");
+			System.out.println("\nPedido creado correctamente");
+			System.out.println("Estado incial: PENDIENTE");
 
-        } catch (Exception e) {
-            System.out.println("Error creando pedido");
-            e.printStackTrace();
-        }
-    }
+		} catch (Exception e) {
+			System.out.println("Error creando pedido");
+			e.printStackTrace();
+		}
+	}
 
-    private void simularPedido() {
+	private void simularPedido() {
 
-        try {
-            System.out.println("\nSimular Pedido");
+		try {
+			System.out.println("\nSimular Pedido");
 
-            System.out.print("Ingrese el código del pedido: ");
-            String codigo = scanner.nextLine();
+			System.out.print("Ingrese el código del pedido: ");
+			String codigo = scanner.nextLine();
 
-            PedidosCliente pedido = servicioPedido.buscarPedidoPorCodigo(codigo);
+			PedidosCliente pedido = servicioPedido.buscarPedidoPorCodigo(codigo);
 
-            if (pedido == null) {
-                System.out.println("\nEl pedido no fue encontrado");
+			if (pedido == null) {
+				System.out.println("\nEl pedido no fue encontrado");
 
-                return;
-            }
+				return;
+			}
 
-            System.out.println("Estado incial: " + pedido.getEstadoActualId().getCodigoEstado());
+			System.out.println("Estado incial: " + pedido.getEstadoActualId().getCodigoEstado());
 
-            List<String> estados = servicioSimulacion.simularPedido(pedido);
-            try {
-                Thread.sleep(8000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+			List<String> estados = servicioSimulacion.simularPedido(pedido);
+			try {
+				Thread.sleep(8000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 
-            for (String estado: estados) {
-                System.out.println("Estado actualizado a: " + estado);
-            }
+			for (String estado : estados) {
+				System.out.println("Estado actualizado a: " + estado);
+			}
 
-            pedido = servicioPedido.buscarPedidoPorCodigo(codigo);
+			pedido = servicioPedido.buscarPedidoPorCodigo(codigo);
 
-            System.out.println("Estado final: " + pedido.getEstadoActualId().getCodigoEstado());
-        } catch (Exception e) {
-            System.out.println("Error en simulacion");
-            e.printStackTrace();
-        }
-    }
+			System.out.println("Estado final: " + pedido.getEstadoActualId().getCodigoEstado());
+		} catch (Exception e) {
+			System.out.println("Error en simulacion");
+			e.printStackTrace();
+		}
+	}
 
-    private void consultarEstadoPedido() {
-        System.out.println("\nConsultar el Estado");
+	private void consultarEstadoPedido() {
+		System.out.println("\nConsultar el Estado");
 
-        System.out.print("Ingrese el código del pedido");
-        String codigo = scanner.nextLine();
+		System.out.print("Ingrese el código del pedido");
+		String codigo = scanner.nextLine();
 
-        String estado = servicioPedido.consultarEstadoPorCodigo(codigo);
+		String estado = servicioPedido.consultarEstadoPorCodigo(codigo);
 
-        System.out.println("\nEstado actual: " + estado);
-    }
+		System.out.println("\nEstado actual: " + estado);
+	}
 }

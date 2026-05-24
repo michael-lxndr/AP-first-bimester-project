@@ -11,49 +11,49 @@ import java.util.concurrent.TimeUnit;
 
 public class ConfiguracionHilos {
 
-    private static final int KITCHEN_THREADS = 3;
-    private static final int DELIVERY_THREADS = 3;
-    private static final int SIMULATION_THREADS = 2;
+	private static final int KITCHEN_THREADS = 3;
+	private static final int DELIVERY_THREADS = 3;
+	private static final int SIMULATION_THREADS = 2;
 
-    private static final ExecutorService kitchenExecutor = Executors.newFixedThreadPool(KITCHEN_THREADS);
+	private static final ExecutorService kitchenExecutor = Executors.newFixedThreadPool(KITCHEN_THREADS);
 
-    private static final ExecutorService deliveryExecutor = Executors.newFixedThreadPool(DELIVERY_THREADS);
+	private static final ExecutorService deliveryExecutor = Executors.newFixedThreadPool(DELIVERY_THREADS);
 
-    private static final ExecutorService simulationExecutor = Executors.newFixedThreadPool(SIMULATION_THREADS);
+	private static final ExecutorService simulationExecutor = Executors.newFixedThreadPool(SIMULATION_THREADS);
 
-    private ConfiguracionHilos() {
-    }
+	private ConfiguracionHilos() {
+	}
 
-    // GETTERS DE POOLS
-    public static ExecutorService kitchenExecutor() {
-        return kitchenExecutor;
-    }
+	// GETTERS DE POOLS
+	public static ExecutorService kitchenExecutor() {
+		return kitchenExecutor;
+	}
 
-    public static ExecutorService deliveryExecutor() {
-        return deliveryExecutor;
-    }
+	public static ExecutorService deliveryExecutor() {
+		return deliveryExecutor;
+	}
 
-    public static ExecutorService simulationExecutor() {
-        return simulationExecutor;
-    }
+	public static ExecutorService simulationExecutor() {
+		return simulationExecutor;
+	}
 
-    // SHUTDOWN GLOBAL
+	// SHUTDOWN GLOBAL
 
-    public static void shutdown() {
-        shutdownExecutor(kitchenExecutor);
-        shutdownExecutor(deliveryExecutor);
-        shutdownExecutor(simulationExecutor);
-    }
+	public static void shutdown() {
+		shutdownExecutor(kitchenExecutor);
+		shutdownExecutor(deliveryExecutor);
+		shutdownExecutor(simulationExecutor);
+	}
 
-    private static void shutdownExecutor(ExecutorService executorService) {
-        executorService.shutdown();
-        try {
-            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                executorService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            executorService.shutdownNow();
-        }
-    }
+	private static void shutdownExecutor(ExecutorService executorService) {
+		executorService.shutdown();
+		try {
+			if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+				executorService.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			executorService.shutdownNow();
+		}
+	}
 }

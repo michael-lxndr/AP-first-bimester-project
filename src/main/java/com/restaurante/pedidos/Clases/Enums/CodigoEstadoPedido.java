@@ -6,7 +6,7 @@ package com.restaurante.pedidos.Clases.Enums;
 
 
 public enum CodigoEstadoPedido {
-        PENDIENTE,
+	PENDIENTE,
 	EN_PREPARACION,
 	LISTO,
 	EN_CAMINO,

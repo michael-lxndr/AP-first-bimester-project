@@ -4,223 +4,207 @@
  */
 package com.restaurante.pedidos.Clases;
 
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
 
 @Entity
 @Table(name = "direcciones_cliente")
 @NamedQueries({
-    @NamedQuery(name = "DireccionesCliente.findAll", query = "SELECT d FROM DireccionesCliente d")})
+	@NamedQuery(name = "DireccionesCliente.findAll", query = "SELECT d FROM DireccionesCliente d")})
 public class DireccionesCliente implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Basic(optional = false)
-    @Column(name = "direccion_id")
-    private Long direccionId;
-    @Basic(optional = false)
-    @Column(name = "alias")
-    private String alias;
-    @Basic(optional = false)
-    @Column(name = "calle_principal")
-    private String callePrincipal;
-    @Column(name = "calle_secundaria")
-    private String calleSecundaria;
-    @Column(name = "numero_casa")
-    private String numeroCasa;
-    @Column(name = "referencia")
-    private String referencia;
-    @Column(name = "codigo_postal")
-    private String codigoPostal;
-    @Basic(optional = false)
-    @Column(name = "ciudad")
-    private String ciudad;
-    @Basic(optional = false)
-    @Column(name = "provincia")
-    private String provincia;
-    @Basic(optional = false)
-    @Column(name = "pais")
-    private String pais;
-    @Basic(optional = false)
-    @Column(name = "principal")
-    private boolean principal;
-    @Basic(optional = false)
-    @Column(name = "activa")
-    private boolean activa;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "direccionEntregaId")
-    private Collection<PedidosCliente> pedidosClienteCollection;
-    @JoinColumn(name = "cliente_id", referencedColumnName = "cliente_id")
-    @ManyToOne(optional = false)
-    private Clientes clienteId;
+	private static final long serialVersionUID = 1L;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Basic(optional = false)
+	@Column(name = "direccion_id")
+	private Long direccionId;
+	@Basic(optional = false)
+	@Column(name = "alias")
+	private String alias;
+	@Basic(optional = false)
+	@Column(name = "calle_principal")
+	private String callePrincipal;
+	@Column(name = "calle_secundaria")
+	private String calleSecundaria;
+	@Column(name = "numero_casa")
+	private String numeroCasa;
+	@Column(name = "referencia")
+	private String referencia;
+	@Column(name = "codigo_postal")
+	private String codigoPostal;
+	@Basic(optional = false)
+	@Column(name = "ciudad")
+	private String ciudad;
+	@Basic(optional = false)
+	@Column(name = "provincia")
+	private String provincia;
+	@Basic(optional = false)
+	@Column(name = "pais")
+	private String pais;
+	@Basic(optional = false)
+	@Column(name = "principal")
+	private boolean principal;
+	@Basic(optional = false)
+	@Column(name = "activa")
+	private boolean activa;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "direccionEntregaId")
+	private Collection<PedidosCliente> pedidosClienteCollection;
+	@JoinColumn(name = "cliente_id", referencedColumnName = "cliente_id")
+	@ManyToOne(optional = false)
+	private Clientes clienteId;
 
-    public DireccionesCliente() {
-    }
+	public DireccionesCliente() {
+	}
 
-    public DireccionesCliente(Long direccionId) {
-        this.direccionId = direccionId;
-    }
+	public DireccionesCliente(Long direccionId) {
+		this.direccionId = direccionId;
+	}
 
-    public DireccionesCliente(Long direccionId, String alias, String callePrincipal, String ciudad, String provincia, String pais, boolean principal, boolean activa) {
-        this.direccionId = direccionId;
-        this.alias = alias;
-        this.callePrincipal = callePrincipal;
-        this.ciudad = ciudad;
-        this.provincia = provincia;
-        this.pais = pais;
-        this.principal = principal;
-        this.activa = activa;
-    }
+	public DireccionesCliente(Long direccionId, String alias, String callePrincipal, String ciudad, String provincia, String pais, boolean principal, boolean activa) {
+		this.direccionId = direccionId;
+		this.alias = alias;
+		this.callePrincipal = callePrincipal;
+		this.ciudad = ciudad;
+		this.provincia = provincia;
+		this.pais = pais;
+		this.principal = principal;
+		this.activa = activa;
+	}
 
-    public Long getDireccionId() {
-        return direccionId;
-    }
+	public Long getDireccionId() {
+		return direccionId;
+	}
 
-    public void setDireccionId(Long direccionId) {
-        this.direccionId = direccionId;
-    }
+	public void setDireccionId(Long direccionId) {
+		this.direccionId = direccionId;
+	}
 
-    public String getAlias() {
-        return alias;
-    }
+	public String getAlias() {
+		return alias;
+	}
 
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
 
-    public String getCallePrincipal() {
-        return callePrincipal;
-    }
+	public String getCallePrincipal() {
+		return callePrincipal;
+	}
 
-    public void setCallePrincipal(String callePrincipal) {
-        this.callePrincipal = callePrincipal;
-    }
+	public void setCallePrincipal(String callePrincipal) {
+		this.callePrincipal = callePrincipal;
+	}
 
-    public String getCalleSecundaria() {
-        return calleSecundaria;
-    }
+	public String getCalleSecundaria() {
+		return calleSecundaria;
+	}
 
-    public void setCalleSecundaria(String calleSecundaria) {
-        this.calleSecundaria = calleSecundaria;
-    }
+	public void setCalleSecundaria(String calleSecundaria) {
+		this.calleSecundaria = calleSecundaria;
+	}
 
-    public String getNumeroCasa() {
-        return numeroCasa;
-    }
+	public String getNumeroCasa() {
+		return numeroCasa;
+	}
 
-    public void setNumeroCasa(String numeroCasa) {
-        this.numeroCasa = numeroCasa;
-    }
+	public void setNumeroCasa(String numeroCasa) {
+		this.numeroCasa = numeroCasa;
+	}
 
-    public String getReferencia() {
-        return referencia;
-    }
+	public String getReferencia() {
+		return referencia;
+	}
 
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
-    }
+	public void setReferencia(String referencia) {
+		this.referencia = referencia;
+	}
 
-    public String getCodigoPostal() {
-        return codigoPostal;
-    }
+	public String getCodigoPostal() {
+		return codigoPostal;
+	}
 
-    public void setCodigoPostal(String codigoPostal) {
-        this.codigoPostal = codigoPostal;
-    }
+	public void setCodigoPostal(String codigoPostal) {
+		this.codigoPostal = codigoPostal;
+	}
 
-    public String getCiudad() {
-        return ciudad;
-    }
+	public String getCiudad() {
+		return ciudad;
+	}
 
-    public void setCiudad(String ciudad) {
-        this.ciudad = ciudad;
-    }
+	public void setCiudad(String ciudad) {
+		this.ciudad = ciudad;
+	}
 
-    public String getProvincia() {
-        return provincia;
-    }
+	public String getProvincia() {
+		return provincia;
+	}
 
-    public void setProvincia(String provincia) {
-        this.provincia = provincia;
-    }
+	public void setProvincia(String provincia) {
+		this.provincia = provincia;
+	}
 
-    public String getPais() {
-        return pais;
-    }
+	public String getPais() {
+		return pais;
+	}
 
-    public void setPais(String pais) {
-        this.pais = pais;
-    }
+	public void setPais(String pais) {
+		this.pais = pais;
+	}
 
-    public boolean getPrincipal() {
-        return principal;
-    }
+	public boolean getPrincipal() {
+		return principal;
+	}
 
-    public void setPrincipal(boolean principal) {
-        this.principal = principal;
-    }
+	public void setPrincipal(boolean principal) {
+		this.principal = principal;
+	}
 
-    public boolean getActiva() {
-        return activa;
-    }
+	public boolean getActiva() {
+		return activa;
+	}
 
-    public void setActiva(boolean activa) {
-        this.activa = activa;
-    }
+	public void setActiva(boolean activa) {
+		this.activa = activa;
+	}
 
-    public Collection<PedidosCliente> getPedidosClienteCollection() {
-        return pedidosClienteCollection;
-    }
+	public Collection<PedidosCliente> getPedidosClienteCollection() {
+		return pedidosClienteCollection;
+	}
 
-    public void setPedidosClienteCollection(Collection<PedidosCliente> pedidosClienteCollection) {
-        this.pedidosClienteCollection = pedidosClienteCollection;
-    }
+	public void setPedidosClienteCollection(Collection<PedidosCliente> pedidosClienteCollection) {
+		this.pedidosClienteCollection = pedidosClienteCollection;
+	}
 
-    public Clientes getClienteId() {
-        return clienteId;
-    }
+	public Clientes getClienteId() {
+		return clienteId;
+	}
 
-    public void setClienteId(Clientes clienteId) {
-        this.clienteId = clienteId;
-    }
+	public void setClienteId(Clientes clienteId) {
+		this.clienteId = clienteId;
+	}
 
-    @Override
-    public int hashCode() {
-        int hash = 0;
-        hash += (direccionId != null ? direccionId.hashCode() : 0);
-        return hash;
-    }
+	@Override
+	public int hashCode() {
+		int hash = 0;
+		hash += (direccionId != null ? direccionId.hashCode() : 0);
+		return hash;
+	}
 
-    @Override
-    public boolean equals(Object object) {
-        // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof DireccionesCliente)) {
-            return false;
-        }
-        DireccionesCliente other = (DireccionesCliente) object;
-        if ((this.direccionId == null && other.direccionId != null) || (this.direccionId != null && !this.direccionId.equals(other.direccionId))) {
-            return false;
-        }
-        return true;
-    }
+	@Override
+	public boolean equals(Object object) {
+		// TODO: Warning - this method won't work in the case the id fields are not set
+		if (!(object instanceof DireccionesCliente other)) {
+			return false;
+		}
+		return (this.direccionId != null || other.direccionId == null) && (this.direccionId == null || this.direccionId.equals(other.direccionId));
+	}
 
-    @Override
-    public String toString() {
-        return "Clases.DireccionesCliente[ direccionId=" + direccionId + " ]";
-    }
+	@Override
+	public String toString() {
+		return "Clases.DireccionesCliente[ direccionId=" + direccionId + " ]";
+	}
 
 }

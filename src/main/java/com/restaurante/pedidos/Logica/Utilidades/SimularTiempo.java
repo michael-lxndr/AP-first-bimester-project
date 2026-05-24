@@ -5,13 +5,14 @@
 package com.restaurante.pedidos.Logica.Utilidades;
 
 import com.restaurante.pedidos.LogicaConfiguracion.ConfiguracionSimulacion;
+
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 
 
 public class SimularTiempo {
 
-    private SimularTiempo() {
+	private SimularTiempo() {
 	}
 
 	public static Duration kitchenDelay() {
@@ -22,13 +23,13 @@ public class SimularTiempo {
 		return randomBetween(ConfiguracionSimulacion.minEntregaDelay(), ConfiguracionSimulacion.maxEntregaDelay());
 	}
 
-        public static void esperarPreparacion() throws InterruptedException{
-            Thread.sleep(kitchenDelay().toMillis());
-        }
+	public static void esperarPreparacion() throws InterruptedException {
+		Thread.sleep(kitchenDelay().toMillis());
+	}
 
-        public static void esperarEntrega() throws InterruptedException{
-            Thread.sleep(deliveryDelay().toMillis());
-        }
+	public static void esperarEntrega() throws InterruptedException {
+		Thread.sleep(deliveryDelay().toMillis());
+	}
 
 	private static Duration randomBetween(Duration minDelay, Duration maxDelay) {
 		long minMillis = minDelay.toMillis();
