@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox spacing="15" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="com.restaurante.pedidos.presentacion.controladores.ControladorSimulacion"
+      styleClass="dashboard-container" stylesheets="/estilo/aplicacion.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header Section -->
+    <HBox alignment="CENTER_LEFT" styleClass="glass-header" spacing="15">
+        <VBox>
+            <Label text="Simulación Multihilo Concurrente" styleClass="dashboard-title"/>
+            <Label text="Patrón Productor-Consumidor en Tiempo Real (JPA + Multithreading)" styleClass="dashboard-subtitle"/>
+        </VBox>
+        <Region HBox.hgrow="ALWAYS"/>
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Estado:" styleClass="status-label"/>
+            <Label fx:id="labelEstadoSimulacion" text="INACTIVA" styleClass="status-badge, status-inactive"/>
+        </HBox>
+    </HBox>
+
+    <!-- Content Split -->
+    <HBox spacing="20" VBox.vgrow="ALWAYS">
+        
+        <!-- Left Side: Controls, Search and Terminal Logs -->
+        <VBox spacing="15" prefWidth="420" minWidth="380">
+            
+            <!-- Controls Card -->
+            <VBox styleClass="glass-card" spacing="12">
+                <Label text="Configuración del Motor" styleClass="card-title"/>
+                <Separator styleClass="dark-separator"/>
+                
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="60"/>
+                        <ColumnConstraints percentWidth="40"/>
+                    </columnConstraints>
+                    
+                    <Label text="Generación de Pedidos:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <ComboBox fx:id="comboIntervalo" prefWidth="150" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    
+                    <Label text="Capacidad de Cocina (Hilos):" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="form-label"/>
+                    <ComboBox fx:id="comboCocineros" prefWidth="150" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                </GridPane>
+                
+                <HBox spacing="10" alignment="CENTER" styleClass="button-row">
+                    <Button fx:id="btnIniciar" text="Iniciar Simulación" onAction="#iniciarSimulacion" styleClass="btn-primary" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button fx:id="btnCerrar" text="Cerrar Cocina" onAction="#cerrarCocina" styleClass="btn-danger" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                </HBox>
+            </VBox>
+            
+            <!-- ScrollPane for search and terminal logs -->
+            <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+                <content>
+                    <VBox spacing="15" style="-fx-background-color: transparent;">
+                        <!-- Customer Search Card -->
+                        <VBox styleClass="glass-card" spacing="12">
+                            <Label text="Consulta Rápida de Clientes" styleClass="card-title"/>
+                            <Separator styleClass="dark-separator"/>
+                            
+                            <HBox spacing="8" alignment="CENTER">
+                                <TextField fx:id="campoBuscarCodigo" promptText="Ingrese Código (ej: PED-001)" HBox.hgrow="ALWAYS" styleClass="dark-field"/>
+                                <Button text="Buscar" onAction="#buscarPedidoCliente" styleClass="btn-accent"/>
+                            </HBox>
+                            
+                            <!-- Search Result Panel -->
+                            <VBox fx:id="panelResultadoBusqueda" spacing="8" visible="false" managed="false" styleClass="result-card">
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label fx:id="lblBusquedaCodigo" text="PED-000000" styleClass="result-code"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label fx:id="lblBusquedaEstado" text="PENDIENTE" styleClass="result-status-badge"/>
+                                </HBox>
+                                
+                                <Label fx:id="lblBusquedaCliente" text="Cliente: María López" styleClass="result-text"/>
+                                <Label fx:id="lblBusquedaDireccion" text="Dirección: Calle Principal 123" styleClass="result-text"/>
+                                <Label fx:id="lblBusquedaTotal" text="Total: $0.00" styleClass="result-text"/>
+                                
+                                <VBox spacing="4">
+                                    <Label text="Progreso del Envío:" styleClass="result-subtext"/>
+                                    <ProgressBar fx:id="progressBusqueda" progress="0.1" prefWidth="380" maxWidth="Infinity" styleClass="custom-progress"/>
+                                </VBox>
+                                
+                                <VBox spacing="2">
+                                    <Label text="Bitácora de Entrega:" styleClass="result-subtext"/>
+                                    <Label fx:id="lblBusquedaBitacora" text="—" styleClass="result-notes" wrapText="true"/>
+                                </VBox>
+                            </VBox>
+                            <Label fx:id="lblErrorBusqueda" text="Pedido no encontrado" visible="false" managed="false" styleClass="error-text"/>
+                        </VBox>
+
+                        <!-- Console Terminal Logs -->
+                        <VBox styleClass="glass-card" spacing="8" minHeight="300">
+                            <Label text="Consola de Eventos en Tiempo Real" styleClass="card-title"/>
+                            <Separator styleClass="dark-separator"/>
+                            <TextArea fx:id="areaLogsTerminal" editable="false" wrapText="true" prefHeight="250" VBox.vgrow="ALWAYS" styleClass="terminal-console"/>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </VBox>
+        
+        <!-- Right Side: Active Orders Real-Time Grid -->
+        <VBox HBox.hgrow="ALWAYS" spacing="15">
+            <VBox styleClass="glass-card" VBox.vgrow="ALWAYS" spacing="12">
+                <Label text="Monitoreo de Pedidos Activos (Consumidores Concurrentes)" styleClass="card-title"/>
+                <Separator styleClass="dark-separator"/>
+                
+                <TableView fx:id="tablaPedidosActivos" VBox.vgrow="ALWAYS" styleClass="premium-table">
+                    <placeholder>
+                        <Label text="No hay pedidos activos en simulación. Presione 'Iniciar Simulación'." styleClass="empty-table-label"/>
+                    </placeholder>
+                    <columns>
+                        <TableColumn fx:id="colID" text="ID" prefWidth="60" maxWidth="80"/>
+                        <TableColumn fx:id="colCodigo" text="Código" prefWidth="100"/>
+                        <TableColumn fx:id="colCliente" text="Cliente" prefWidth="140"/>
+                        <TableColumn fx:id="colEstado" text="Estado" prefWidth="130"/>
+                        <TableColumn fx:id="colProgreso" text="Progreso de Preparación/Envío" prefWidth="180"/>
+                        <TableColumn fx:id="colTotal" text="Total ($)" prefWidth="80"/>
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                    </columnResizePolicy>
+                </TableView>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

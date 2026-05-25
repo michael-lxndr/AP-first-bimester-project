@@ -1,0 +1,281 @@
+@startuml ER Diagram
+title Gestion de Pedidos de Restaurante - Diagrama ER
+
+hide methods
+hide stereotypes
+skinparam linetype ortho
+
+entity "Rol" as Rol {
+  *rol_id : BIGINT <<PK>>
+  --
+  codigo_rol : VARCHAR(30) <<UK>>
+}
+
+entity "Personal" as Personal {
+  *personal_id : BIGINT <<PK>>
+  --
+  rol_id : BIGINT <<FK>>
+  nombre_completo : VARCHAR(120)
+  telefono : VARCHAR(20)
+  correo_electronico : VARCHAR(120) <<UK>>
+  nombre_usuario : VARCHAR(50) <<UK>>
+  activo : BOOLEAN
+  creado_en : DATETIME
+}
+
+entity "Cliente" as Cliente {
+  *cliente_id : BIGINT <<PK>>
+  --
+  nombre_completo : VARCHAR(120)
+  telefono : VARCHAR(20)
+  correo_electronico : VARCHAR(120) <<UK>>
+  activo : BOOLEAN
+  creado_en : DATETIME
+}
+
+entity "DireccionCliente" as DireccionCliente {
+  *direccion_id : BIGINT <<PK>>
+  --
+  cliente_id : BIGINT <<FK>>
+  alias : VARCHAR(50)
+  calle_principal : VARCHAR(150)
+  calle_secundaria : VARCHAR(150)
+  numero_casa : VARCHAR(10)
+  referencia : VARCHAR(255)
+  codigo_postal : VARCHAR(10)
+  ciudad : VARCHAR(50)
+  provincia : VARCHAR(50)
+  pais : VARCHAR(50)
+  principal : BOOLEAN
+  activa : BOOLEAN
+}
+
+entity "Producto" as Producto {
+  *producto_id : BIGINT <<PK>>
+  --
+  codigo_producto : VARCHAR(20) <<UK>>
+  nombre_producto : VARCHAR(120)
+  descripcion : VARCHAR(255)
+  precio_unitario : DECIMAL(10,2)
+  costo_produccion : DECIMAL(10,2)
+  categoria : VARCHAR(30)
+  tiempo_preparacion_minutos : INT
+  disponible : BOOLEAN
+  url_imagen : VARCHAR(255)
+  creado_en : DATETIME
+}
+
+entity "EstadoPedido" as EstadoPedido {
+  *estado_id : BIGINT <<PK>>
+  --
+  codigo_estado : VARCHAR(30) <<UK>>
+  nombre_estado : VARCHAR(50) <<UK>>
+  orden_estado : INT <<UK>>
+  finalizado : BOOLEAN
+}
+
+entity "ReglaTransicionEstadoPedido" as ReglaTransicionEstadoPedido {
+  *regla_transicion_id : BIGINT <<PK>>
+  --
+  estado_origen_id : BIGINT <<FK>>
+  estado_destino_id : BIGINT <<FK>>
+  rol_id : BIGINT <<FK>>
+  activa : BOOLEAN
+}
+
+entity "PedidoCliente" as PedidoCliente {
+  *pedido_id : BIGINT <<PK>>
+  --
+  codigo_pedido : VARCHAR(30) <<UK>>
+  cliente_id : BIGINT <<FK>>
+  registrado_por_personal_id : BIGINT <<FK>>
+  estado_actual_id : BIGINT <<FK>>
+  direccion_entrega_id : BIGINT <<FK>>
+  snapshot_direccion_entrega : VARCHAR(500)
+  instrucciones_entrega : VARCHAR(500)
+  subtotal : DECIMAL(10,2)
+  impuesto : DECIMAL(10,2)
+  descuento : DECIMAL(10,2)
+  recargo_direccion : DECIMAL(10,2)
+  total : DECIMAL(10,2)
+  codigo_descuento : VARCHAR(20)
+  prioritario : BOOLEAN
+  notas_generales : VARCHAR(255)
+  creado_en : DATETIME
+  entrega_estimada_en : DATETIME
+  estado_actual_cambiado_en : DATETIME
+}
+
+entity "ItemPedido" as ItemPedido {
+  *item_pedido_id : BIGINT <<PK>>
+  --
+  pedido_id : BIGINT <<FK>>
+  producto_id : BIGINT <<FK>>
+  cantidad : INT
+  snapshot_nombre_producto : VARCHAR(120)
+  precio_unitario : DECIMAL(10,2)
+  total_linea : DECIMAL(10,2)
+  nota_especial : VARCHAR(150)
+  listo : BOOLEAN
+}
+
+entity "HistorialEstadoPedido" as HistorialEstadoPedido {
+  *historial_id : BIGINT <<PK>>
+  --
+  pedido_id : BIGINT <<FK>>
+  estado_origen_id : BIGINT <<FK>> <<DEFAULT:PENDIENTE>>
+  estado_destino_id : BIGINT <<FK>>
+  cambiado_por_personal_id : BIGINT <<FK>>
+  cambiado_en : DATETIME
+  notas : VARCHAR(255)
+}
+
+entity "Entrega" as Entrega {
+  *entrega_id : BIGINT <<PK>>
+  --
+  pedido_id : BIGINT <<FK>> <<UK>>
+  repartidor_personal_id : BIGINT <<FK>>
+  despachado_en : DATETIME
+  entregado_en : DATETIME <<NULL>>
+  nombre_receptor : VARCHAR(120) <<NULL>>
+  confirmado_por_cliente_en : DATETIME <<NULL>>
+  notas_confirmacion_cliente : VARCHAR(255) <<NULL>>
+  estado_entrega : VARCHAR(30)
+  notas_repartidor : VARCHAR(500)
+  numero_intento : INT
+}
+
+Rol ||--o{ Personal : tiene
+Rol ||--o{ ReglaTransicionEstadoPedido : autoriza
+
+Cliente ||--o{ PedidoCliente : realiza
+Cliente ||--o{ DireccionCliente : posee
+DireccionCliente ||--o{ PedidoCliente : seleccionada_para
+
+Personal ||--o{ PedidoCliente : registra
+Personal ||--o{ HistorialEstadoPedido : cambia
+Personal ||--o{ Entrega : reparte
+
+EstadoPedido ||--o{ PedidoCliente : estado_actual
+EstadoPedido ||--o{ ReglaTransicionEstadoPedido : estado_origen
+EstadoPedido ||--o{ ReglaTransicionEstadoPedido : estado_destino
+EstadoPedido ||--o{ HistorialEstadoPedido : desde_estado
+EstadoPedido ||--o{ HistorialEstadoPedido : hacia_estado
+
+PedidoCliente ||--|{ ItemPedido : contiene
+PedidoCliente ||--o{ HistorialEstadoPedido : registra_historial
+PedidoCliente ||--o| Entrega : tiene
+
+Producto ||--o{ ItemPedido : aparece_en
+
+note right of PedidoCliente
+- codigo_pedido debe ser unico
+- un pedido debe contener al menos un item
+- direccion_entrega_id referencia la direccion elegida
+  por el cliente y es obligatoria porque define
+  donde se realiza la entrega
+- snapshot_direccion_entrega preserva la direccion
+  historica aunque luego el cliente edite sus direcciones
+- instrucciones_entrega guarda indicaciones especiales
+  para el repartidor
+- total = subtotal + impuesto + recargo_direccion - descuento
+- los montos no pueden ser negativos segun checks
+  de base de datos
+- estado_actual_cambiado_en acelera consultas de seguimiento
+- al crear el pedido debe insertarse tambien
+  el primer registro en HistorialEstadoPedido
+end note
+
+note right of DireccionCliente
+- Un cliente puede registrar varias direcciones.
+- principal marca la direccion sugerida por defecto.
+- activa permite ocultar direcciones sin borrar historial.
+- Al crear un pedido se debe validar que la direccion
+  pertenezca al cliente del pedido.
+- ciudad y provincia son obligatorias.
+- pais es obligatorio y usa Ecuador por defecto.
+end note
+
+note right of Producto
+- codigo_producto facilita busqueda e integracion externa.
+- categoria clasifica menu: ENTRADA, PLATO_FUERTE,
+  BEBIDA, POSTRE, COMBO.
+- tiempo_preparacion_minutos ayuda a estimar entrega.
+- url_imagen permite mostrar la imagen del producto.
+- precio_unitario, costo_produccion y tiempo_preparacion_minutos
+  tienen validaciones CHECK para evitar valores invalidos.
+end note
+
+note right of EstadoPedido
+Catalogo sugerido:
+- PENDIENTE / Pendiente
+- EN_PREPARACION / En preparacion
+- LISTO / Listo
+- EN_CAMINO / En camino
+- ENTREGADO / Entregado
+
+ENTREGADO representa que el repartidor confirmo la entrega.
+
+La confirmacion del cliente no se modela
+como nuevo estado; se guarda en Entrega
+mediante confirmado_por_cliente_en.
+
+orden_estado tambien es unico y debe ser mayor a cero.
+end note
+
+note right of ReglaTransicionEstadoPedido
+Reglas de negocio trazables:
+- PENDIENTE -> EN_PREPARACION : COCINERO
+- EN_PREPARACION -> LISTO : COCINERO
+- LISTO -> EN_CAMINO : REPARTIDOR
+- EN_CAMINO -> ENTREGADO : REPARTIDOR
+
+No se permiten saltos ni retrocesos.
+
+Estas reglas aplican a Personal.
+El Cliente no usa esta tabla porque
+no cambia el estado operativo del pedido.
+
+La base impide duplicar una regla mediante
+UNIQUE(estado_origen_id, estado_destino_id, rol_id).
+end note
+
+note right of HistorialEstadoPedido
+- todo cambio de estado debe registrarse
+- estado_origen_id es obligatorio; si no se informa,
+  la base usa PENDIENTE como estado inicial por defecto
+- cambiado_por_personal_id + cambiado_en cubren
+  quien hizo el cambio y cuando
+- notas permite guardar observaciones
+  operativas o incidencias
+end note
+
+note right of ItemPedido
+- snapshot_nombre_producto preserva trazabilidad
+  historica aunque cambie el nombre del producto
+- precio_unitario conserva el precio usado
+  al momento de crear el pedido
+- nota_especial permite observaciones por producto
+- listo permite seguimiento interno de cocina
+end note
+
+note right of Entrega
+- despachado_en se registra cuando el repartidor
+  sale con el pedido
+- estado_entrega permite distinguir DESPACHADO,
+  EN_TRANSITO, ENTREGADO, FALLIDO y DEVUELTO
+- notas_repartidor guarda novedades del repartidor
+- numero_intento registra cuantos intentos de entrega hubo
+- entregado_en y nombre_receptor se registran
+  cuando el repartidor confirma la entrega
+- confirmado_por_cliente_en se registra cuando
+  el cliente confirma que recibio el pedido
+- entregado_en, nombre_receptor y confirmado_por_cliente_en
+  son campos opcionales hasta que avance la entrega
+- si entregado_en tiene valor, nombre_receptor se vuelve
+  obligatorio por CHECK de base de datos
+- confirmado_por_cliente_en solo puede existir despues
+  de entregado_en
+end note
+
+@enduml

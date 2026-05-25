@@ -1,0 +1,54 @@
+strict_tdd: true
+context: |
+  FirstBimesterProject is a Java/Maven project.
+  Detected markers: pom.xml.
+  Additional evidence: Java/Maven manifest detected via pom.xml.
+  Primary test command: mvn test.
+  Unit tests: Maven test (mvn test).
+  Integration tests: none.
+  E2E tests: none.
+rules:
+  proposal:
+    require_problem_statement: true
+  spec:
+    require_acceptance_criteria: true
+  design:
+    require_tradeoffs: true
+  tasks:
+    protect_review_workload: true
+  apply:
+    test_command: "mvn test"
+  verify:
+    test_command: "mvn test"
+testing:
+  detected: "2026-05-17"
+  runner:
+    command: "mvn test"
+    framework: "Maven test"
+  layers:
+    unit: "Maven test"
+    integration: ""
+    e2e: ""
+  commands:
+    unit:
+      - scope: "."
+        command: "mvn test"
+        framework: "Maven test"
+    integration:
+      []
+    e2e:
+      []
+  coverage:
+    command: ""
+    commands:
+      []
+quality:
+  lint: ""
+  lint_commands:
+    []
+  typecheck: ""
+  typecheck_commands:
+    []
+  format: ""
+  format_commands:
+    []
