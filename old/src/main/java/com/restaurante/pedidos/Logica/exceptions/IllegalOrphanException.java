@@ -1,4 +1,4 @@
-package com.restaurante.pedidos.Logica.exceptions;
+package com.restaurante.pedidos.logica.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;

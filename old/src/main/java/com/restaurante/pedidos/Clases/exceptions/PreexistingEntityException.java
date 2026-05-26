@@ -1,4 +1,4 @@
-package com.restaurante.pedidos.Clases.exceptions;
+package com.restaurante.pedidos.clases.exceptions;
 
 public class PreexistingEntityException extends Exception {
 	public PreexistingEntityException(String message, Throwable cause) {

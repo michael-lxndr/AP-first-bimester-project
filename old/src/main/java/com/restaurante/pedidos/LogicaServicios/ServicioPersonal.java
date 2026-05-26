@@ -4,11 +4,11 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import com.restaurante.pedidos.Clases.Enums.CodigoRol;
-import com.restaurante.pedidos.Clases.Personal;
-import com.restaurante.pedidos.Clases.Roles;
-import com.restaurante.pedidos.Logica.PersonalJpaController;
-import com.restaurante.pedidos.Logica.RolesJpaController;
+import com.restaurante.pedidos.clases.Enums.CodigoRol;
+import com.restaurante.pedidos.clases.Personal;
+import com.restaurante.pedidos.clases.Roles;
+import com.restaurante.pedidos.logica.PersonalJpaController;
+import com.restaurante.pedidos.logica.RolesJpaController;
 import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 
 import java.util.Date;

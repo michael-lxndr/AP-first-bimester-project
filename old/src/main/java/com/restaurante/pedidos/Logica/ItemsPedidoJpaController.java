@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.restaurante.pedidos.Logica;
+package com.restaurante.pedidos.logica;
 
-import com.restaurante.pedidos.Clases.ItemsPedido;
-import com.restaurante.pedidos.Clases.PedidosCliente;
-import com.restaurante.pedidos.Clases.Productos;
-import com.restaurante.pedidos.Logica.exceptions.NonexistentEntityException;
+import com.restaurante.pedidos.clases.ItemsPedido;
+import com.restaurante.pedidos.clases.PedidosCliente;
+import com.restaurante.pedidos.clases.Productos;
+import com.restaurante.pedidos.logica.exceptions.NonexistentEntityException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

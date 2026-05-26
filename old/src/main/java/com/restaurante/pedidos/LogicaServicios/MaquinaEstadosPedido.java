@@ -4,9 +4,9 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import com.restaurante.pedidos.Clases.Enums.CodigoEstadoPedido;
-import com.restaurante.pedidos.Clases.EstadosPedido;
-import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.clases.Enums.CodigoEstadoPedido;
+import com.restaurante.pedidos.clases.EstadosPedido;
+import com.restaurante.pedidos.clases.PedidosCliente;
 
 
 public class MaquinaEstadosPedido {

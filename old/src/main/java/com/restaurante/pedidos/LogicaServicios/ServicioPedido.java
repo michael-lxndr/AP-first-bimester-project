@@ -4,10 +4,10 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import com.restaurante.pedidos.Clases.EstadosPedido;
-import com.restaurante.pedidos.Clases.PedidosCliente;
-import com.restaurante.pedidos.Logica.EstadosPedidoJpaController;
-import com.restaurante.pedidos.Logica.PedidosClienteJpaController;
+import com.restaurante.pedidos.clases.EstadosPedido;
+import com.restaurante.pedidos.clases.PedidosCliente;
+import com.restaurante.pedidos.logica.EstadosPedidoJpaController;
+import com.restaurante.pedidos.logica.PedidosClienteJpaController;
 import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 
 

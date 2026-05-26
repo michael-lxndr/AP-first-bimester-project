@@ -1,4 +1,4 @@
-package com.restaurante.pedidos.Logica.exceptions;
+package com.restaurante.pedidos.logica.exceptions;
 
 public class NonexistentEntityException extends Exception {
 	public NonexistentEntityException(String message, Throwable cause) {

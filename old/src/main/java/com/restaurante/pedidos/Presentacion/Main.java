@@ -2,12 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
 
-package com.restaurante.pedidos.Presentacion;
+package com.restaurante.pedidos.presentacion;
 
-import com.restaurante.pedidos.Clases.Clientes;
-import com.restaurante.pedidos.Clases.DireccionesCliente;
-import com.restaurante.pedidos.Clases.PedidosCliente;
-import com.restaurante.pedidos.Clases.Personal;
+import com.restaurante.pedidos.clases.Clientes;
+import com.restaurante.pedidos.clases.DireccionesCliente;
+import com.restaurante.pedidos.clases.PedidosCliente;
+import com.restaurante.pedidos.clases.Personal;
 import com.restaurante.pedidos.LogicaServicios.ServicioPedido;
 import com.restaurante.pedidos.LogicaServicios.ServicioPersonal;
 import com.restaurante.pedidos.LogicaServicios.ServicioSimulacion;
