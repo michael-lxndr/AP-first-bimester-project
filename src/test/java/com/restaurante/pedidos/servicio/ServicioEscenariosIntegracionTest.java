@@ -3,16 +3,15 @@ package com.restaurante.pedidos.servicio;
 import com.restaurante.pedidos.configuracion.ConfiguracionBaseDatos;
 import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
 import com.restaurante.pedidos.dominio.CodigoRol;
-import com.restaurante.pedidos.Logica.Utilidades.GeneradorCodigoPedido;
-import com.restaurante.pedidos.Clases.*;
-import com.restaurante.pedidos.Logica.PersonalJpaController;
+import com.restaurante.pedidos.logica.Utilidades.GeneradorCodigoPedido;
+import com.restaurante.pedidos.clases.*;
+import com.restaurante.pedidos.logica.PersonalJpaController;
 import com.restaurante.pedidos.LogicaServicios.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.persistence.EntityManager;
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -69,7 +68,7 @@ class ServicioEscenariosIntegracionTest {
 
         ServicioSimulacion simulacion = new ServicioSimulacion(servicioPedido);
         List<String> historial = simulacion.simularPedido(pedido);
-        
+
         assertNotNull(historial);
         assertEquals("ENTREGADO", servicioPedido.consultarEstadoPorCodigo(pedido.getCodigoPedido()));
     }

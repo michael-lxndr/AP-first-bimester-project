@@ -1,17 +1,16 @@
 package com.restaurante.pedidos.negocio.servicios;
 
-import com.restaurante.pedidos.Clases.*;
-import com.restaurante.pedidos.Clases.Enums.CodigoEstadoPedido;
+import com.restaurante.pedidos.clases.*;
+import com.restaurante.pedidos.clases.Enums.CodigoEstadoPedido;
 import com.restaurante.pedidos.datos.dao.PedidoDAO;
-import com.restaurante.pedidos.Logica.EstadosPedidoJpaController;
-import com.restaurante.pedidos.Logica.HistorialEstadosPedidoJpaController;
-import com.restaurante.pedidos.Logica.PersonalJpaController;
-import com.restaurante.pedidos.Logica.EntregasJpaController;
+import com.restaurante.pedidos.logica.EstadosPedidoJpaController;
+import com.restaurante.pedidos.logica.HistorialEstadosPedidoJpaController;
+import com.restaurante.pedidos.logica.PersonalJpaController;
+import com.restaurante.pedidos.logica.EntregasJpaController;
 import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 import com.restaurante.pedidos.LogicaServicios.MaquinaEstadosPedido;
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Servicio de negocio para coordinar validación de reglas de transición de pedidos,
@@ -30,13 +29,13 @@ public class PedidoService {
         this.estadosController = new EstadosPedidoJpaController(JPABaseDeDatos.getEntityManagerFactory());
         this.historialController = new HistorialEstadosPedidoJpaController(JPABaseDeDatos.getEntityManagerFactory());
         this.personalController = new PersonalJpaController(JPABaseDeDatos.getEntityManagerFactory());
-        
+
         EntregasJpaController tempController = null;
         try {
             tempController = new EntregasJpaController(JPABaseDeDatos.getEntityManagerFactory());
         } catch (Exception e) {}
         this.entregasController = tempController;
-        
+
         this.maquinaEstados = new MaquinaEstadosPedido();
     }
 
@@ -48,7 +47,7 @@ public class PedidoService {
         pedido.setEstadoActualId(estadoInicial);
         pedido.setCreadoEn(new Date());
         pedido.setEstadoActualCambiadoEn(new Date());
-        
+
         pedidoDAO.crearPedido(pedido);
 
         // Registrar historial inicial
@@ -133,7 +132,7 @@ public class PedidoService {
                 e.setDespachadoEn(new Date());
                 e.setEstadoEntrega("EN_CAMINO");
                 e.setNumeroIntento(1);
-                
+
                 entregasController.create(e);
                 pedido.setEntregas(e);
             }
@@ -155,7 +154,7 @@ public class PedidoService {
                 e.setNombreReceptor(pedido.getClienteId() != null ? pedido.getClienteId().getNombreCompleto() : "Cliente");
                 e.setEstadoEntrega("ENTREGADO");
                 e.setNumeroIntento(1);
-                
+
                 entregasController.create(e);
                 pedido.setEntregas(e);
             } else {

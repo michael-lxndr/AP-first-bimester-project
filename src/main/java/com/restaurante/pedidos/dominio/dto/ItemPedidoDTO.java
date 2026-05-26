@@ -1,7 +1,7 @@
 package com.restaurante.pedidos.dominio.dto;
 
-import com.restaurante.pedidos.Clases.ItemsPedido;
-import com.restaurante.pedidos.Clases.Productos;
+import com.restaurante.pedidos.clases.ItemsPedido;
+import com.restaurante.pedidos.clases.Productos;
 import java.math.BigDecimal;
 
 public record ItemPedidoDTO(

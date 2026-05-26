@@ -1,7 +1,7 @@
 package com.restaurante.pedidos.datos.dao;
 
-import com.restaurante.pedidos.Clases.PedidosCliente;
-import com.restaurante.pedidos.Logica.PedidosClienteJpaController;
+import com.restaurante.pedidos.clases.PedidosCliente;
+import com.restaurante.pedidos.logica.PedidosClienteJpaController;
 import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 import javax.persistence.EntityManager;
 import java.util.List;

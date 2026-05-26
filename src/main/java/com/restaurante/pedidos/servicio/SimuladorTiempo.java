@@ -1,7 +1,7 @@
 package com.restaurante.pedidos.servicio;
 
 import java.time.Duration;
-import com.restaurante.pedidos.Logica.Utilidades.SimularTiempo;
+import com.restaurante.pedidos.logica.Utilidades.SimularTiempo;
 
 /**
  * Clase puente de compatibilidad para la simulación de demoras en la suite de pruebas.

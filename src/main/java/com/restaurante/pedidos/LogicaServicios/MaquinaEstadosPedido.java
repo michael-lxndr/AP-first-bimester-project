@@ -4,9 +4,9 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import com.restaurante.pedidos.Clases.Enums.CodigoEstadoPedido;
-import com.restaurante.pedidos.Clases.EstadosPedido;
-import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.clases.Enums.CodigoEstadoPedido;
+import com.restaurante.pedidos.clases.EstadosPedido;
+import com.restaurante.pedidos.clases.PedidosCliente;
 
 
 public class MaquinaEstadosPedido {
@@ -51,11 +51,11 @@ public class MaquinaEstadosPedido {
 			com.restaurante.pedidos.dominio.CodigoEstadoPedido origen,
 			com.restaurante.pedidos.dominio.CodigoEstadoPedido destino,
 			com.restaurante.pedidos.dominio.CodigoRol rol,
-			java.util.List<com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido> reglas) {
+			java.util.List<com.restaurante.pedidos.clases.ReglasTransicionEstadoPedido> reglas) {
 		if (reglas == null) {
 			return false;
 		}
-		for (com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido regla : reglas) {
+		for (com.restaurante.pedidos.clases.ReglasTransicionEstadoPedido regla : reglas) {
 			if (regla.getActiva() &&
 				regla.getRolId() != null && rol.name().equals(regla.getRolId().getCodigoRol()) &&
 				regla.getEstadoOrigenId() != null && origen.name().equals(regla.getEstadoOrigenId().getCodigoEstado()) &&

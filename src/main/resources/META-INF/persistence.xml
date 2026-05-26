@@ -2,17 +2,17 @@
 <persistence version="2.2" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence           http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
   <persistence-unit name="primerBimestrePU" transaction-type="RESOURCE_LOCAL">
     <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-    <class>com.restaurante.pedidos.Clases.ItemsPedido</class>
-    <class>com.restaurante.pedidos.Clases.HistorialEstadosPedido</class>
-    <class>com.restaurante.pedidos.Clases.Clientes</class>
-    <class>com.restaurante.pedidos.Clases.Roles</class>
-    <class>com.restaurante.pedidos.Clases.EstadosPedido</class>
-    <class>com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido</class>
-    <class>com.restaurante.pedidos.Clases.DireccionesCliente</class>
-    <class>com.restaurante.pedidos.Clases.PedidosCliente</class>
-    <class>com.restaurante.pedidos.Clases.Entregas</class>
-    <class>com.restaurante.pedidos.Clases.Productos</class>
-    <class>com.restaurante.pedidos.Clases.Personal</class>
+    <class>com.restaurante.pedidos.clases.ItemsPedido</class>
+    <class>com.restaurante.pedidos.clases.HistorialEstadosPedido</class>
+    <class>com.restaurante.pedidos.clases.Clientes</class>
+    <class>com.restaurante.pedidos.clases.Roles</class>
+    <class>com.restaurante.pedidos.clases.EstadosPedido</class>
+    <class>com.restaurante.pedidos.clases.ReglasTransicionEstadoPedido</class>
+    <class>com.restaurante.pedidos.clases.DireccionesCliente</class>
+    <class>com.restaurante.pedidos.clases.PedidosCliente</class>
+    <class>com.restaurante.pedidos.clases.Entregas</class>
+    <class>com.restaurante.pedidos.clases.Productos</class>
+    <class>com.restaurante.pedidos.clases.Personal</class>
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/proyecto_primer_bimestre?serverTimezone=UTC"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

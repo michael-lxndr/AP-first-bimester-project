@@ -1,6 +1,6 @@
 package com.restaurante.pedidos.dominio.servicio.ui;
 
-import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.clases.PedidosCliente;
 import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
 import com.restaurante.pedidos.dominio.dto.PedidoDTO;
 import com.restaurante.pedidos.negocio.servicios.PedidoService;
@@ -64,7 +64,7 @@ public class ServicioPedidosUIImpl implements IServicioPedidosUI {
                             .filter(p -> p.estadoActual() != null && estado.name().equals(p.estadoActual().codigo()))
                             .collect(Collectors.toList());
                 }
-                
+
                 return pedidoService.buscarTodos().stream()
                         .map(PedidoDTO::fromEntity)
                         .filter(p -> p.estadoActual() != null && estado.name().equals(p.estadoActual().codigo()))
@@ -120,13 +120,13 @@ public class ServicioPedidosUIImpl implements IServicioPedidosUI {
                 if (exito) {
                     PedidosCliente pc = pedidoService.buscarPedidoPorId(pedidoId);
                     PedidoDTO dto = PedidoDTO.fromEntity(pc);
-                    
+
                     // Sincronizar en simulación si está activo
                     if (simulacion != null && simulacion.isSimulating()) {
                         // El motor de simulación maneja sus transiciones concurrentemente,
                         // pero notificamos la actualización manual en los escuchadores
                     }
-                    
+
                     notificarCambioExterno(dto);
                 }
                 return exito;

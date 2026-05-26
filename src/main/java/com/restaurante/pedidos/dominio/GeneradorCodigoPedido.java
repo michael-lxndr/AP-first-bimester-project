@@ -7,6 +7,6 @@ package com.restaurante.pedidos.dominio;
 public class GeneradorCodigoPedido {
 
     public static String generar() {
-        return com.restaurante.pedidos.Logica.Utilidades.GeneradorCodigoPedido.generar();
+        return com.restaurante.pedidos.logica.Utilidades.GeneradorCodigoPedido.generar();
     }
 }

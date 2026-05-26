@@ -1,8 +1,7 @@
 package com.restaurante.pedidos.LogicaServicios;
 
-import com.restaurante.pedidos.Clases.*;
-import com.restaurante.pedidos.Clases.Enums.CodigoEstadoPedido;
-import com.restaurante.pedidos.Logica.*;
+import com.restaurante.pedidos.clases.*;
+import com.restaurante.pedidos.logica.*;
 import com.restaurante.pedidos.LogicaConfiguracion.JPABaseDeDatos;
 import com.restaurante.pedidos.dominio.dto.PedidoDTO;
 import javax.persistence.EntityManagerFactory;
@@ -47,12 +46,12 @@ public class ServicioSimulacionConcurrente {
     // Colas concurrentes seguras
     private final BlockingQueue<PedidosCliente> colaPendientes = new LinkedBlockingQueue<>();
     private final BlockingQueue<PedidosCliente> colaListos = new LinkedBlockingQueue<>();
-    
+
     // Control de Hilos
     private Thread producerThread;
     private ExecutorService poolCocineros;
     private ExecutorService poolRepartidores;
-    
+
     private volatile boolean produciendo = false;
     private volatile boolean simulando = false;
 
@@ -153,7 +152,7 @@ public class ServicioSimulacionConcurrente {
             dbClientes = clientesController.findClientesEntities();
             dbPersonal = personalController.findPersonalEntities();
             dbDirecciones = direccionesController.findDireccionesClienteEntities();
-            
+
             for (int i = 1; i <= 5; i++) {
                 dbEstados[i] = estadosController.findEstadosPedido((long) i);
             }
@@ -164,7 +163,7 @@ public class ServicioSimulacionConcurrente {
             dbClientes = new ArrayList<>();
             dbPersonal = new ArrayList<>();
             dbDirecciones = new ArrayList<>();
-            
+
             // Crear estados mock autónomos
             dbEstados[1] = crearMockEstado(1L, "PENDIENTE", "Pendiente", 1, false);
             dbEstados[2] = crearMockEstado(2L, "EN_PREPARACION", "En preparación", 2, false);
@@ -201,10 +200,10 @@ public class ServicioSimulacionConcurrente {
      */
     public synchronized void startSimulation(int intervalSeconds, int numCooks) {
         if (simulando) return;
-        
+
         simulando = true;
         produciendo = true;
-        
+
         colaPendientes.clear();
         colaListos.clear();
         pedidosActivos.clear();
@@ -238,11 +237,11 @@ public class ServicioSimulacionConcurrente {
         if (!produciendo) return;
         produciendo = false;
         registrarLog("🛑 cocina cerrada: Deteniendo la generación de nuevos pedidos.");
-        
+
         if (producerThread != null) {
             producerThread.interrupt();
         }
-        
+
         // Lanzar un hilo de monitoreo para apagar los pools cuando todo esté procesado
         new Thread(() -> {
             while (!colaPendientes.isEmpty() || !colaListos.isEmpty() || hayPedidosEnCurso()) {
@@ -270,7 +269,7 @@ public class ServicioSimulacionConcurrente {
     private synchronized void shutdownPools() {
         simulando = false;
         produciendo = false;
-        
+
         if (poolCocineros != null) {
             poolCocineros.shutdown();
             try {
@@ -279,7 +278,7 @@ public class ServicioSimulacionConcurrente {
                 poolCocineros.shutdownNow();
             }
         }
-        
+
         if (poolRepartidores != null) {
             poolRepartidores.shutdown();
             try {
@@ -288,7 +287,7 @@ public class ServicioSimulacionConcurrente {
                 poolRepartidores.shutdownNow();
             }
         }
-        
+
         registrarLog("🏁 Simulación terminada y pools cerrados correctamente.");
     }
 
@@ -312,12 +311,12 @@ public class ServicioSimulacionConcurrente {
                 PedidosCliente pedido = generarPedidoAleatorio();
                 colaPendientes.put(pedido);
                 pedidosActivos.put(pedido.getCodigoPedido(), pedido);
-                
-                registrarLog(String.format("📝 Pedido %s creado para cliente '%s' (Total: $%s). PENDIENTE", 
-                        pedido.getCodigoPedido(), 
+
+                registrarLog(String.format("📝 Pedido %s creado para cliente '%s' (Total: $%s). PENDIENTE",
+                        pedido.getCodigoPedido(),
                         pedido.getClienteId().getNombreCompleto(),
                         pedido.getTotal()));
-                
+
                 notificarActualizacion(pedido);
 
                 // Esperar intervalo
@@ -340,7 +339,7 @@ public class ServicioSimulacionConcurrente {
 
                 String codigo = pedido.getCodigoPedido();
                 registrarLog(String.format("🍳 Cocinero #%d toma Pedido %s. Cambiando a: EN PREPARACIÓN", idCocinero, codigo));
-                
+
                 // Actualizar estado a EN_PREPARACION
                 try {
                     pedidoService.actualizarEstado(pedido.getPedidoId(), "EN_PREPARACION", (long) idCocinero);
@@ -355,7 +354,7 @@ public class ServicioSimulacionConcurrente {
                 // Calcular tiempo total de preparación (suma de tiempos de productos)
                 int totalMinutos = 0;
                 for (ItemsPedido item : pedido.getItemsPedidoCollection()) {
-                    totalMinutos += (item.getProductoId().getTiempoPreparacionMinutos() != null 
+                    totalMinutos += (item.getProductoId().getTiempoPreparacionMinutos() != null
                             ? item.getProductoId().getTiempoPreparacionMinutos() : 2);
                 }
                 if (totalMinutos == 0) totalMinutos = 3;
@@ -412,11 +411,11 @@ public class ServicioSimulacionConcurrente {
 
                 // Actualizar estado a ENTREGADO
                 registrarLog(String.format("🏁 Repartidor #%d entregó Pedido %s. Cambiando a: ENTREGADO", idRepartidor, codigo));
-                
+
                 // Simular quién recibe
                 String receptor = pedido.getClienteId().getNombreCompleto();
-                pedido.setNotasGenerales(String.format("Entregado a las %s. Recibe: %s", 
-                        new java.text.SimpleDateFormat("HH:mm").format(new Date()), 
+                pedido.setNotasGenerales(String.format("Entregado a las %s. Recibe: %s",
+                        new java.text.SimpleDateFormat("HH:mm").format(new Date()),
                         receptor));
 
                 try {
@@ -581,11 +580,11 @@ public class ServicioSimulacionConcurrente {
         pedido.setTotal(total);
         pedido.setPrioritario(ThreadLocalRandom.current().nextBoolean());
         pedido.setNotasGenerales("Pedido creado mediante simulación");
-        
+
         pedido.setEstadoActualId(dbEstados[1]); // PENDIENTE
         pedido.setCreadoEn(new Date());
         pedido.setEstadoActualCambiadoEn(new Date());
-        
+
         // Tiempo estimado de entrega: 15 minutos en el futuro
         pedido.setEntregaEstimadaEn(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)));
         pedido.setRegistradoPorPersonalId(registrador);

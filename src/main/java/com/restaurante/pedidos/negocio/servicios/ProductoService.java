@@ -1,6 +1,6 @@
 package com.restaurante.pedidos.negocio.servicios;
 
-import com.restaurante.pedidos.Clases.Productos;
+import com.restaurante.pedidos.clases.Productos;
 import com.restaurante.pedidos.datos.dao.ProductoDAO;
 import java.util.List;
 

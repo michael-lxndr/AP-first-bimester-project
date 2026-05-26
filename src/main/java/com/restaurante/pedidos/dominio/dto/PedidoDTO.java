@@ -1,14 +1,13 @@
 package com.restaurante.pedidos.dominio.dto;
 
-import com.restaurante.pedidos.Clases.PedidosCliente;
-import com.restaurante.pedidos.Clases.Clientes;
-import com.restaurante.pedidos.Clases.DireccionesCliente;
-import com.restaurante.pedidos.Clases.ItemsPedido;
+import com.restaurante.pedidos.clases.PedidosCliente;
+import com.restaurante.pedidos.clases.Clientes;
+import com.restaurante.pedidos.clases.DireccionesCliente;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 /**

@@ -4,8 +4,8 @@
  */
 package com.restaurante.pedidos.LogicaServicios;
 
-import com.restaurante.pedidos.Clases.EstadosPedido;
-import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.clases.EstadosPedido;
+import com.restaurante.pedidos.clases.PedidosCliente;
 import com.restaurante.pedidos.LogicaConfiguracion.ConfiguracionHilos;
 
 import java.util.ArrayList;

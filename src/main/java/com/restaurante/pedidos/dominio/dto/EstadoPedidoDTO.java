@@ -1,7 +1,7 @@
 package com.restaurante.pedidos.dominio.dto;
 
-import com.restaurante.pedidos.Clases.EstadosPedido;
-import com.restaurante.pedidos.Clases.Personal;
+import com.restaurante.pedidos.clases.EstadosPedido;
+
 import java.time.Instant;
 
 /**

@@ -3,10 +3,10 @@ package com.restaurante.pedidos.persistencia.controlador;
 import com.restaurante.pedidos.configuracion.ConfiguracionBaseDatos;
 import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
 import com.restaurante.pedidos.dominio.CodigoRol;
-import com.restaurante.pedidos.Clases.EstadosPedido;
-import com.restaurante.pedidos.Clases.Roles;
-import com.restaurante.pedidos.Logica.RolesJpaController;
-import com.restaurante.pedidos.Logica.EstadosPedidoJpaController;
+import com.restaurante.pedidos.clases.EstadosPedido;
+import com.restaurante.pedidos.clases.Roles;
+import com.restaurante.pedidos.logica.RolesJpaController;
+import com.restaurante.pedidos.logica.EstadosPedidoJpaController;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,7 @@ class ControladoresJpaTest {
                 .filter(r -> r.getCodigoRol().equals(CodigoRol.ADMINISTRADOR.name()))
                 .findFirst()
                 .orElse(null);
-                
+
         if (rol == null) {
             Roles nuevo = new Roles();
             nuevo.setCodigoRol(CodigoRol.ADMINISTRADOR.name());

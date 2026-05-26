@@ -1,7 +1,7 @@
 package com.restaurante.pedidos.dominio.dto;
 
-import com.restaurante.pedidos.Clases.Personal;
-import com.restaurante.pedidos.Clases.Roles;
+import com.restaurante.pedidos.clases.Personal;
+import com.restaurante.pedidos.clases.Roles;
 
 public record PersonalDTO(
         Long id,
