@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.restaurante.pedidos.presentacion.controladores.ControladorCliente"
+      styleClass="mobile-screen, screen-cliente"
+      spacing="12">
+
+    <padding>
+        <Insets top="40" right="15" bottom="20" left="15"/>
+    </padding>
+
+    <!-- Header -->
+    <VBox spacing="4" alignment="CENTER">
+        <Label text="🔍 Cliente" styleClass="title"/>
+        <Label text="Consultar Estado de Pedido" styleClass="subtitle"/>
+    </VBox>
+
+    <!-- Búsqueda -->
+    <VBox spacing="8" styleClass="card">
+        <Label text="Ingrese su código" style="-fx-font-weight: bold;"/>
+        <TextField fx:id="campoCodigo" promptText="Ej: PED-001" style="-fx-font-size: 14px;"/>
+
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Consultar" onAction="#consultar" prefWidth="120"/>
+            <Button text="Limpiar" onAction="#limpiar" prefWidth="120" styleClass="button-secondary"/>
+        </HBox>
+    </VBox>
+
+    <!-- Mensaje -->
+    <Label fx:id="lblMensaje" text="" wrapText="true" style="-fx-text-fill: #ff6b35; -fx-font-size: 12px;"/>
+
+    <!-- Resultado -->
+    <VBox fx:id="panelResultado" spacing="10" styleClass="card" visible="false" managed="false">
+        <Label fx:id="lblCodigoPedido" styleClass="label-codigo"/>
+        <Label fx:id="lblEstado"/>
+        <Label fx:id="lblCliente"/>
+        <Label fx:id="lblDireccion" wrapText="true"/>
+        <Label fx:id="lblTotal" styleClass="label-total"/>
+        <Label fx:id="lblPrioritario"/>
+        <Separator/>
+        <Label text="🍽️ Items:" style="-fx-font-weight: bold;"/>
+        <Label fx:id="lblItems" wrapText="true"/>
+    </VBox>
+
+    <Region VBox.vgrow="ALWAYS"/>
+
+    <!-- Botón cerrar -->
+    <Button text="Cerrar" onAction="#cerrarVentana" maxWidth="Infinity" styleClass="button-exit"/>
+</VBox>

@@ -1,28 +1,32 @@
 package com.restaurante.pedidos.dominio.dto;
 
-/**
- * DTO ligero para mostrar personal en listas/combos de UI.
- */
+import com.restaurante.pedidos.Clases.Personal;
+import com.restaurante.pedidos.Clases.Roles;
+
 public record PersonalDTO(
         Long id,
         String nombreCompleto,
-        String rol,              // "Cocinero", "Repartidor" (no enum para UI)
+        String rol,
         String telefono,
         boolean activo,
-        String avatarUrl         // Opcional: para mostrar foto en UI
+        String avatarUrl
 ) {
-    public static PersonalDTO fromEntity(
-            com.restaurante.pedidos.dominio.entidad.Personal entidad
-    ) {
+    public static PersonalDTO fromEntity(Personal entidad) {
         if (entidad == null) return null;
 
+        String nombreRol = "Sin rol";
+        Roles rol = entidad.getRolId();
+        if (rol != null && rol.getCodigoRol() != null) {
+            nombreRol = rol.getCodigoRol();
+        }
+
         return new PersonalDTO(
-                entidad.getId(),
+                entidad.getPersonalId(),
                 entidad.getNombreCompleto(),
-                entidad.getCodigoRol() != null ? entidad.getCodigoRol().getDescripcion() : "Sin rol",
+                nombreRol,
                 entidad.getTelefono(),
-                entidad.isActivo(),
-                null // Avatar se puede agregar después
+                entidad.getActivo(),
+                null
         );
     }
 }

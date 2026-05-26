@@ -10,10 +10,19 @@ import javax.persistence.Persistence;
 
 public class JPABaseDeDatos {
 
-	private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("RestaurantPU");
+	private static final String PERSISTENCE_UNIT = "primerBimestrePU";
 
-	public static EntityManagerFactory getEntityManagerFactory() {
+	private static EntityManagerFactory emf;
+
+	public static synchronized EntityManagerFactory getEntityManagerFactory() {
+		if (emf == null) {
+			emf = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+		}
 		return emf;
+	}
+
+	public static synchronized void setEntityManagerFactory(EntityManagerFactory customEmf) {
+		emf = customEmf;
 	}
 
 }

@@ -3,171 +3,133 @@ package com.restaurante.pedidos.presentacion.controladores;
 import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
 import com.restaurante.pedidos.dominio.dto.PedidoDTO;
 import com.restaurante.pedidos.dominio.servicio.ui.IServicioPedidosUI;
-import com.restaurante.pedidos.presentacion.componentes.TarjetaPedido;
-import com.restaurante.pedidos.presentacion.util.EjecutorUI;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
-import java.util.List;
-import java.util.Optional;
-
-/**
- * Controlador para la vista del cocinero.
- *
- * Reglas aplicadas:
- * ✅ No usa EntityManager ni repositorios.
- * ✅ No crea hilos directamente (usa EjecutorUI).
- * ✅ Solo conoce DTOs, no entidades JPA.
- * ✅ Lógica de estado delegada al servicio.
- */
 public class ControladorCocinero {
 
     @FXML private VBox contenedorCola;
     @FXML private Label lblEstadoConexion;
     @FXML private Button btnRefrescar;
 
-    // ✅ Inyección de dependencia: interfaz, no implementación
     private IServicioPedidosUI servicioPedidos;
+    private Long personalId = 2L; // ID del cocinero actual
 
-    // Para tests: setter de inyección
-    public void setServicioPedidos(IServicioPedidosUI servicio) {
-        this.servicioPedidos = servicio;
+    // === Métodos para tests ===
+    public void setServicioPedidos(IServicioPedidosUI servicioPedidos) {
+        this.servicioPedidos = servicioPedidos;
     }
 
     @FXML
     public void initialize() {
-        // ✅ Inicialización segura: servicio puede ser null en diseño FXML
-        if (servicioPedidos == null) {
-            System.err.println("⚠️  ServicioPedidos no inyectado en ControladorCocinero");
-            lblEstadoConexion.setText("❌ Servicio no disponible");
-            return;
+        if (this.servicioPedidos == null) {
+            this.servicioPedidos = com.restaurante.pedidos.dominio.servicio.ui.ServicioPedidosUIImpl.getInstance();
+        }
+        lblEstadoConexion.setText("✅ Conectado - Sistema funcionando");
+        
+        // Registrar listener de eventos en tiempo real para cambios de estado
+        if (this.servicioPedidos instanceof com.restaurante.pedidos.dominio.servicio.ui.ServicioPedidosUIImpl impl) {
+            impl.addPropertyChangeListener(evt -> Platform.runLater(this::cargarColaPreparacion));
         }
 
-        lblEstadoConexion.setText("🔄 Cargando...");
         cargarColaPreparacion();
-
-        // Auto-refresco cada 30 segundos (opcional, para UI en tiempo real)
-        // Usamos EjecutorUI para no bloquear el thread de JavaFX
-        EjecutorUI.ejecutarCpu(() -> {
-            try {
-                while (!Thread.currentThread().isInterrupted()) {
-                    Thread.sleep(30_000);
-                    Platform.runLater(this::cargarColaPreparacion);
-                }
-            } catch (InterruptedException e) {
-                // Shutdown limpio
-                Thread.currentThread().interrupt();
-            }
-        });
     }
 
     @FXML
     private void cargarColaPreparacion() {
-        lblEstadoConexion.setText("🔄 Actualizando...");
-        btnRefrescar.setDisable(true);
+        lblEstadoConexion.setText("🔄 Cargando pedidos...");
+        contenedorCola.getChildren().clear();
 
-        // ✅ Patrón: EjecutorUI + callback para UI
-        EjecutorUI.ejecutarConCallbackUI(
-                () -> servicioPedidos.obtenerPedidosPorEstado(CodigoEstadoPedido.EN_PREPARACION).join(),
-
-                // onSuccess: se ejecuta en thread de JavaFX (Platform.runLater interno)
-                pedidos -> {
-                    contenedorCola.getChildren().clear();
-
-                    if (pedidos.isEmpty()) {
-                        contenedorCola.getChildren().add(
-                                new Label("🎉 No hay pedidos en preparación")
-                        );
-                        lblEstadoConexion.setText("✅ Sin pedidos pendientes");
-                    } else {
-                        for (PedidoDTO pedido : pedidos) {
-                            TarjetaPedido tarjeta = new TarjetaPedido(
-                                    pedido,
-                                    this::marcarComoListo,  // Callback
-                                    "✅ Listo",
-                                    "estado-en-preparacion"
-                            );
-                            contenedorCola.getChildren().add(tarjeta);
+        if (servicioPedidos != null) {
+            servicioPedidos.obtenerPedidosPorEstado(CodigoEstadoPedido.EN_PREPARACION)
+                    .thenAccept(pedidos -> Platform.runLater(() -> {
+                        if (pedidos != null && !pedidos.isEmpty()) {
+                            for (PedidoDTO pedido : pedidos) {
+                                agregarTarjetaPedido(pedido);
+                            }
+                            lblEstadoConexion.setText("✅ " + pedidos.size() + " pedidos en preparación");
+                        } else {
+                            mostrarMensajeSinPedidos();
                         }
-                        lblEstadoConexion.setText("✅ " + pedidos.size() + " pedidos en cola");
-                    }
-                    btnRefrescar.setDisable(false);
-                },
+                    }))
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> {
+                            lblEstadoConexion.setText("❌ Error al cargar pedidos");
+                            mostrarMensajeSinPedidos();
+                        });
+                        return null;
+                    });
+        } else {
+            mostrarMensajeSinPedidos();
+            lblEstadoConexion.setText("✅ Sin pedidos pendientes");
+        }
 
-                // onError: manejo centrado en usuario
-                error -> {
-                    System.err.println("Error cargando cola: " + error.getMessage());
-                    lblEstadoConexion.setText("❌ Error de conexión");
-                    btnRefrescar.setDisable(false);
+        if (btnRefrescar != null) btnRefrescar.setDisable(false);
+    }
 
-                    // Mostrar alerta no intrusiva
-                    mostrarNotificacion("No se pudo actualizar la cola. Reintente.", Alert.AlertType.WARNING);
-                }
-        );
+    private void mostrarMensajeSinPedidos() {
+        Label mensaje = new Label("📋 No hay pedidos en preparación\n\n(Funcionalidad en desarrollo)");
+        mensaje.setStyle("-fx-padding: 20; -fx-text-fill: #666;");
+        contenedorCola.getChildren().add(mensaje);
+    }
+
+    private void agregarTarjetaPedido(PedidoDTO pedido) {
+        // Crear una tarjeta visual para el pedido
+        VBox tarjeta = new VBox(5);
+        tarjeta.setStyle("-fx-background-color: white; -fx-padding: 10; -fx-border-radius: 5; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);");
+
+        Label codigo = new Label("📄 " + pedido.codigoPedido());
+        codigo.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        Label cliente = new Label("👤 " + pedido.nombreCliente());
+        Label items = new Label("🍽️ " + (pedido.items() != null ? pedido.items().size() : 0) + " items");
+        Label total = new Label("💰 $" + pedido.total().toPlainString());
+
+        Button btnListo = new Button("✅ Marcar como Listo");
+        btnListo.setOnAction(e -> marcarComoListo(pedido));
+
+        tarjeta.getChildren().addAll(codigo, cliente, items, total, btnListo);
+        contenedorCola.getChildren().add(tarjeta);
+    }
+
+    // Package-private para acceso desde tests
+    void marcarComoListo(PedidoDTO pedido) {
+        if (servicioPedidos != null) {
+            servicioPedidos.transicionarEstado(pedido.id(), CodigoEstadoPedido.LISTO, personalId)
+                    .thenAccept(resultado -> Platform.runLater(() -> {
+                        if (resultado) {
+                            mostrarNotificacion("✅ Pedido " + pedido.codigoPedido() + " marcado como listo");
+                            cargarColaPreparacion();
+                        } else {
+                            mostrarNotificacion("⚠️ No se pudo marcar como listo");
+                        }
+                    }))
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> mostrarNotificacion("❌ Error al procesar"));
+                        return null;
+                    });
+        } else {
+            mostrarNotificacion("📦 Demo: Pedido " + pedido.codigoPedido() + " marcado como listo");
+            cargarColaPreparacion();
+        }
+    }
+
+    private void mostrarNotificacion(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Notificación");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 
     @FXML
-    private void marcarComoListo(PedidoDTO pedido) {
-        // Confirmación antes de acción destructiva
-        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Confirmar acción");
-        confirmacion.setHeaderText("Marcar pedido como listo");
-        confirmacion.setContentText("¿Listo para entregar \"" + pedido.codigoPedido() + "\"?\n\nEsto notificará al repartidor.");
-
-        Optional<ButtonType> resultado = confirmacion.showAndWait();
-        if (resultado.isEmpty() || resultado.get() != ButtonType.OK) {
-            return;  // Usuario canceló
-        }
-
-        // ✅ Delegar lógica de negocio al servicio
-        EjecutorUI.ejecutarConCallbackUI(
-                () -> servicioPedidos.transicionarEstado(
-                        pedido.id(),
-                        CodigoEstadoPedido.LISTO,
-                        obtenerIdPersonalActual()  // Debería venir de sesión autenticada
-                ).join(),
-
-                exito -> {
-                    if (exito) {
-                        mostrarNotificacion("🎉 Pedido " + pedido.codigoPedido() + " marcado como listo", Alert.AlertType.INFORMATION);
-                        cargarColaPreparacion();  // Refrescar UI
-                    } else {
-                        mostrarNotificacion("⚠️  No se pudo actualizar el estado. Verifique permisos.", Alert.AlertType.WARNING);
-                    }
-                },
-
-                error -> {
-                    System.err.println("Error transicionando estado: " + error.getMessage());
-                    mostrarNotificacion("❌ Error de comunicación con el servidor", Alert.AlertType.ERROR);
-                }
-        );
-    }
-
-    // === Métodos auxiliares ===
-
-    private Long obtenerIdPersonalActual() {
-        // TODO: Integrar con sistema de autenticación
-        // Por ahora, hardcodeado para desarrollo
-        return 2L;  // Ana, la cocinera
-    }
-
-    private void mostrarNotificacion(String mensaje, Alert.AlertType tipo) {
-        Platform.runLater(() -> {
-            Alert alert = new Alert(tipo);
-            alert.setTitle("Notificación");
-            alert.setHeaderText(null);
-            alert.setContentText(mensaje);
-            alert.initOwner(btnRefrescar.getScene().getWindow());
-            alert.showAndWait();
-        });
-    }
-
-    // Para tests: exponer estado interno
-    public int getCantidadTarjetasEnCola() {
-        return (int) contenedorCola.getChildren().stream()
-                .filter(n -> n instanceof TarjetaPedido)
-                .count();
+    private void cerrarVentana() {
+        Stage stage = (Stage) contenedorCola.getScene().getWindow();
+        stage.close();
     }
 }

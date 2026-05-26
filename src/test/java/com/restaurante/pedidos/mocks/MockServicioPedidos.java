@@ -1,6 +1,9 @@
 package com.restaurante.pedidos.mocks;
 
 import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
+import com.restaurante.pedidos.dominio.dto.EstadoPedidoDTO;
+import com.restaurante.pedidos.dominio.dto.ItemPedidoDTO;
+import com.restaurante.pedidos.dominio.dto.PedidoDTO;
 import com.restaurante.pedidos.dominio.servicio.ui.IServicioPedidosUI;
 
 import java.math.BigDecimal;
@@ -11,16 +14,11 @@ import java.util.stream.Collectors;
 
 /**
  * Implementación mock de IServicioPedidosUI para desarrollo de UI.
- *
- * Características:
- * - Datos predecibles para pruebas manuales.
- * - Simula latencia de red/BD (100-300ms) para testear estados de carga.
- * - Fácil de reemplazar: cuando Persona 2 entregue el servicio real,
- *   solo cambia la inyección en el controlador.
+ * EstadoPedidoDTO.codigo es String ("PENDIENTE", "EN_PREPARACION", etc.)
+ * IServicioPedidosUI usa CodigoEstadoPedido enum para filtrar/transicionar.
  */
 public class MockServicioPedidos implements IServicioPedidosUI {
 
-    // Datos de prueba: en producción vendrían de BD
     private static final List<PedidoDTO> PEDIDOS_DE_PRUEBA = generarPedidosMock();
 
     private static List<PedidoDTO> generarPedidosMock() {
@@ -31,12 +29,13 @@ public class MockServicioPedidos implements IServicioPedidosUI {
                 1L, "PED-001", "María López", "Calle Falsa 123",
                 List.of(
                         new ItemPedidoDTO(10L, "Hamburguesa Clásica", 2, BigDecimal.valueOf(8500), BigDecimal.valueOf(17000), "Sin cebolla"),
-                        new ItemPedidoDTO(15L, "Papas Fritas", 1, BigDecimal.valueOf(4500), BigDecimal.valueOf(4500), null)
+                        new ItemPedidoDTO(15L, "Papas Fritas",        1, BigDecimal.valueOf(4500), BigDecimal.valueOf(4500), null)
                 ),
-                new EstadoPedidoDTO(100L, CodigoEstadoPedido.EN_PREPARACION, "En cocina", Instant.now().minusSeconds(120), "Ana (Cocina)"),
+                // ✅ codigo es String: usamos .name() del enum
+                new EstadoPedidoDTO(100L, CodigoEstadoPedido.EN_PREPARACION.name(), "En cocina", Instant.now().minusSeconds(120), "Ana (Cocina)"),
                 BigDecimal.valueOf(21500),
-                Instant.now().minusMinutes(10),
-                Instant.now().plusMinutes(15),
+                Instant.now().minusSeconds(600),
+                Instant.now().plusSeconds(900),
                 false,
                 "Cliente alérgico al maní",
                 2L
@@ -46,26 +45,39 @@ public class MockServicioPedidos implements IServicioPedidosUI {
         pedidos.add(new PedidoDTO(
                 2L, "PED-002", "Carlos Ruiz", "Av. Siempre Viva 742",
                 List.of(new ItemPedidoDTO(20L, "Pizza Margarita", 1, BigDecimal.valueOf(15000), BigDecimal.valueOf(15000), "Extra queso")),
-                new EstadoPedidoDTO(101L, CodigoEstadoPedido.LISTO, "Listo para retirar", Instant.now().minusSeconds(30), "Ana (Cocina)"),
+                new EstadoPedidoDTO(101L, CodigoEstadoPedido.LISTO.name(), "Listo para retirar", Instant.now().minusSeconds(30), "Ana (Cocina)"),
                 BigDecimal.valueOf(15000),
-                Instant.now().minusMinutes(25),
-                Instant.now().plusMinutes(5),
-                true,  // prioritario
+                Instant.now().minusSeconds(1500),
+                Instant.now().plusSeconds(300),
+                true,
                 null,
                 3L
         ));
 
-        // Pedido 3: Entregado (histórico)
+        // Pedido 3: En camino (para repartidor)
         pedidos.add(new PedidoDTO(
                 3L, "PED-003", "Laura Gómez", "Calle 10 #5-20",
                 List.of(new ItemPedidoDTO(12L, "Ensalada César", 1, BigDecimal.valueOf(12000), BigDecimal.valueOf(12000), null)),
-                new EstadoPedidoDTO(102L, CodigoEstadoPedido.ENTREGADO, "Entregado", Instant.now().minusMinutes(30), "Luis (Repartidor)"),
+                new EstadoPedidoDTO(102L, CodigoEstadoPedido.EN_CAMINO.name(), "En camino", Instant.now().minusSeconds(300), "Luis (Repartidor)"),
                 BigDecimal.valueOf(12000),
-                Instant.now().minusHours(1),
-                Instant.now().minusMinutes(30),
+                Instant.now().minusSeconds(3600),
+                Instant.now().plusSeconds(600),
                 false,
                 null,
                 3L
+        ));
+
+        // Pedido 4: Pendiente (para cocinero)
+        pedidos.add(new PedidoDTO(
+                4L, "PED-004", "Roberto Torres", "Diagonal 80 #20",
+                List.of(new ItemPedidoDTO(5L, "Pollo a la plancha", 2, BigDecimal.valueOf(9000), BigDecimal.valueOf(18000), null)),
+                new EstadoPedidoDTO(103L, CodigoEstadoPedido.PENDIENTE.name(), "Pendiente", Instant.now().minusSeconds(60), "Sistema"),
+                BigDecimal.valueOf(18000),
+                Instant.now().minusSeconds(60),
+                Instant.now().plusSeconds(1800),
+                false,
+                null,
+                null
         ));
 
         return Collections.unmodifiableList(pedidos);
@@ -74,11 +86,11 @@ public class MockServicioPedidos implements IServicioPedidosUI {
     @Override
     public CompletableFuture<List<PedidoDTO>> obtenerPedidosPorEstado(CodigoEstadoPedido estado) {
         return CompletableFuture.supplyAsync(() -> {
-            // Simular latencia de BD (100-300ms)
             simularLatencia();
-
+            // ✅ codigo() es String, estado.name() convierte el enum a String para comparar
             return PEDIDOS_DE_PRUEBA.stream()
-                    .filter(p -> p.estadoActual() != null && p.estadoActual().codigo() == estado)
+                    .filter(p -> p.estadoActual() != null
+                            && estado.name().equals(p.estadoActual().codigo()))
                     .collect(Collectors.toList());
         });
     }
@@ -87,7 +99,6 @@ public class MockServicioPedidos implements IServicioPedidosUI {
     public CompletableFuture<Optional<PedidoDTO>> consultarPorCodigo(String codigo) {
         return CompletableFuture.supplyAsync(() -> {
             simularLatencia();
-
             return PEDIDOS_DE_PRUEBA.stream()
                     .filter(p -> codigo.equalsIgnoreCase(p.codigoPedido()))
                     .findFirst();
@@ -109,7 +120,6 @@ public class MockServicioPedidos implements IServicioPedidosUI {
         return CompletableFuture.supplyAsync(() -> {
             simularLatencia();
 
-            // Lógica mock: permitir transiciones válidas
             var pedido = PEDIDOS_DE_PRUEBA.stream()
                     .filter(p -> Objects.equals(p.id(), pedidoId))
                     .findFirst()
@@ -117,13 +127,13 @@ public class MockServicioPedidos implements IServicioPedidosUI {
 
             if (pedido == null) return false;
 
-            // Reglas simples de mock (en producción, esto va en dominio)
+            // ✅ codigo() es String → switch con String
             boolean transicionValida = switch (pedido.estadoActual().codigo()) {
-                case RECIBIDO -> nuevoEstado == CodigoEstadoPedido.EN_PREPARACION;
-                case EN_PREPARACION -> nuevoEstado == CodigoEstadoPedido.LISTO;
-                case LISTO -> nuevoEstado == CodigoEstadoPedido.EN_REPARTO;
-                case EN_REPARTO -> nuevoEstado == CodigoEstadoPedido.ENTREGADO;
-                default -> false;
+                case "PENDIENTE"      -> nuevoEstado == CodigoEstadoPedido.EN_PREPARACION;
+                case "EN_PREPARACION" -> nuevoEstado == CodigoEstadoPedido.LISTO;
+                case "LISTO"          -> nuevoEstado == CodigoEstadoPedido.EN_CAMINO;
+                case "EN_CAMINO"      -> nuevoEstado == CodigoEstadoPedido.ENTREGADO;
+                default               -> false;
             };
 
             return transicionValida;
@@ -134,7 +144,6 @@ public class MockServicioPedidos implements IServicioPedidosUI {
     public CompletableFuture<Boolean> asignarPersonal(Long pedidoId, Long personalId) {
         return CompletableFuture.supplyAsync(() -> {
             simularLatencia();
-            // Mock: siempre éxito si los IDs son positivos
             return pedidoId > 0 && personalId > 0;
         });
     }
@@ -143,18 +152,18 @@ public class MockServicioPedidos implements IServicioPedidosUI {
     public CompletableFuture<Boolean> cancelarPedido(Long pedidoId, Long personalId, String motivo) {
         return CompletableFuture.supplyAsync(() -> {
             simularLatencia();
-            // Mock: solo se puede cancelar si está en RECIBIDO
             var pedido = PEDIDOS_DE_PRUEBA.stream()
                     .filter(p -> Objects.equals(p.id(), pedidoId))
                     .findFirst();
-            return pedido.map(p -> p.estadoActual().codigo() == CodigoEstadoPedido.RECIBIDO)
+            // ✅ comparar String con String
+            return pedido.map(p -> CodigoEstadoPedido.PENDIENTE.name().equals(p.estadoActual().codigo()))
                     .orElse(false);
         });
     }
 
     private void simularLatencia() {
         try {
-            Thread.sleep(new Random().nextInt(200) + 100); // 100-300ms
+            Thread.sleep(new Random().nextInt(200) + 100);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

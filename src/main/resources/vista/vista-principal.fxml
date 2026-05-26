@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.restaurante.pedidos.presentacion.ControladorPanelPrincipal"
+      fx:controller="com.restaurante.pedidos.presentacion.controladores.ControladorPanelPrincipal"
       alignment="CENTER"
       spacing="18"
       styleClass="screen">
@@ -23,6 +23,7 @@
 		<Button text="Cocinero" onAction="#abrirVistaCocinero"/>
 		<Button text="Repartidor" onAction="#abrirVistaRepartidor"/>
 		<Button text="Cliente" onAction="#abrirVistaCliente"/>
+		<Button text="Simulación Multihilo" onAction="#abrirVistaSimulacion" styleClass="btn-simulacion"/>
 	</HBox>
 
 	<Label fx:id="statusLabel" text="Selecciona una vista para continuar" styleClass="status"/>

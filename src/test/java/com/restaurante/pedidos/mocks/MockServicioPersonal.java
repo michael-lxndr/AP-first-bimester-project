@@ -1,5 +1,6 @@
 package com.restaurante.pedidos.mocks;
 
+import com.restaurante.pedidos.dominio.dto.PersonalDTO;
 import com.restaurante.pedidos.dominio.servicio.ui.IServicioPersonalUI;
 
 import java.util.List;
@@ -9,10 +10,10 @@ import java.util.stream.Collectors;
 public class MockServicioPersonal implements IServicioPersonalUI {
 
     private static final List<PersonalDTO> PERSONAL_MOCK = List.of(
-            new PersonalDTO(1L, "Ana Martínez", "Cocinero", "3001234567", true, null),
-            new PersonalDTO(2L, "Luis Ramírez", "Repartidor", "3109876543", true, null),
-            new PersonalDTO(3L, "Carla Díaz", "Administrador", "3205551234", true, null),
-            new PersonalDTO(4L, "Pedro Sánchez", "Cocinero", "3112223344", false, null)  // inactivo
+            new PersonalDTO(1L, "Ana Martínez",  "COCINERO",       "3001234567", true,  null),
+            new PersonalDTO(2L, "Luis Ramírez",  "REPARTIDOR",     "3109876543", true,  null),
+            new PersonalDTO(3L, "Carla Díaz",    "ADMINISTRADOR",  "3205551234", true,  null),
+            new PersonalDTO(4L, "Pedro Sánchez", "COCINERO",       "3112223344", false, null)  // inactivo
     );
 
     @Override
@@ -42,14 +43,13 @@ public class MockServicioPersonal implements IServicioPersonalUI {
     public CompletableFuture<Boolean> actualizarDisponibilidad(Long personalId, boolean disponible) {
         return CompletableFuture.supplyAsync(() -> {
             simularLatencia();
-            // Mock: éxito si el ID existe
             return PERSONAL_MOCK.stream().anyMatch(p -> p.id().equals(personalId));
         });
     }
 
     private void simularLatencia() {
         try {
-            Thread.sleep(50 + (long)(Math.random() * 100));
+            Thread.sleep(50 + (long) (Math.random() * 100));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

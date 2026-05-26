@@ -1,0 +1,476 @@
+/* Variables de color - Tema moderno restaurante */
+.root {
+    -fx-background-color: #F4F6F7; /* Gris muy claro de fondo general */
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif; /* Tipografía obligatoria */
+}
+
+/* Estilo para pantalla móvil base */
+.mobile-screen {
+    -fx-padding: 20 15 20 15;
+}
+
+/* === PALETAS DE COLORES OBLIGATORIAS POR ROL === */
+
+/* 1. ADMINISTRADOR (#2C3E50 - azul gris) */
+.screen-admin {
+    -fx-background-color: linear-gradient(to bottom, #34495E, #2C3E50);
+}
+.screen-admin .button {
+    -fx-background-color: #2C3E50;
+    -fx-border-color: #2C3E50;
+}
+.screen-admin .button:hover {
+    -fx-background-color: #1A252F;
+}
+.screen-admin .card {
+    -fx-border-color: #2C3E50;
+    -fx-border-width: 1px;
+}
+.screen-admin .section-title {
+    -fx-text-fill: #2C3E50;
+}
+
+/* 2. COCINERO (#E67E22 - naranja) */
+.screen-cocinero {
+    -fx-background-color: linear-gradient(to bottom, #F39C12, #E67E22);
+}
+.screen-cocinero .button {
+    -fx-background-color: #E67E22;
+    -fx-border-color: #E67E22;
+}
+.screen-cocinero .button:hover {
+    -fx-background-color: #D35400;
+}
+.screen-cocinero .section-title {
+    -fx-text-fill: #E67E22;
+}
+
+/* 3. REPARTIDOR (#27AE60 - verde) */
+.screen-repartidor {
+    -fx-background-color: linear-gradient(to bottom, #2ECC71, #27AE60);
+}
+.screen-repartidor .button {
+    -fx-background-color: #27AE60;
+    -fx-border-color: #27AE60;
+}
+.screen-repartidor .button:hover {
+    -fx-background-color: #219653;
+}
+.screen-repartidor .section-title {
+    -fx-text-fill: #27AE60;
+}
+
+/* 4. CLIENTE (#8E44AD - púrpura) */
+.screen-cliente {
+    -fx-background-color: linear-gradient(to bottom, #9B59B6, #8E44AD);
+}
+.screen-cliente .button {
+    -fx-background-color: #8E44AD;
+    -fx-border-color: #8E44AD;
+}
+.screen-cliente .button:hover {
+    -fx-background-color: #7D3C98;
+}
+.screen-cliente .label-codigo {
+    -fx-text-fill: #8E44AD;
+}
+.screen-cliente .label-total {
+    -fx-text-fill: #8E44AD;
+}
+
+/* 5. SIMULACIÓN (#1ABC9C - turquesa) */
+.custom-progress .bar {
+    -fx-background-color: #1ABC9C;
+}
+.terminal-console {
+    -fx-text-fill: #1ABC9C !important;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+}
+.premium-table .progress-bar .bar {
+    -fx-background-color: #1ABC9C;
+}
+.card-title {
+    -fx-text-fill: #1ABC9C !important;
+}
+
+/* Tarjetas blancas */
+.card {
+    -fx-background-color: white;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 5);
+    -fx-padding: 20;
+}
+
+/* Títulos */
+.title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: rgba(255,255,255,0.8);
+}
+
+.section-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+}
+
+/* Botones */
+.button {
+    -fx-background-color: #ff6b35;
+    -fx-background-radius: 30;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);
+}
+
+.button:hover {
+    -fx-background-color: #ff8c42;
+}
+
+.button-secondary {
+    -fx-background-color: #4CAF50;
+}
+
+.button-danger {
+    -fx-background-color: #f44336;
+}
+
+.button-exit {
+    -fx-background-color: #9e9e9e;
+}
+
+/* Campos de texto */
+.text-field, .combo-box {
+    -fx-background-color: #f5f5f5;
+    -fx-background-radius: 10;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 10;
+    -fx-padding: 10;
+}
+
+/* Tabla */
+.table-view {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #ff6b35;
+    -fx-background-radius: 15 15 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+/* Estados */
+.estado-pendiente { -fx-text-fill: #ff9800; -fx-font-weight: bold; }
+.estado-en-preparacion { -fx-text-fill: #2196f3; -fx-font-weight: bold; }
+.estado-listo { -fx-text-fill: #4caf50; -fx-font-weight: bold; }
+.estado-en-camino { -fx-text-fill: #9c27b0; -fx-font-weight: bold; }
+.estado-entregado { -fx-text-fill: #4caf50; -fx-font-weight: bold; }
+
+/* Tarjeta de pedido */
+.tarjeta-pedido {
+    -fx-background-color: white;
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);
+    -fx-padding: 12;
+    -fx-border-color: #f0f0f0;
+    -fx-border-radius: 15;
+}
+
+.label-codigo {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff6b35;
+}
+
+.label-cliente {
+    -fx-font-size: 14px;
+    -fx-text-fill: #666;
+}
+
+.label-total {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4caf50;
+}
+
+/* ScrollPane */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* === ESTILOS PREMIUM PARA LA PANTALLA DE SIMULACIÓN (DASHBOARD OSCURO) === */
+
+.dashboard-container {
+    -fx-background-color: #0f172a; /* Fondo pizarra oscuro */
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;
+}
+
+.glass-header {
+    -fx-background-color: rgba(30, 41, 59, 0.7);
+    -fx-background-radius: 12;
+    -fx-padding: 15 20;
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);
+}
+
+.dashboard-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f8fafc;
+}
+
+.dashboard-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #94a3b8;
+}
+
+.status-label {
+    -fx-text-fill: #e2e8f0;
+    -fx-font-weight: bold;
+}
+
+.status-badge {
+    -fx-background-radius: 20;
+    -fx-padding: 6 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+}
+
+.status-inactive {
+    -fx-background-color: #64748b; /* Gris slate */
+}
+
+.status-active {
+    -fx-background-color: #10b981; /* Esmeralda */
+}
+
+.status-draining {
+    -fx-background-color: #f59e0b; /* Amber */
+}
+
+.glass-card {
+    -fx-background-color: rgba(30, 41, 59, 0.55);
+    -fx-background-radius: 16;
+    -fx-padding: 18;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 4);
+}
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #38bdf8; /* Azul cielo brillante */
+}
+
+.dark-separator {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+}
+
+.form-label {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 13px;
+}
+
+/* Botones Premium */
+.btn-primary {
+    -fx-background-color: linear-gradient(to right, #0284c7, #0369a1);
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+.btn-primary:hover {
+    -fx-background-color: linear-gradient(to right, #38bdf8, #0284c7);
+}
+
+.btn-danger {
+    -fx-background-color: linear-gradient(to right, #dc2626, #b91c1c);
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+.btn-danger:hover {
+    -fx-background-color: linear-gradient(to right, #f87171, #dc2626);
+}
+
+.btn-accent {
+    -fx-background-color: #0d9488; /* Teal */
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+.btn-accent:hover {
+    -fx-background-color: #14b8a6;
+}
+
+.btn-simulacion {
+    -fx-background-color: linear-gradient(to right, #ec4899, #d946ef); /* Rosa - Fucsia */
+    -fx-background-radius: 30;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+.btn-simulacion:hover {
+    -fx-background-color: linear-gradient(to right, #f472b6, #ec4899);
+}
+
+/* Campos de entrada oscuros */
+.dark-field {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #f8fafc;
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8;
+}
+.dark-field:focused {
+    -fx-border-color: #38bdf8;
+}
+
+/* Tarjeta de resultado */
+.result-card {
+    -fx-background-color: rgba(15, 23, 42, 0.7);
+    -fx-background-radius: 12;
+    -fx-padding: 14;
+    -fx-border-color: rgba(56, 189, 248, 0.25);
+    -fx-border-width: 1;
+}
+
+.result-code {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #38bdf8;
+}
+
+.result-status-badge {
+    -fx-background-color: #1e293b;
+    -fx-text-fill: #f59e0b;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+}
+
+.result-text {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 13px;
+}
+
+.result-subtext {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+}
+
+.result-notes {
+    -fx-text-fill: #cbd5e1;
+    -fx-font-size: 12px;
+    -fx-font-style: italic;
+    -fx-background-color: rgba(30, 41, 59, 0.5);
+    -fx-padding: 8;
+    -fx-background-radius: 6;
+}
+
+.error-text {
+    -fx-text-fill: #f87171;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+/* Consola de Logs Terminal */
+.terminal-console {
+    -fx-control-inner-background: #090d16;
+    -fx-text-fill: #4ade80; /* Verde brillante terminal */
+    -fx-font-family: "Courier New", monospace;
+    -fx-font-size: 11px;
+    -fx-background-color: #090d16;
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 8;
+}
+
+/* Tabla Premium Oscura */
+.premium-table {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.premium-table .column-header-background {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 12 12 0 0;
+}
+
+.premium-table .column-header {
+    -fx-background-color: transparent;
+    -fx-size: 40;
+}
+
+.premium-table .column-header .label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.premium-table .table-row-cell {
+    -fx-background-color: #1e293b;
+    -fx-border-color: rgba(255, 255, 255, 0.04);
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #f1f5f9;
+}
+
+.premium-table .table-row-cell:odd {
+    -fx-background-color: #131d31;
+}
+
+.premium-table .table-row-cell:selected {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #38bdf8;
+}
+
+.empty-table-label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+}
+
+.custom-progress {
+    -fx-pref-height: 10px;
+    -fx-background-radius: 10;
+}
+.custom-progress .bar {
+    -fx-background-radius: 10;
+}
+.custom-progress .track {
+    -fx-background-color: #1e293b;
+    -fx-background-radius: 10;
+}

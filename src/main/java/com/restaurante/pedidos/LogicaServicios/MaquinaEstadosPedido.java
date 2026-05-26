@@ -46,4 +46,23 @@ public class MaquinaEstadosPedido {
 
 		pedido.setEstadoActualId(nuevoEstadoEntidad);
 	}
+
+	public boolean esTransicionValida(
+			com.restaurante.pedidos.dominio.CodigoEstadoPedido origen,
+			com.restaurante.pedidos.dominio.CodigoEstadoPedido destino,
+			com.restaurante.pedidos.dominio.CodigoRol rol,
+			java.util.List<com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido> reglas) {
+		if (reglas == null) {
+			return false;
+		}
+		for (com.restaurante.pedidos.Clases.ReglasTransicionEstadoPedido regla : reglas) {
+			if (regla.getActiva() &&
+				regla.getRolId() != null && rol.name().equals(regla.getRolId().getCodigoRol()) &&
+				regla.getEstadoOrigenId() != null && origen.name().equals(regla.getEstadoOrigenId().getCodigoEstado()) &&
+				regla.getEstadoDestinoId() != null && destino.name().equals(regla.getEstadoDestinoId().getCodigoEstado())) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

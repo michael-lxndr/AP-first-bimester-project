@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.collections.FXCollections?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.restaurante.pedidos.presentacion.controladores.ControladorAdministrador"
+      styleClass="mobile-screen, screen-admin"
+      spacing="12">
+
+    <padding>
+        <Insets top="40" right="15" bottom="20" left="15"/>
+    </padding>
+
+    <!-- Header -->
+    <VBox spacing="4" alignment="CENTER">
+        <Label text="👔 Admin" styleClass="title"/>
+        <Label text="Gestión de Personal" styleClass="subtitle"/>
+    </VBox>
+
+    <!-- Tabla de personal -->
+    <VBox spacing="8" VBox.vgrow="ALWAYS">
+        <Label text="👥 Personal" styleClass="section-title"/>
+        <TableView fx:id="tablaPersonal" prefHeight="300">
+            <columns>
+                <TableColumn fx:id="columnaId" text="ID" prefWidth="50"/>
+                <TableColumn fx:id="columnaRol" text="Rol" prefWidth="80"/>
+                <TableColumn fx:id="columnaNombreCompleto" text="Nombre" prefWidth="120"/>
+                <TableColumn fx:id="columnaEstado" text="Estado" prefWidth="60"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <!-- Formulario -->
+    <VBox spacing="8" styleClass="card">
+        <Label text="📝 Datos del personal" styleClass="section-title"/>
+
+        <!-- CORREGIDO: Eliminar FXCollections y usar solo items -->
+        <ComboBox fx:id="comboRol" promptText="Rol" maxWidth="Infinity"/>
+
+        <TextField fx:id="campoNombreCompleto" promptText="Nombre completo"/>
+        <TextField fx:id="campoTelefono" promptText="Teléfono"/>
+        <TextField fx:id="campoCorreo" promptText="Correo electrónico"/>
+        <TextField fx:id="campoNombreUsuario" promptText="Usuario"/>
+
+        <CheckBox fx:id="checkboxActivo" text="Activo" selected="true"/>
+
+        <Label fx:id="etiquetaMensaje" text="Seleccione o cree personal" wrapText="true"
+               style="-fx-text-fill: #666; -fx-font-size: 12px;"/>
+
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Crear" onAction="#crearPersonal" prefWidth="100"/>
+            <Button text="Modificar" onAction="#modificarPersonal" prefWidth="100"
+                    styleClass="button-secondary"/>
+        </HBox>
+
+        <HBox spacing="10" alignment="CENTER">
+            <Button text="Alta/Baja" onAction="#alternarActivo" prefWidth="100"/>
+            <Button text="Eliminar" onAction="#eliminarPersonal" prefWidth="100"
+                    styleClass="button-danger"/>
+            <Button text="Limpiar" onAction="#limpiarFormulario" prefWidth="100"/>
+        </HBox>
+    </VBox>
+
+    <!-- Botón cerrar -->
+    <Button text="Cerrar" onAction="#cerrarVentana" maxWidth="Infinity" styleClass="button-exit"/>
+</VBox>

@@ -1,5 +1,7 @@
 package com.restaurante.pedidos.dominio.dto;
 
+import com.restaurante.pedidos.Clases.ItemsPedido;
+import com.restaurante.pedidos.Clases.Productos;
 import java.math.BigDecimal;
 
 public record ItemPedidoDTO(
@@ -8,7 +10,7 @@ public record ItemPedidoDTO(
         int cantidad,
         BigDecimal precioUnitario,
         BigDecimal subtotal,
-        String observaciones  // Ej: "Sin cebolla", "Extra queso"
+        String observaciones
 ) {
     public ItemPedidoDTO {
         if (cantidad <= 0) {
@@ -17,22 +19,22 @@ public record ItemPedidoDTO(
         if (precioUnitario == null || precioUnitario.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Precio inválido");
         }
-        // subtotal se calcula, pero lo recibimos ya calculado del servicio
     }
 
-    public static ItemPedidoDTO fromEntity(
-            com.restaurante.pedidos.dominio.entidad.ItemPedido entidad
-    ) {
+    public static ItemPedidoDTO fromEntity(ItemsPedido entidad) {
         if (entidad == null) return null;
 
-        var producto = entidad.getProducto();
+        Productos producto = entidad.getProductoId();
+        String nombreProducto = producto != null ? producto.getNombreProducto() : "Producto eliminado";
+        Long productoId = producto != null ? producto.getProductoId() : null;
+
         return new ItemPedidoDTO(
-                producto != null ? producto.getId() : null,
-                producto != null ? producto.getNombre() : "Producto eliminado",
+                productoId,
+                nombreProducto,
                 entidad.getCantidad(),
                 entidad.getPrecioUnitario(),
-                entidad.getSubtotal(),
-                entidad.getObservaciones()
+                entidad.getTotalLinea(),        // totalLinea = cantidad * precioUnitario
+                entidad.getNotaEspecial()       // observaciones
         );
     }
 }

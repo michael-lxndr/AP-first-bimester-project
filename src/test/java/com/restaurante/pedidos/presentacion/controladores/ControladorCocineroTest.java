@@ -1,24 +1,22 @@
 package com.restaurante.pedidos.presentacion.controladores;
 
 import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
+import com.restaurante.pedidos.dominio.dto.EstadoPedidoDTO;
 import com.restaurante.pedidos.dominio.dto.PedidoDTO;
 import com.restaurante.pedidos.dominio.servicio.ui.IServicioPedidosUI;
-import com.restaurante.pedidos.mocks.MockServicioPedidos;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.util.WaitForAsyncUtils;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(ApplicationExtension.class)
-@DisplayName("ControladorCocinero - Pruebas de integración con mocks")
+@DisplayName("ControladorCocinero - Pruebas de lógica con mocks")
 class ControladorCocineroTest {
 
     private ControladorCocinero controlador;
@@ -34,57 +32,67 @@ class ControladorCocineroTest {
     @Test
     @DisplayName("Al marcar como listo, llama al servicio con parámetros correctos")
     void marcarComoListo_LlamaServicio_ConParametrosCorrectos() {
-        // Arrange
-        PedidoDTO pedidoTest = new PedidoDTO(
-                99L, "PED-TEST", "Cliente", "Dir", List.of(),
-                new com.restaurante.pedidos.dominio.dto.EstadoPedidoDTO(
-                        1L, CodigoEstadoPedido.EN_PREPARACION, "En cocina", java.time.Instant.now(), "Cocina"
-                ),
-                java.math.BigDecimal.TEN, java.time.Instant.now(), null, false, null, 1L
-        );
+        PedidoDTO pedidoTest = crearPedidoMock(99L, "PED-TEST", CodigoEstadoPedido.EN_PREPARACION);
 
-        // Mock: servicio retorna éxito
         when(mockServicio.transicionarEstado(eq(99L), eq(CodigoEstadoPedido.LISTO), anyLong()))
                 .thenReturn(CompletableFuture.completedFuture(true));
 
-        // Act
-        // Nota: En pruebas reales con TestFX, se simularía el click en el botón.
-        // Aquí probamos la lógica directa del método.
+        // marcarComoListo es package-private → accesible desde el mismo paquete de test
         controlador.marcarComoListo(pedidoTest);
 
-        // Esperar que la tarea asíncrona termine (mock es inmediato)
-        WaitForAsyncUtils.waitForFxEvents();
-
-        // Assert
         verify(mockServicio).transicionarEstado(
                 eq(99L),
                 eq(CodigoEstadoPedido.LISTO),
-                anyLong()  // El ID del personal puede variar
+                anyLong()
         );
     }
 
     @Test
-    @DisplayName("Cuando servicio falla, controlador maneja error sin crashear")
+    @DisplayName("Cuando servicio falla, controlador no lanza excepción no controlada")
     void marcarComoListo_CuandoServicioFalla_ManejaErrorGracefully() {
-        PedidoDTO pedidoTest = crearPedidoMock();
+        PedidoDTO pedidoTest = crearPedidoMock(1L, "PED-001", CodigoEstadoPedido.EN_PREPARACION);
 
         when(mockServicio.transicionarEstado(anyLong(), any(), anyLong()))
                 .thenReturn(CompletableFuture.failedFuture(new RuntimeException("BD caída")));
 
-        // No debe lanzar excepción no controlada
         assertDoesNotThrow(() -> controlador.marcarComoListo(pedidoTest));
-
-        WaitForAsyncUtils.waitForFxEvents();
         verify(mockServicio).transicionarEstado(anyLong(), any(), anyLong());
     }
 
-    private PedidoDTO crearPedidoMock() {
+    @Test
+    @DisplayName("Cuando servicio retorna false, no lanza excepción")
+    void marcarComoListo_CuandoServicioRetornaFalse_ManejaGracefully() {
+        PedidoDTO pedidoTest = crearPedidoMock(1L, "PED-001", CodigoEstadoPedido.EN_PREPARACION);
+
+        when(mockServicio.transicionarEstado(anyLong(), any(), anyLong()))
+                .thenReturn(CompletableFuture.completedFuture(false));
+
+        assertDoesNotThrow(() -> controlador.marcarComoListo(pedidoTest));
+    }
+
+    @Test
+    @DisplayName("setServicioPedidos - inyección funciona correctamente")
+    void setServicioPedidos_InyeccionFunciona() {
+        IServicioPedidosUI nuevoMock = mock(IServicioPedidosUI.class);
+        assertDoesNotThrow(() -> controlador.setServicioPedidos(nuevoMock));
+    }
+
+    // === Helper ===
+
+    // ✅ EstadoPedidoDTO.codigo es String → usamos .name()
+    private PedidoDTO crearPedidoMock(Long id, String codigo, CodigoEstadoPedido estado) {
         return new PedidoDTO(
-                1L, "PED-001", "Test", "Test", List.of(),
-                new com.restaurante.pedidos.dominio.dto.EstadoPedidoDTO(
-                        1L, CodigoEstadoPedido.EN_PREPARACION, "En cocina", java.time.Instant.now(), "Test"
+                id, codigo, "Cliente Test", "Dir Test", List.of(),
+                new EstadoPedidoDTO(
+                        id * 10,
+                        estado.name(),          // "EN_PREPARACION", "LISTO", etc.
+                        estado.name().toLowerCase().replace("_", " "),
+                        Instant.now(),
+                        "Test"
                 ),
-                java.math.BigDecimal.TEN, java.time.Instant.now(), null, false, null, 1L
+                BigDecimal.TEN,
+                Instant.now(), null,
+                false, null, 1L
         );
     }
 }

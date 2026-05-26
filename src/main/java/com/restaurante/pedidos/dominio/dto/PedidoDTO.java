@@ -1,9 +1,14 @@
 package com.restaurante.pedidos.dominio.dto;
 
+import com.restaurante.pedidos.Clases.PedidosCliente;
+import com.restaurante.pedidos.Clases.Clientes;
+import com.restaurante.pedidos.Clases.DireccionesCliente;
+import com.restaurante.pedidos.Clases.ItemsPedido;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -62,37 +67,79 @@ public record PedidoDTO(
      */
     public String getCssClassParaEstado() {
         if (estadoActual == null) return "estado-desconocido";
-        return "estado-" + estadoActual.codigo().name().toLowerCase().replace("_", "-");
+        if (estadoActual.codigo() == null || estadoActual.codigo().isBlank()) {
+            return "estado-desconocido";
+        }
+        return "estado-" + estadoActual.codigo().toLowerCase().replace("_", "-");
     }
 
     /**
-     * Factory method desde entidad (se migrará a servicio después).
+     * Factory method desde entidad.
      */
-    public static PedidoDTO fromEntity(
-            com.restaurante.pedidos.dominio.entidad.PedidoCliente entidad
-    ) {
+    public static PedidoDTO fromEntity(PedidosCliente entidad) {
         if (entidad == null) return null;
 
-        List<ItemPedidoDTO> itemsDTO = entidad.getItems() != null
-                ? entidad.getItems().stream()
+        // Convertir items
+        List<ItemPedidoDTO> itemsDTO = entidad.getItemsPedidoCollection() != null
+                ? entidad.getItemsPedidoCollection().stream()
                 .map(ItemPedidoDTO::fromEntity)
                 .filter(java.util.Objects::nonNull)
                 .toList()
                 : List.of();
 
+        // Obtener nombre del cliente
+        String nombreCliente = "Cliente anónimo";
+        Clientes cliente = entidad.getClienteId();
+        if (cliente != null && cliente.getNombreCompleto() != null) {
+            nombreCliente = cliente.getNombreCompleto();
+        }
+
+        // Obtener dirección de entrega
+        String direccionEntrega = entidad.getSnapshotDireccionEntrega();
+        if (direccionEntrega == null || direccionEntrega.isBlank()) {
+            DireccionesCliente direccion = entidad.getDireccionEntregaId();
+            if (direccion != null) {
+                // Construir dirección a partir de los campos
+                direccionEntrega = String.format("%s %s, %s, %s, %s",
+                        direccion.getCallePrincipal() != null ? direccion.getCallePrincipal() : "",
+                        direccion.getNumeroCasa() != null ? direccion.getNumeroCasa() : "",
+                        direccion.getCiudad() != null ? direccion.getCiudad() : "",
+                        direccion.getProvincia() != null ? direccion.getProvincia() : "",
+                        direccion.getPais() != null ? direccion.getPais() : ""
+                ).replaceAll("\\s+", " ").trim();
+            }
+        }
+
+        // Convertir Date a Instant
+        Instant creadoEnInstant = null;
+        if (entidad.getCreadoEn() != null) {
+            creadoEnInstant = entidad.getCreadoEn().toInstant();
+        }
+
+        Instant entregaEstimadaInstant = null;
+        if (entidad.getEntregaEstimadaEn() != null) {
+            entregaEstimadaInstant = entidad.getEntregaEstimadaEn().toInstant();
+        }
+
+        // Obtener ID del personal asignado (de Entregas)
+        Long asignadoAPersonalId = null;
+        if (entidad.getEntregas() != null && entidad.getEntregas().getRepartidorPersonalId() != null) {
+            asignadoAPersonalId = entidad.getEntregas().getRepartidorPersonalId().getPersonalId();
+        }
+
         return new PedidoDTO(
-                entidad.getId(),
+                entidad.getPedidoId(),
                 entidad.getCodigoPedido(),
-                entidad.getCliente() != null ? entidad.getCliente().getNombre() : "Cliente anónimo",
-                entidad.getDireccionEntrega(),
+                nombreCliente,
+                direccionEntrega,
                 itemsDTO,
-                EstadoPedidoDTO.fromEntity(entidad.getEstadoActual()),
-                entidad.calcularTotal(),  // Método de dominio, OK
-                entidad.getFechaCreacion(),
-                entidad.getEntregaEstimada(),
-                entidad.isPrioritario(),
-                entidad.getNotasParaPersonal(),
-                entidad.getAsignadoA() != null ? entidad.getAsignadoA().getId() : null
+                EstadoPedidoDTO.fromEntity(entidad.getEstadoActualId()),
+                entidad.getTotal(),
+                creadoEnInstant,
+                entregaEstimadaInstant,
+                entidad.getPrioritario(),
+                entidad.getNotasGenerales(),
+                asignadoAPersonalId
         );
     }
 }

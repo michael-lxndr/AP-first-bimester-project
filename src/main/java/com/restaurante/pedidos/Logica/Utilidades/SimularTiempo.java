@@ -31,7 +31,7 @@ public class SimularTiempo {
 		Thread.sleep(deliveryDelay().toMillis());
 	}
 
-	private static Duration randomBetween(Duration minDelay, Duration maxDelay) {
+	public static Duration randomBetween(Duration minDelay, Duration maxDelay) {
 		long minMillis = minDelay.toMillis();
 		long maxMillis = maxDelay.toMillis();
 		if (minMillis > maxMillis) {

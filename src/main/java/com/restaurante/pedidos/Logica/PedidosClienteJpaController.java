@@ -44,39 +44,57 @@ public class PedidosClienteJpaController implements Serializable {
 			em = getEntityManager();
 			em.getTransaction().begin();
 			Entregas entregas = pedidosCliente.getEntregas();
-			if (entregas != null) {
-				entregas = em.getReference(entregas.getClass(), entregas.getEntregaId());
-				pedidosCliente.setEntregas(entregas);
+			if (entregas != null && entregas.getEntregaId() != null && entregas.getEntregaId() > 0) {
+				try {
+					entregas = em.getReference(entregas.getClass(), entregas.getEntregaId());
+					pedidosCliente.setEntregas(entregas);
+				} catch (javax.persistence.EntityNotFoundException e) {}
 			}
 			Clientes clienteId = pedidosCliente.getClienteId();
-			if (clienteId != null) {
-				clienteId = em.getReference(clienteId.getClass(), clienteId.getClienteId());
-				pedidosCliente.setClienteId(clienteId);
+			if (clienteId != null && clienteId.getClienteId() != null && clienteId.getClienteId() > 0) {
+				try {
+					clienteId = em.getReference(clienteId.getClass(), clienteId.getClienteId());
+					pedidosCliente.setClienteId(clienteId);
+				} catch (javax.persistence.EntityNotFoundException e) {}
 			}
 			DireccionesCliente direccionEntregaId = pedidosCliente.getDireccionEntregaId();
-			if (direccionEntregaId != null) {
-				direccionEntregaId = em.getReference(direccionEntregaId.getClass(), direccionEntregaId.getDireccionId());
-				pedidosCliente.setDireccionEntregaId(direccionEntregaId);
+			if (direccionEntregaId != null && direccionEntregaId.getDireccionId() != null && direccionEntregaId.getDireccionId() > 0) {
+				try {
+					direccionEntregaId = em.getReference(direccionEntregaId.getClass(), direccionEntregaId.getDireccionId());
+					pedidosCliente.setDireccionEntregaId(direccionEntregaId);
+				} catch (javax.persistence.EntityNotFoundException e) {}
 			}
 			EstadosPedido estadoActualId = pedidosCliente.getEstadoActualId();
-			if (estadoActualId != null) {
-				estadoActualId = em.getReference(estadoActualId.getClass(), estadoActualId.getEstadoId());
-				pedidosCliente.setEstadoActualId(estadoActualId);
+			if (estadoActualId != null && estadoActualId.getEstadoId() != null && estadoActualId.getEstadoId() > 0) {
+				try {
+					estadoActualId = em.getReference(estadoActualId.getClass(), estadoActualId.getEstadoId());
+					pedidosCliente.setEstadoActualId(estadoActualId);
+				} catch (javax.persistence.EntityNotFoundException e) {}
 			}
 			Personal registradoPorPersonalId = pedidosCliente.getRegistradoPorPersonalId();
-			if (registradoPorPersonalId != null) {
-				registradoPorPersonalId = em.getReference(registradoPorPersonalId.getClass(), registradoPorPersonalId.getPersonalId());
-				pedidosCliente.setRegistradoPorPersonalId(registradoPorPersonalId);
+			if (registradoPorPersonalId != null && registradoPorPersonalId.getPersonalId() != null && registradoPorPersonalId.getPersonalId() > 0) {
+				try {
+					registradoPorPersonalId = em.getReference(registradoPorPersonalId.getClass(), registradoPorPersonalId.getPersonalId());
+					pedidosCliente.setRegistradoPorPersonalId(registradoPorPersonalId);
+				} catch (javax.persistence.EntityNotFoundException e) {}
 			}
 			Collection<HistorialEstadosPedido> attachedHistorialEstadosPedidoCollection = new ArrayList<HistorialEstadosPedido>();
 			for (HistorialEstadosPedido historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach : pedidosCliente.getHistorialEstadosPedidoCollection()) {
-				historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach = em.getReference(historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach.getClass(), historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach.getHistorialId());
+				if (historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach.getHistorialId() != null && historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach.getHistorialId() > 0) {
+					try {
+						historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach = em.getReference(historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach.getClass(), historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach.getHistorialId());
+					} catch (javax.persistence.EntityNotFoundException e) {}
+				}
 				attachedHistorialEstadosPedidoCollection.add(historialEstadosPedidoCollectionHistorialEstadosPedidoToAttach);
 			}
 			pedidosCliente.setHistorialEstadosPedidoCollection(attachedHistorialEstadosPedidoCollection);
 			Collection<ItemsPedido> attachedItemsPedidoCollection = new ArrayList<ItemsPedido>();
 			for (ItemsPedido itemsPedidoCollectionItemsPedidoToAttach : pedidosCliente.getItemsPedidoCollection()) {
-				itemsPedidoCollectionItemsPedidoToAttach = em.getReference(itemsPedidoCollectionItemsPedidoToAttach.getClass(), itemsPedidoCollectionItemsPedidoToAttach.getItemPedidoId());
+				if (itemsPedidoCollectionItemsPedidoToAttach.getItemPedidoId() != null && itemsPedidoCollectionItemsPedidoToAttach.getItemPedidoId() > 0) {
+					try {
+						itemsPedidoCollectionItemsPedidoToAttach = em.getReference(itemsPedidoCollectionItemsPedidoToAttach.getClass(), itemsPedidoCollectionItemsPedidoToAttach.getItemPedidoId());
+					} catch (javax.persistence.EntityNotFoundException e) {}
+				}
 				attachedItemsPedidoCollection.add(itemsPedidoCollectionItemsPedidoToAttach);
 			}
 			pedidosCliente.setItemsPedidoCollection(attachedItemsPedidoCollection);

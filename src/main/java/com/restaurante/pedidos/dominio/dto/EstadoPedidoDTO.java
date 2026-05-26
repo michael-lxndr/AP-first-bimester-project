@@ -1,6 +1,7 @@
 package com.restaurante.pedidos.dominio.dto;
 
-import com.restaurante.pedidos.dominio.CodigoEstadoPedido;
+import com.restaurante.pedidos.Clases.EstadosPedido;
+import com.restaurante.pedidos.Clases.Personal;
 import java.time.Instant;
 
 /**
@@ -9,14 +10,13 @@ import java.time.Instant;
  */
 public record EstadoPedidoDTO(
         Long id,
-        CodigoEstadoPedido codigo,
+        String codigo,           // Cambiado: el código viene como String de la BD
         String descripcion,
         Instant fechaCambio,
-        String responsableNombre  // Denormalizado: solo lo que la UI necesita
+        String responsableNombre
 ) {
     public EstadoPedidoDTO {
-        // Validaciones de integridad (no de negocio)
-        if (codigo == null) {
+        if (codigo == null || codigo.isBlank()) {
             throw new IllegalArgumentException("El código de estado no puede ser null");
         }
         if (descripcion == null || descripcion.isBlank()) {
@@ -26,23 +26,19 @@ public record EstadoPedidoDTO(
 
     /**
      * Factory method: convierte entidad → DTO.
-     * Este método DEBE estar en la capa de servicio, pero lo dejamos aquí
-     * temporalmente para que Persona 3 pueda avanzar. Se migrará después.
      */
-    public static EstadoPedidoDTO fromEntity(
-            com.restaurante.pedidos.dominio.entidad.EstadoPedido entidad
-    ) {
+    public static EstadoPedidoDTO fromEntity(EstadosPedido entidad) {
         if (entidad == null) return null;
 
-        String responsable = entidad.getResponsable() != null
-                ? entidad.getResponsable().getNombreCompleto()
-                : "Sistema";
+        String responsable = "Sistema";
+        // Nota: EstadosPedido no tiene referencia directa a Personal
+        // Si necesitas el responsable, tendrías que obtenerlo del HistorialEstadosPedido
 
         return new EstadoPedidoDTO(
-                entidad.getId(),
-                entidad.getCodigoEstado(),
-                entidad.getDescripcion(),
-                entidad.getFechaCambio(),
+                entidad.getEstadoId(),
+                entidad.getCodigoEstado(),      // String: "PENDIENTE", "EN_PREPARACION", etc.
+                entidad.getNombreEstado(),
+                null,                           // EstadosPedido no tiene fechaCambio
                 responsable
         );
     }
